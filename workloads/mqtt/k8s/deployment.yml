@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-broker
+  labels:
+    app: mqtt-broker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mqtt-broker
+  template:
+    metadata:
+      labels:
+        app: mqtt-broker
+    spec:
+      containers:
+        - name: mqtt-broker
+          image: eclipse-mosquitto:2
+          ports:
+            - containerPort: 1883
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
