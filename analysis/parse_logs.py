@@ -4,9 +4,11 @@ import pandas as pd
 from datetime import datetime
 import shutil
 
-RAW_DIR = "results/raw/websocket/experiment-a-hpa"
-PROCESSED_DIR = "results/processed/websocket/experiment-a-hpa"
+RAW_DIR = os.environ.get("RAW_DIR")
+PROCESSED_DIR = os.environ.get("PROCESSED_DIR")
 
+if RAW_DIR is None or PROCESSED_DIR is None:
+    raise RuntimeError("RAW_DIR and PROCESSED_DIR must be set as environment variables.")
 
 if os.path.exists(PROCESSED_DIR):
     shutil.rmtree(PROCESSED_DIR)

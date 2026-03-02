@@ -171,24 +171,7 @@ curl -s "http://localhost:9090/api/v1/query_range?query=active_connections&start
 kill $PROM_PID 2>/dev/null || true
 
 echo "=============================================="
-echo " Experiment-A Run Complete"
-echo " Starting Analysis..."
+echo " Experiment-A Completed Successfully"
 echo "=============================================="
 
-# ------------------------------------------------
-# Automatic Analysis + Plot Generation
-# ------------------------------------------------
-
-export RAW_DIR="$PROJECT_ROOT/results/raw/websocket/experiment-a-hpa"
-export PROCESSED_DIR="$PROJECT_ROOT/results/processed/websocket/experiment-a-hpa"
-
-bash "$PROJECT_ROOT/scripts/run-analysis.sh" websocket experiment-a-hpa
-
-echo "=============================================="
-echo " Experiment-A Fully Completed"
-echo "=============================================="
-
-# ------------------------------------------------
-# Delete Cluster (AFTER analysis)
-# ------------------------------------------------
 kind delete cluster --name "$CLUSTER_NAME"
