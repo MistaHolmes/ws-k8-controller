@@ -36,16 +36,33 @@ echo "=============================================="
 export RAW_DIR
 export PROCESSED_DIR
 
+# ----------------------------------------------------------
+# Choose Parser + Plotter Based on Experiment Type
+# ----------------------------------------------------------
+
+if [[ "$EXPERIMENT" == *"instrumented"* ]]; then
+  PARSER="$ANALYSIS_DIR/parse_logs_instrumented.py"
+  PLOTTER="$ANALYSIS_DIR/plot_experiment_instrumented.py"
+  echo "[*] Detected instrumented experiment"
+else
+  PARSER="$ANALYSIS_DIR/parse_logs.py"
+  PLOTTER="$ANALYSIS_DIR/plot_experiment.py"
+fi
+
+# ----------------------------------------------------------
 # Parse logs
-if python3 "$ANALYSIS_DIR/parse_logs.py"; then
+# ----------------------------------------------------------
+if python3 "$PARSER"; then
   echo "[✓] Parsing complete"
 else
   echo "[✗] Parsing failed"
   exit 1
 fi
 
+# ----------------------------------------------------------
 # Plot results
-if python3 "$ANALYSIS_DIR/plot_experiment.py"; then
+# ----------------------------------------------------------
+if python3 "$PLOTTER"; then
   echo "[✓] Plot generation complete"
 else
   echo "[✗] Plot generation failed"

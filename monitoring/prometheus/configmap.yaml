@@ -10,16 +10,43 @@ data:
 
     scrape_configs:
 
-      - job_name: "kubernetes-pods"
+      - job_name: "websocket-pods"
 
         kubernetes_sd_configs:
           - role: pod
+            namespaces:
+              names: [default]
 
         relabel_configs:
+
+          # Skip pods that are not Running
+          - source_labels: [__meta_kubernetes_pod_phase]
+            action: keep
+            regex: Running
+
+          # Keep only websocket pods
           - source_labels: [__meta_kubernetes_pod_label_app]
             action: keep
             regex: websocket-server
 
+          # Keep only container port 8080
           - source_labels: [__meta_kubernetes_pod_container_port_number]
             action: keep
             regex: "8080"
+
+          # Set scrape address to pod_ip:8080/metrics
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: __address__
+            replacement: ${1}:8080
+
+          # Set metrics path explicitly
+          - target_label: __metrics_path__
+            replacement: /metrics
+
+          # Add namespace label
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+
+          # Add pod name label
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod

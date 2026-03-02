@@ -150,3 +150,13 @@ kubectl -n monitoring port-forward svc/prometheus 9090:9090
 ```bash
 http://localhost:9090
 ```
+
+
+### Check Logs During Experiment
+```bash
+kubectl get hpa -w
+```
+
+```bash
+ watch -n 2 ls -lh results/raw/websocket/experiment-b2-hpa-churn-instrumented/
+```
