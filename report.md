@@ -1,11 +1,33 @@
 # Comprehensive Report: Stateful Autoscaling for Persistent WebSocket Workloads
 
-## Introduction
-This research builds upon a foundational evaluation of Kubernetes auto-scaling paradigms, which systematically compared the efficacy of native Kubernetes Resource Metrics (KRM) against the precision of Prometheus Custom Metrics (PCM). The foundational study empirically demonstrated the superior control-loop responsiveness of PCM-driven architectures when exposed to severe, stochastic load transients. Specifically, it validated that abstracting scaling triggers away from reactive hardware indicators (CPU/Memory utilization) and toward deterministic, application-level telemetry—such as direct `http_requests_per_second`—fundamentally eliminates scaling hysteresis. For instance, the base research documented the severe "Staircase Effect" that occurs when HPA sync loops (15s) operate on coarse Prometheus data (60s scrape intervals), resulting in dangerous control-to-actuation latency. By pulling high-resolution (15s) Custom Metrics directly from the application layer, the architecture successfully prevented critical infrastructure saturation during traffic bursts.
+## Introduction and Background: Algorithmic Limitations of Stateless Autoscaling
 
-However, the foundational research was strictly constrained to analyzing stateless request/response architectures, where workload completion inherently releases system resources. This current manuscript represents an architectural evolution, intentionally shifting the operational paradigm toward **stateful, persistent-connection workloads**—specifically, large-scale WebSocket deployments.
+This research acts as an architectural evolution, directly building upon a comprehensive foundational study that systematically evaluated the efficacy and operational constraints of standard Kubernetes auto-scaling paradigms in stateless environments. Before addressing the complexities of persistent, stateful workloads, it is imperative to contextualize the systemic flaws inherent in native resource-driven scalers, as diagnosed in the preceding base-paper implementations.
 
-In persistent architectures, the workload pressure is inextricably bound to the static connection state rather than localized CPU computational cycles. A client may hold a TCP session open indefinitely while generating near-zero resource consumption. The following chronological series of experiments is designed to expose the fundamental and catastrophic algorithmic inadequacies of the native Horizontal Pod Autoscaler (HPA) when forced to manage stateful connection density. Ultimately, this empirical progression culminates in the design, deployment, and validation of a proprietary, connection-aware autonomous controller capable of securing active session integrity against volatile network transients.
+### Empirical Evaluation of the Kubernetes Resource Metrics (KRM) Paradigm
+The initial foundational experiment rigorously analyzed the native Horizontal Pod Autoscaler (HPA) governed by the Kubernetes Resource Metrics (KRM) API (via `metrics-server`). The study focused on extracting the relationship between the `metrics-server`'s internal scraping resolution and the resulting control-to-actuation latency during high-churn CPU load cycles. By subjecting a baseline deployment to alternating computational bursts (100-second high/low phases), the KRM implementation empirically established that native CPU-based scaling relies entirely on *lagging indicators*. 
+
+Because CPU utilization is a reactive byproduct of workload execution rather than a deterministic measure of incoming traffic demand, the native HPA consistently demonstrated profound hysteresis. The latency from the inception of a load burst to the actual provisioning of operational pods allowed transient saturation limits to be breached repeatedly. The resultant performance limitations are analytically visible in the empirical data mapping metric resolutions against scaling responsiveness and cluster efficiency:
+
+- **Replicas Over Time (KRM)**: ![KRM: Replicas Over Time](.md/base-paper-resutls/plots-kcm/replicas_over_time.png)
+- **Desired vs Current Replicas (KRM)**: ![KRM: Desired vs Current](.md/base-paper-resutls/plots-kcm/desired_vs_current.png)
+- **Efficiency Scatter**: ![KRM: Efficiency](.md/base-paper-resutls/plots-kcm/efficiency_scatter.png)
+
+### Application-Level Telemetry and the Prometheus Custom Metrics (PCM) Paradigm
+To resolve the lagging indicator latency inherent in KRM, the foundational study shifted the architectural paradigm toward Prometheus Custom Metrics (PCM). This implementation abstracted the scaling triggers away from reactive hardware telemetry and toward deterministic, application-level indicators, specifically monitoring `http_requests_per_second` (PCM-H).
+
+The PCM experiments exposed a critical architectural vulnerability within hybrid telemetry pipelines: the so-called "Staircase Effect." When the standard HPA synchronization loop (defaulting to 15 seconds) was forced to operate on coarse, lagging Prometheus data (e.g., a 60-second `scrape_interval`), the controller would repeatedly process identically stale metric values across multiple sync cycles. This aliasing induced a severe control-to-actuation lag, visually manifested as distinct, step-like delays in the replica scaling plots.
+
+By contrast, pulling high-resolution (15-second) custom metrics directly from the application's traffic ingress (PCM-H) established a *leading indicator* scaling system. The research further proved that a hybrid multi-metric selection architecture (PCM-CH), which evaluates both CPU and HTTP traffic simultaneously (`max(CPU_recommendation, HTTP_recommendation)`), fundamentally eliminated scaling hysteresis and prevented critical infrastructure saturation.
+
+- **The Staircase Effect (Scraping Period Comparison)**: ![PCM: Scraping Period Comparison](.md/base-paper-resutls/plots-pcm/scraping_period_comparison.png)
+- **HTTP Rate Over Time**: ![PCM: HTTP Request Rate](.md/base-paper-resutls/plots-pcm/http_rate_over_time.png)
+- **PCM-H vs PCM-CH (Hybrid Scaling)**: ![PCM: HTTP vs Hybrid Scaling](.md/base-paper-resutls/plots-pcm/pcm_h_vs_pcm_ch.png)
+
+### Architectural Evolution Towards Stateful Connection Management
+While the foundational research successfully neutralized the scaling latency of stateless request/response architectures, its findings were strictly constrained to environments where workload completion inherently releases system resources. This current manuscript represents a necessary divergence, intentionally shifting the operational paradigm toward **stateful, persistent-connection workloads**—specifically, large-scale WebSocket deployments.
+
+In persistent architectures, the workload pressure is inextricably bound to the static connection state rather than localized CPU computational cycles. A client may hold a TCP session open indefinitely while generating near-zero resource consumption. The following chronological series of experiments is designed to expose the fundamental and catastrophic algorithmic inadequacies of the native HPA—even when optimized by PCM—when forced to manage stateful connection density. Ultimately, this empirical progression culminates in the design, deployment, and validation of a proprietary, connection-aware autonomous controller mathematically engineered to secure active session integrity against volatile network transients.
 
 ---
 
@@ -17,14 +39,64 @@ The fundamental objective of Experiment A is to establish a mechanical baseline 
 ### 1.2 Theoretical and Empirical Achievements
 This experiment successfully validates that HPA *possesses the mechanical capacity* to scale a WebSocket workload, provided the environment is heavily manipulated. Success requires the artificial enforcement of a "best-case scenario" wherein the total volume of persistent connections is hard-coded to correlate flawlessly with CPU utilization. Consequently, Experiment A establishes that mechanical infrastructure scaling works, purposefully isolating the algorithmic flaw (state-blindness) to be aggressively exploited in subsequent trials.
 
-### 1.3 Detailed Methodology
-This experiment establishes a best-case baseline and is fully orchestrated by the `experiments/websocket/experiment-a-hpa-baseline/run.sh` bash script. The execution environment relies on a local `kind` cluster specifically provisioned for this run.
+### 1.3 Detailed Methodology and Technical Instrumentation
+This experiment establishes a deterministic best-case baseline and is orchestrated end-to-end via the `experiments/websocket/experiment-a-hpa-baseline/run.sh` initialization script. The execution environment consists of an isolated `kind` cluster specifically provisioned to prevent external scheduling interference.
 
-**The Workload Pipeline**: The target application (`server.py`) is a custom `asyncio`/`websockets` server written in Python. To test standard CPU-based HPA against stateful constraints, the server is artificially injected with a spin-loop execution layer controlled by a configuration variable (`CPU_WORK=1`). Every time a client sends a message, the server executes computationally intensive loops before responding, creating a hard mathematical correlation between active connections and CPU saturation.
+**The Workload Architecture (`server.py`)**: The target application is an asynchronous WebSocket server engineered using the Python `asyncio` and `websockets` libraries. To evaluate standard CPU-based HPA functionality against inherently low-compute stateful connections, the server’s request handler is intentionally injected with an artificial spin-loop execution layer commanded by an environmental variable (`CPU_WORK=1`). 
+```python
+# Intentionally inducing computational saturation per connection
+async for message in websocket:
+    if CPU_WORK > 0:
+        for _ in range(CPU_WORK):
+            pass 
+    await websocket.send("ack")
+```
+Every time a client transmits a payload, the server must process the computationally intensive loop before returning an acknowledgment. This mechanism creates a manufactured, rigid mathematical correlation between the volume of active user sessions and the underlying node CPU saturation.
 
-**The Scaler and Monitoring**: The system relies on Kubernetes `metrics-server` to actively scrape pod CPU utilization. The native Horizontal Pod Autoscaler is configured via a standard `v2` manifest (`hpa.yml`) targeting 60% average utilization, bounded between `minReplicas=2` and `maxReplicas=15`. To establish ground truth, the Python server concurrently exposes a custom `/metrics` endpoint mapping its internal active connection count, which is polled continuously by a background bash routine in `run.sh`.
+**The Control Plane and Monitoring Infrastructure**: The architecture relies on the native Kubernetes `metrics-server` to actively poll pod CPU utilization. To grant the HPA highly responsive telemetry, the `metrics-server` deployment is explicitly patched via the deployment arguments to enforce a `--metric-resolution=15s` polling cycle, completely overriding the default 60-second resolution. 
+```yaml
+# metrics-server patch applied during cluster initialization
+- op: replace
+  path: /spec/template/spec/containers/0/args
+  value:
+    - --cert-dir=/tmp
+    - --secure-port=10250
+    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+    - --kubelet-use-node-status-port
+    - --metric-resolution=15s
+    - --kubelet-insecure-tls
+```
+The Horizontal Pod Autoscaler targets a `60%` average utilization threshold via a standard `autoscaling/v2` API manifest.
+```yaml
+# workloads/websocket/k8s/hpa.yml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: websocket-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: websocket-server
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+```
+Concurrently, the Python server exposes a custom `/metrics` HTTP endpoint serving real-time internal gauges (`active_connections`), which is scraped continuously by an asynchronous bash routine within the orchestrator script to establish ground truth.
 
-**The Load Generation**: To simulate active stateful users, a custom Python asynchronous client (`client.py`) is deployed into the cluster as a Kubernetes Job. To prevent overwhelming a single pod before HPA can react, the client script uses a purely linear ramp-up function (`delay = (client_index / CLIENTS) * 90`). It smoothly staggers the initialization of ~400 persistent WebSocket connections over 90 seconds. Once connected, the client executes an infinite `asyncio` loop, firing a `"ping"` string payload down the open TCP socket every 5 seconds to continuously trigger the server's CPU spin-loop. This active load is sustained steadily for approximately 5.5 minutes before the `run.sh` orchestrator permanently terminates the Kubernetes Job.
+**The Stateful Load Paradigm (`client.py`)**: To simulate a fleet of active stateful users, an asynchronous Python client is executed within the cluster as an independent Kubernetes Job. To prevent overwhelming a heavily constrained single pod before the 15-second HPA sync cycle can react, the load-generation script implements a precise linear mathematical stagger:
+```python
+# Stagger initialization to match scaling mechanics
+delay = (client_index / CLIENTS) * RAMP_UP_DURATION
+await asyncio.sleep(delay)
+```
+This function smoothly distributes the initialization of 800 persistent WebSocket TCP connections over a 90-second duration. Once successfully connected, the clients enter an infinite `asyncio` loop, firing a `"ping"` string payload down the open socket strictly every 5 seconds. This transmission consistency guarantees the server’s CPU spin-loop is continuously engaged, maintaining perfect symmetric load for the 5-minute duration of the experiment.
 
 ### 1.4 Result Analysis
 When the load generator initiated its ~400 connections, the active pings immediately drove CPU utilization to ~230–260m on the baseline 2 pods. HPA recognized this CPU saturation and efficiently scaled the cluster from 2 up to 4, and finally to 5 replicas. Once 5 pods were established, CPU utilization settled perfectly near the 60% optimal target.
@@ -64,15 +136,34 @@ Experiment B2 intensifies the parameters introduced in B1 by radically extending
 **Workload and Automation**: The experiment utilizes the exact same Python WebSocket application configured with `CPU_WORK=1`. The orchestration is driven heavily by the `run.sh` bash script, which programmatically loops four complete "Churn Cycles." During each cycle, the bash script issues a `kubectl apply` to dynamically launch the Python load-generator Job. After an extended HIGH phase, it issues a `kubectl delete job` to forcibly simulate a massive, instantaneous connection severance (the LOW phase), repeating this four times in a row.
 
 **Instrumentation and Scraping**:
-Unlike Experiment A's simple bash polling, B2 requires precise quantification of network behavior during chaotic events. A full Prometheus monitoring stack is deployed directly into the `kind` cluster. The Python server is upgraded to utilize the `prometheus_client` library, actively registering and exposing metrics for both `active_connections` (a gauge) and `new_connections_total` (a counter). Prometheus scrapes these endpoints at strict 15-second intervals. This dual-metric approach allows the research to calculate exactly how many connections are permanently severed versus how many wildly reconnect during the HPA scale-down maneuvers.
+Unlike Experiment A's simple bash polling, B2 requires precise quantification of network behavior during chaotic events. A full Prometheus monitoring stack is deployed directly into the `kind` cluster. The Python server is upgraded to utilize the `prometheus_client` library, actively registering and exposing metrics for both `active_connections` (a gauge) and `new_connections_total` (a counter).
+```python
+# workloads/websocket/app-instrumented/server.py
+ACTIVE_CONNECTIONS = Gauge("active_connections", "Current number of active WebSocket connections")
+NEW_CONNECTIONS = Counter("new_connections_total", "Total WebSocket connections established")
+```
+Prometheus scrapes these endpoints at strict 15-second intervals. This is enforced via the global `scrape_interval` in the Prometheus configuration map:
+```yaml
+# monitoring/prometheus/configmap.yaml
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: "websocket-pods"
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: [default]
+```
+This dual-metric approach allows the research to calculate exactly how many connections are permanently severed versus how many wildly reconnect during the HPA scale-down maneuvers.
 
-### 3.3 Empirical Results and Network Chaos Evaluation
-During every single HIGH phase across the four cycles, HPA immediately choked and saturated at `maxReplicas=15`.
-More importantly, whenever the extended LOW phase breached the 5-minute stabilization limit, HPA noticed the near-zero CPU and aggressively initiated a scale-down (e.g., dropping from 15 to 7 pods, then down to 6).
+### 3.3 Empirical Results and Network Chaos Evaluation: The Reconnection Storm
+The empirical observations from Experiment B2 conclusively establish that resource-driven (CPU-based) scaling is fundamentally incompatible with the lifecycle of persistent TCP sessions. During the four simulated "HIGH" phases, the HPA controller predictably saturated the cluster at the `maxReplicas=15` boundary. However, the critical failure mode emerged during the extended "LOW" phases when the cluster's collective CPU utilization decayed below the target threshold, thereby causing the HPA to routinely breach the 5-minute downscale stabilization limit.
 
-Because HPA only registers CPU, it remained dangerously oblivious to the fact that the terminated pods were still holding hundreds of active user sessions. The moment a pod was deleted, its corresponding TCP connections were severed instantly.
+Because the native HPA algorithm strictly processes generic resource metrics, it remained critically oblivious to the architectural reality that the targeted pods were still holding hundreds of active ingress connections. When the algorithm initiated consecutive scale-down executions (e.g., terminating pods to reduce fleet size from 15 to 7), the underlying network disruption was instantaneously catastrophic. Upon the issuance of a `SIGQUIT`/`SIGKILL` to the pod container, all active WebSocket TCP sockets terminated abruptly without a coordinated connection drain.
 
-The instrumentation captured extreme **reconnection storms**. The metrics show immediate, massive spikes exceeding **1,400 connections per second**. In Cycle 2, total active connections artificially overshot the 800 baseline limit, peaking at **1,215**. This overshoot occurred because the disconnected users flooded the system with new connection requests faster than the backend could clean up the garbage state of the old, severed sockets.
+Through the injection of the `prometheus_client` into the application layer, the resulting network chaos was quantitatively captured at 15-second tracking intervals. The moment a pod was mechanically executed by the control loop, the severed clients immediately engaged in aggressive retry strategies. The `new_connections_total` counter metric recorded violent **reconnection storms**, with burst velocities consistently exceeding **1,400 new connection attempts per second**.
+
+In Cycle 2 of the experiment, this uncoordinated swarm maneuver artificially overwhelmed the backend routing mesh. The `active_connections` gauge overshot the steady-state baseline of 800 users, registering an extreme peak of **1,215** active sessions. This mathematical overshoot is indicative of "zombie state propagation," wherein the disconnected clients succeed in opening new, parallel TCP sockets faster than the remaining backend servers can execute garbage-collection sweeps on the dead, severed connections. 
 
 - **Reconnections Plot**: ![Experiment B2 Reconnections](results/processed/websocket/experiment-b2-hpa-churn-instrumented/plots/reconnections.png)
 - **Connections vs Replicas**: ![Experiment B2 Scaling Activity](results/processed/websocket/experiment-b2-hpa-churn-instrumented/plots/scaling_activity.png)
@@ -93,12 +184,51 @@ The primary objective of Experiment B3 is to artificially compress the scale-dow
 To ensure HPA scales down precisely within an observable timeframe, the methodology relies on overriding Kubernetes defaults and utilizing highly specific client scripting behavior.
 
 **Cluster and Scaler Tuning**:
-The experiment is orchestrated via `run.sh` on a standardized `kind` cluster equipped only with `metrics-server` to ensure the HPA logic is fully isolated. The major architectural modification in B3 involves forcefully rewriting the native HPA behaviors via the `v2` API specification in `hpa.yml`. The `scaleDownStabilizationWindowSeconds` is drastically reduced from its 300-second default setting down to a hyper-aggressive 60 seconds. The target configuration remains `targetCPU=60%`, `minReplicas=2`, and `maxReplicas=15`.
+The experiment is orchestrated via `run.sh` on a standardized `kind` cluster equipped only with `metrics-server` to ensure the HPA logic is fully isolated. The major architectural modification in B3 involves forcefully rewriting the native HPA behaviors via the `v2` API specification. The `scaleDown` `stabilizationWindowSeconds` is drastically reduced from its 300-second default setting down to a hyper-aggressive 60 seconds to force the controller into an execution state within an observable timeframe:
+```yaml
+# HPA v2 API behavior modification for B3
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: websocket-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: websocket-server
+  minReplicas: 2
+  maxReplicas: 15
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+```
 
 **The Three-Phase Load Script**:
-To systematically expose the fatal flaw of resource-based scaling, the Python asynchronous load generator (`client.py`) executes a highly specific behavioral sequence simulating stateful usage:
-- **CONNECT Phase (0s - 120s)**: The Python client leverages the linear stagger formula (`delay = (client_index / CLIENTS) * 90`) to ramp up 800 parallel TCP connections perfectly over 90 seconds. Once the `websockets.connect` handshake succeeds, the client enters an active `asyncio` loop, firing string payloads to force the server's `CPU_WORK=1` spin-loop to execute, deliberately inducing a cluster-wide CPU scale-up.
-- **IDLE Phase (120s+)**: At exactly 120 seconds into execution, the client hits a programmed time barrier. It immediately breaks out of its pinging loop, silencing all data transmission. Crucially, the process does **not** close the TCP sockets; it transitions to an asynchronous reading loop (`async for _ in ws:`). This perfectly simulates a fleet of long-lived user sessions holding active state (memory/file descriptors) while generating zero incoming compute pressure on the backend.
+To systematically expose the fatal flaw of resource-based scaling, the Python asynchronous load generator (`client.py`) executes a highly specific behavioral sequence simulating stateful usage. This behavior is structurally embedded within the core client execution loop:
+```python
+# load-generator/websocket-client/client.py
+while True:
+    elapsed = time.time() - GLOBAL_START_TIME
+    if ACTIVE_DURATION > 0 and elapsed > ACTIVE_DURATION:
+        # --- IDLE PHASE ---
+        # Stop sending pings, keep connection open by consuming messages.
+        async for _ in ws:
+            pass
+        return # Exit if server kills connection
+
+    # --- ACTIVE PHASE ---
+    await ws.send("ping")
+    await asyncio.sleep(5)
+```
+- **CONNECT Phase (0s - 120s)**: The Python client leverages the linear stagger formula (`delay = (client_index / CLIENTS) * 90`) to ramp up 800 parallel TCP connections perfectly over 90 seconds. Once the `websockets.connect` handshake succeeds, the client enters the Active Phase, firing string payloads to force the server's `CPU_WORK=1` spin-loop to execute, deliberately inducing a cluster-wide CPU scale-up.
+- **IDLE Phase (120s+)**: At exactly 120 seconds into execution (`ACTIVE_DURATION`), the client hits the programmed time barrier. It immediately breaks out of its pinging loop, silencing all data transmission. Crucially, the process does **not** close the TCP sockets; it transitions to the asynchronous reading loop (`async for _ in ws:`). This perfectly simulates a fleet of long-lived user sessions holding active state (memory/file descriptors) while generating zero incoming compute pressure on the backend.
 - **HPA Destruction Phase**: Because no data is moving, the backend pods report near-zero CPU to the `metrics-server`. After the 60-second stabilization window expires, HPA initiates aggressive pod destruction. If the client catches an `Exception` during the IDLE phase (indicating its underlying socket was severed by the HPA `SIGKILL`), the script explicitly commands `return` to terminate the worker thread. It strictly refuses to attempt reconnection, leaving a permanent visual representation of dropped users on the connection graph.
 
 ### 4.3 Empirical Results and Analytical Evaluation
