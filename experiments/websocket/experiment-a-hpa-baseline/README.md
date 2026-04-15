@@ -93,24 +93,37 @@ results/processed/websocket/experiment-a-hpa/
 ## 7. Observed Results
 
 ### Active Connections
-- Rapid ramp-up to ~400 connections.
+
+![Active Connections Over Time — Experiment A](../processed-results-websockets/experiment-a-hpa/plots/connections.png)
+
+*The connection graph shows a rapid ramp to approximately 388 active connections as the load generator establishes its sessions. The plateau is held stably for the duration of the sustained load phase. The descent after t≈330s is smooth and gradual — the load generator terminates cleanly, and connections drop to zero without any reconnection spikes. The staircase-like descent reflects natural attrition as individual clients disconnect sequentially. Crucially, there is no overshoot above 388, confirming that no reconnection storm occurred.*
+
+- Rapid ramp-up to ~388 connections.
 - Stable plateau during sustained load.
-- Gradual drop after load removal.
+- Gradual, staircase drop after load removal — no reconnection spikes.
 - Clean return to zero.
-- No reconnection spikes observed.
 
 ### CPU Usage
-- CPU increases proportionally to connection load.
-- Peaks during sustained phase.
-- Drops to near-zero after load ends.
-- No post-scale-down CPU spikes.
+
+![CPU Usage (millicores) — Experiment A](../processed-results-websockets/experiment-a-hpa/plots/cpu.png)
+
+*CPU usage climbs proportionally with connection load, peaking at 230–260m per pod when 2 pods handle the full 388-connection load. After HPA scales to 5 pods, per-pod CPU settles to approximately 130m — proportional load distribution working correctly. The abrupt drop to near-zero after load removal (t≈330s) confirms that CPU and connection count are tightly correlated under this workload (CPU_WORK=1). The prolonged near-zero CPU tail corresponds to the 5-minute HPA stabilization window before scale-down.*
+
+- CPU scales proportionally with connection load.
+- Peak at load onset: 230–260m (2 pods sharing load).
+- Post-scale-up: ~130m/pod (correct load distribution).
+- Drops sharply after load removal, then stays near-zero during the stabilization window.
 
 ### Replica Count
+
+![Replica Count Over Time — Experiment A](../processed-results-websockets/experiment-a-hpa/plots/replicas.png)
+
+*The replica graph shows the clean, monotonic scaling that characterises ideal HPA behaviour. The staircase rise from 2 → 4 → 5 replicas follows the CPU signal. The long flat plateau at 5 replicas reflects HPA's default 300-second scaledown stabilization window: the system waits for steady-state CPU to confirm the load has fully dropped before scaling down. The clean return to 2 replicas at the end confirms no oscillation. This is the baseline against which all subsequent experiments are compared.*
+
 - Initial: 2 replicas.
-- Scaled to 4–5 replicas during load.
-- Remained elevated during stabilization window.
-- Returned cleanly to 2 replicas after stabilization period.
-- No oscillation observed.
+- Scaled to 4 → 5 replicas during load (correct, proportional).
+- Remained elevated during 300s stabilization window (by design).
+- Returned cleanly to 2 replicas. No oscillation observed.
 
 
 

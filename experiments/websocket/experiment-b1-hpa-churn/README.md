@@ -86,22 +86,46 @@ results/processed/websocket/experiment-b-hpa-churn/
 
 ---
 
-## 7. Expected Observations
+## 7. Observed Results
 
-Compared to Experiment-A:
+### Active Connections
 
-- Sawtooth pattern in active connections
-- Visible replica oscillation
-- CPU spikes during reconnection bursts
-- HPA chasing load rather than stabilizing
+![Active Connections Over Time — Experiment B1](../processed-results-websockets/experiment-b1-hpa-churn/plots/connections.png)
 
-This experiment demonstrates that:
+*Unlike Experiment A's clean plateau, the connection graph shows a sawtooth-like descending staircase. After the initial burst to ~419 connections, connections step down in chunks as the cyclic load pattern forces repeated HIGH/LOW transitions and the over-provisioned HPA begins to shed connections during scale-down events. By t≈430s, connections have fully dropped to zero, but the descent is not a clean ramp — the staggered drops correspond to pods being terminated at different times during the slow, multi-step scale-down. The dashed vertical lines mark HIGH/LOW phase boundaries.*
 
-Default HPA is stable under steady load (Experiment-A)
-but unstable under dynamic persistent connection churn.
+- Initial burst to **419** connections, then descends in a staggered staircase.
+- No clean plateau — cyclic churn prevents stability.
+- Connections reach zero only after ~430s (long over-provisioning tail).
+- No reconnection storm visible — scale-down was slow enough that individual client disconnects were sequential.
+
+### CPU Usage
+
+![Total CPU Usage (millicores) — Experiment B1](../processed-results-websockets/experiment-b1-hpa-churn/plots/cpu.png)
+
+*The CPU graph remains persistently elevated throughout the experiment, peaking at ~2,000m aggregated total during the early cycles and holding above 1,000–1,400m across most of the mid-experiment period. This is the CPU "floor" caused by HPA being locked at maxReplicas=15: even with low load from the cyclic pattern, 15 pods each consuming idle CPU adds up to a large aggregate baseline. The final drop to near-zero below t≈480s corresponds to complete load removal. The jagged shape reflects the cyclic HIGH/LOW switching — each HIGH phase drives a CPU spike, but the 5-minute stabilization window prevents scale-down before the next HIGH arrives.*
+
+- CPU persistently elevated, peaks ~2,000m aggregate.
+- Never reaches near-zero during LOW phases (too many idle replicas).
+- Jagged cyclic pattern from alternating HIGH/LOW phases.
+- Final drop only after complete load removal.
+
+### Replica Count
+
+![Replica Count Over Time — Experiment B1](../processed-results-websockets/experiment-b1-hpa-churn/plots/replicas.png)
+
+*This is the definitive plot of HPA over-provisioning under cyclic load. HPA climbs rapidly from 2 to 15 replicas (maxReplicas) within the first two cycles and stays there for the entire mid-experiment period — never scaling back down during the LOW phases because the 5-minute stabilization window is longer than the 60-second LOW phase. The system is permanently stuck at maximum capacity. Only after all load is removed does the slow, 11-minute descent from 15 → 13 → 12 → 11 → 6 → 2 begin. At no point during the active load period does HPA make a correct scale-down decision.*
+
+- Climbs to **maxReplicas=15** within the first ~99 seconds.
+- Stays locked at 15 throughout all active cycles — never scales down during LOW phases.
+- Slow descent: 15 → 13 → 12 → 11 → 6 → 2 takes **~650 seconds** after load removal.
+- HPA never reaches a stable, appropriate replica count during the active experiment.
+
+This experiment demonstrates that default CPU-based HPA is stable under steady load (Experiment A)
+but over-provisions permanently under dynamic persistent connection churn.
 
 ---
 
-## 8. Conclusion Target
+## 8. Conclusion
 
-This experiment provides justification for implementing a stateful autoscaler in Experiment-C.
+Experiment B1 provides justification for implementing a stateful autoscaler in Experiment C.
