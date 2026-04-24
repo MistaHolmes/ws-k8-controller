@@ -38,11 +38,13 @@ Design, Empirical Evaluation, and Validation of a Custom Controller}
 Abhash Behera \and
 Aditya Hota \and
 Suprit Kumar Naik \and
-Ritesh Kumar Singh \and
-Rakesh Kumar Ranjan
+Ritesh Kumar Singh
 }
 
 \authorrunning{Behera et al.}
+
+% Avoid journal production placeholder "date of receipt/acceptance"
+\date{Received: --; Accepted: --}
 
 \institute{
 Abhash Behera \at
@@ -62,11 +64,6 @@ C V Raman Global University, Bhubaneswar 752054, India
 Ritesh Kumar Singh \at
 Department of Computer Science and Engineering, \\
 C V Raman Global University, Bhubaneswar 752054, India
-\and
-Dr.\ Rakesh Kumar Ranjan (Supervisor) \at
-Department of Computer Science and Engineering, \\
-C V Raman Global University, Bhubaneswar 752054, India \\
-\email{rakeshranjan.cdac@gmail.com}
 }
 
 
@@ -93,7 +90,7 @@ This introduces a structural incompatibility: \textbf{CPU utilization cannot enc
 Prior investigations of WebSocket autoscaling, such as Dickel et al.~\cite{dickel2019stateful}, have acknowledged the additional complexity of stateful protocols compared to stateless HTTP workloads. However, these works neither quantify the failure modes of CPU-based HPA with empirical precision, nor propose and validate a complete controller-level solution with connection-stable semantics. This paper addresses both gaps through the following contributions:
 
 \begin{enumerate}[leftmargin=*]
-\item \textbf{Systematic empirical evidence chain.} Through four progressive experiments (A, B1, B2-Instrumented, B3), we characterize and quantify the failure of CPU-based HPA for WebSocket workloads: from over-provisioning under cyclic load, to the measurement of peak reconnection storm rates (1,400~conn/s), to causal proof of permanent connection destruction via idle-connection scale-down.
+\item \textbf{Systematic empirical evidence chain.} Through five progressive experiments (A, B1, B2-Instrumented, B3, C), we characterize and quantify the failure of CPU-based HPA for WebSocket workloads: from over-provisioning under cyclic load, to the measurement of peak reconnection storm rates (1,400~conn/s), to causal proof of permanent connection destruction via idle-connection scale-down and validation of the custom controller.
 
 \item \textbf{Custom Kubernetes controller design.} We present the \texttt{StatefulAutoscaler}, a CRD-based Kubernetes controller implemented with the Kubebuilder~\cite{kubebuilder_docs} SDK, which scales exclusively on \texttt{sum(active\_connections)} queried from Prometheus and incorporates a sliding-window stabilization mechanism (\texttt{ScaleDownCooldownSeconds}) to absorb transient connection drops without triggering premature scale-down.
 
@@ -209,6 +206,9 @@ This formulation implicitly encodes the assumption that \texttt{currentMetricVal
 %% ============================================================
 
 We present a controlled, progressive chain of experiments designed to isolate and characterize each failure mode of CPU-based HPA when applied to persistent WebSocket workloads. The experiments are ordered from least severe (over-provisioning) to most severe (permanent connection destruction), with each experiment building upon the instrumentation and findings of its predecessor. All WebSocket experiments share a common infrastructure: a 4-node Kind cluster~\cite{kind_docs}, a custom WebSocket server (image: \texttt{ws-instrumented}), 800 persistent client connections, and Kubernetes HPA configured with \texttt{targetCPUUtilizationPercentage: 60}.
+
+\paragraph{Instrumented server: definition and rationale}
+By "instrumented" we mean the server was extended to expose Prometheus-format metrics (notably a gauge \texttt{active\_connections} and a counter \texttt{new\_connections\_total}) and a minimal control endpoint (for example, \texttt{/drain}) to enable graceful handoff. We adopted this instrumentation to obtain direct, low-latency visibility into live session counts and connection churn — signals that CPU does not capture. This approach was selected because it (i) supplies a precise scaling signal for the controller, (ii) permits reproducible measurement of reconnection storms via PromQL rate() on \texttt{new\_connections\_total}, and (iii) is minimally invasive and portable (it can be implemented in-application or as a small sidecar/exporter), improving experimental repeatability and external validity.
 
 \subsection{Experiment A: HPA Baseline Under Monotonic Correlated Load}
 
@@ -595,7 +595,7 @@ We make several operational assumptions in our evaluation and identify correspon
 \label{sec:conclusion}
 %% ============================================================
 
-This paper presented a systematic, empirically grounded investigation of Kubernetes Horizontal Pod Autoscaler behavior for stateful WebSocket workloads. Through a four-experiment progressive evidence chain, we demonstrated that CPU-based HPA exhibits three distinct failure modes when applied to persistent-connection workloads: over-provisioning by 87.5\% under cyclic load (Experiment B1); reconnection storm induction at 1,400~connections/second during each scale-down event (Experiment B2-Instrumented); and permanent, staircase-pattern destruction of live idle connections (Experiment B3). These failure modes are architectural in nature and cannot be remediated through parameter tuning, reinforcing the findings of Nguyen et al.~\cite{nguyen2020hpa} on the fundamental behavioral constraints of the HPA proportional control loop.
+This paper presented a systematic, empirically grounded investigation of Kubernetes Horizontal Pod Autoscaler behavior for stateful WebSocket workloads. Through a five-experiment progressive evidence chain (A, B1, B2-Instrumented, B3, C), we demonstrated that CPU-based HPA exhibits three distinct failure modes when applied to persistent-connection workloads: over-provisioning by 87.5\% under cyclic load (Experiment B1); reconnection storm induction at 1,400~connections/second during each scale-down event (Experiment B2-Instrumented); and permanent, staircase-pattern destruction of live idle connections (Experiment B3). We then validated a practical mitigation (Experiment C): the \texttt{StatefulAutoscaler} controller, which uses \texttt{sum(active\_connections)} and a sliding-window stabilization mechanism to preserve pods through transient connection loss. These failure modes are architectural in nature and cannot be remediated through parameter tuning, reinforcing the findings of Nguyen et al.~\cite{nguyen2020hpa} on the fundamental behavioral constraints of the HPA proportional control loop.
 
 To address these failures, we designed and implemented the \texttt{StatefulAutoscaler} -- a custom Kubernetes controller that substitutes \texttt{sum(active\_connections)} as the primary scaling signal and augments the proportional replica computation with a sliding-window stabilization mechanism that is semantically aware of connection-context history. Experimental validation under a two-cycle restorm simulation (Experiment C) yielded the following outcomes:
 
@@ -607,6 +607,10 @@ To address these failures, we designed and implemented the \texttt{StatefulAutos
 \end{itemize}
 
 These results validate that connection-aware autoscaling with sliding-window stabilization semantics is both necessary and sufficient for production-grade management of stateful WebSocket deployments in Kubernetes. The \texttt{StatefulAutoscaler} demonstrates that a controller of modest implementation complexity can eliminate the fundamental failure modes of CPU-based HPA for this growing class of workloads. As cloud-native architectures continue to adopt persistent-connection protocols -- from WebSocket to gRPC streaming, MQTT, and SSE -- connection-aware autoscaling represents an increasingly critical infrastructure requirement.
+
+
+\section*{Acknowledgements}
+The authors gratefully acknowledge Dr.\\ Rakesh Kumar Ranjan for his supervision and sustained guidance throughout this project. His strategic input on experimental design, controller implementation decisions, and measurement methodology improved the rigor of the study. We also thank him for detailed manuscript feedback that helped clarify presentation of the results and for facilitating access to institutional compute resources used to run the Kind clusters and collect metrics. Finally, we appreciate helpful discussions with colleagues and lab members that informed analysis and figure preparation.
 
 
 %% ============================================================
