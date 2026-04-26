@@ -18,7 +18,7 @@
    - [5.1 Shared Infrastructure for All Experiments](#51-shared-infrastructure-for-all-experiments)
    - [5.2 Experiment A — Baseline: Does HPA Even Work for WebSockets?](#52-experiment-a--baseline-does-hpa-even-work-for-websockets)
    - [5.3 Experiment B1 — Cyclic Churn: Over-Provisioning Trap](#53-experiment-b1--cyclic-churn-over-provisioning-trap)
-   - [5.4 Experiment B2 (Extended LOW) — Forced Scale-Down Kills Connections](#54-experiment-b2-extended-low--forced-scale-down-kills-connections)
+   - [5.4 Experiment B2 (Extended LOW) — The Experimental Wander *(not in the paper)*](#54-experiment-b2-extended-low--the-experimental-wander-not-in-the-paper)
    - [5.5 Experiment B2 (Instrumented) — Quantifying the Reconnection Storm](#55-experiment-b2-instrumented--quantifying-the-reconnection-storm)
    - [5.6 Experiment B3 — The Fatal Flaw (Control Baseline)](#56-experiment-b3--the-fatal-flaw-control-baseline)
    - [5.7 Experiment C — The Custom StatefulAutoscaler (The Solution)](#57-experiment-c--the-custom-statefulautoscaler-the-solution)
@@ -455,41 +455,75 @@ The 5-minute stabilization window exists to prevent premature scale-downs. But w
 
 ---
 
-### 5.4 Experiment B2 (Extended LOW) — Forced Scale-Down Kills Connections
+### 5.4 Experiment B2 (Extended LOW) — The Experimental Wander *(not in the paper)*
 
 **Location**: `scripts/run-experiment-b2.sh`, `experiments/websocket/experiment-b2-hpa-churn/`
 
-#### Goal
+> **⚠️ Important for SDE-1 readers**: This experiment does **not appear as a standalone section in the research paper**. It was a necessary stepping stone during development — a "trial run" to check if the failure mode was real before spending time building the full measurement setup. Understanding *why* it was dropped from the paper is as important as understanding what it found.
 
-Force HPA to actually scale down by making the LOW (idle) phase long enough to outlast the 5-minute stabilization window. Observe what happens to active connections.
+#### What Is an "Experimental Wander"?
 
-#### Load Pattern
+In research, an "experimental wander" is a run you do to check a hunch. You're not yet ready to measure things precisely — you just want to know: *is anything interesting happening here at all?* If the answer is yes, you go back, build proper tools, and run it again properly. The second, properly-measured run is what you actually publish.
+
+B2 Extended LOW is exactly that. It answered "yes, connections definitely die when HPA scales down" — but it couldn't tell you *how many* connections died or *how fast* clients reconnected. Those are the numbers the paper needs. That's why B2 Instrumented (Section 5.5) exists: it's the same idea, done properly with Prometheus metrics.
+
+#### What Was the Goal Here?
+
+From B1, we know HPA gets stuck at `maxReplicas` when cycles are fast and never scales down during the experiment. So the next logical question is: **what actually happens when HPA eventually does scale down?** To force that, make the LOW phase so long that it outlasts the 5-minute stabilization window.
 
 ```
-HIGH (60s): 500 connections, pinging.
-Extended LOW (200s+): connections stay open, clients stop pinging.
-→ This outlasts the 5-minute window, forcing HPA all the way to minReplicas=2.
+HIGH (60s): 500 connections, pinging hard (CPU high).      ← HPA scales UP
+Extended LOW (200s+): clients go silent, connections stay open. ← HPA eventually scales DOWN
+→ The LOW outlasts the 5-minute window, so HPA has no choice but to start killing pods.
 ```
 
 #### What Happened (3 Cycles)
 
-Each cycle follows the same tragic pattern:
+Each cycle followed the same pattern:
 
 1. HIGH: HPA scales up to 8–10 pods.
-2. Extended LOW: CPU is 0%. After 5+ minutes, HPA scales back to 2 pods.
+2. Extended LOW: CPU is 0%. After 5+ minutes, HPA scales back down to 2 pods.
 3. Kubernetes terminates 6–8 pods. Each pod holds ~80–100 live WebSocket connections.
-4. Those ~600 connections are hard-killed (TCP RST).
-5. Clients detect disconnect, immediately reconnect.
+4. Those ~600 connections are hard-killed (TCP RST — the networking equivalent of hanging up on someone mid-sentence).
+5. Clients detect disconnect and immediately try to reconnect.
 6. Reconnection burst hits the now-tiny 2-pod cluster.
-7. CPU spikes. HPA scales back up. Cycle starts again.
+7. CPU spikes from the reconnection rush. HPA scales back up. Cycle repeats.
 
-Full transition log: `2 → 6 → 8 → 2 → 6 → 8 → 10 → 2 → 5 → 10 → 4 → 2`
+Full replica transition log: `2 → 6 → 8 → 2 → 6 → 8 → 10 → 2 → 5 → 10 → 4 → 2`
 
-#### Edge Cases / Caveats
+#### Why It Was Dropped from the Paper
 
-- **No Prometheus instrumentation yet**: The exact number of dropped vs. reconnected connections was not captured in this experiment. It was observed qualitatively but not quantified.
-- **Race condition at scale-down**: When Kubernetes sends `SIGTERM` to a pod, it removes the pod from the Service's endpoints first. New connections stop routing to it. But existing connections are maintained by the OS kernel (not by Kubernetes) and remain open until the pod process exits or `SIGKILL` is sent. This is why you see a ~30-second delay between "HPA says scale down" and "connections actually drop."
-- **The load generator reconnects aggressively**: This is realistic — production clients always have auto-reconnect logic.
+This experiment had one fatal flaw: **it had no way to measure what it claimed to show.**
+
+The server at this point had no Prometheus metrics. There was no `active_connections` gauge, no connection counter. The only data collected was:
+- `kubectl top pods` (CPU numbers)
+- `kubectl get hpa` (replica counts)
+- `kubectl get pods` (lifecycle events)
+
+None of these tell you how many connections were severed, or how fast clients reconnected. You can *see* the pods being killed and *assume* connections died, but you can't put a number on it. A research paper needs numbers.
+
+Specifically, B2 Extended LOW **cannot answer**:
+- How many connections were severed per scale-down event?
+- At what rate (connections/second) did clients flood back in?
+- Did the server briefly see more connections than the target (overshoot)?
+
+Without those answers, you have an observation but not evidence. The paper needs evidence.
+
+#### What It *Did* Accomplish (Its Real Value)
+
+Even though it doesn't appear in the paper, this experiment was not a waste. It did exactly what a pilot run should do:
+
+1. **Confirmed the failure is real** — connections really do die when HPA scales down. The hunch was right.
+2. **Defined what needs to be measured** — you saw clients reconnecting but had no numbers. That told you exactly what instrumentation to add.
+3. **Made the case for building B2 Instrumented** — you would not invest in setting up a full Prometheus stack without first checking the failure was real.
+
+Think of it like this: before writing a full test suite for a bug, you write a quick one-liner to reproduce it first. B2 Extended LOW was the one-liner. B2 Instrumented was the test suite.
+
+#### Caveats Discovered Here (That Informed B2 Instrumented)
+
+- **The 30-second termination limbo was first noticed here**: Visually, there was a gap between "HPA decided to scale down" and "connections actually disappeared." No exact timestamps, but the delay was visible. This led to the detailed timestamp analysis in B3.
+- **Race condition at scale-down**: When Kubernetes sends `SIGTERM` to a pod, it removes the pod from the Service endpoints first (new connections stop going there), but the existing live connections maintained by the OS kernel stay open until `SIGKILL`. This was suspected here but only measured precisely in B3.
+- **Clients reconnecting aggressively creates a new CPU spike**: Also seen here qualitatively. Exact rates measured in B2 Instrumented (1,400 conn/s).
 
 ---
 
@@ -497,11 +531,13 @@ Full transition log: `2 → 6 → 8 → 2 → 6 → 8 → 10 → 2 → 5 → 10 
 
 **Location**: `scripts/run-experiment-b2-instrumented.sh`, `experiments/websocket/experiment-b2-hpa-churn-instrumented/`
 
+> **This is the experiment that actually appears in the research paper.** Everything B2 Extended LOW showed qualitatively, this experiment shows with real numbers.
+
 #### Goal
 
-Add Prometheus instrumentation to B2 to get exact numbers on the reconnection storm. Answer: *how many connections per second are being lost and re-established?*
+Now that the failure mode is confirmed (from B2 Extended LOW), add Prometheus instrumentation so we can put actual numbers on it. Answer: *how many connections per second are being lost and re-established?* And: *does the reconnection storm overshoot the original connection count?*
 
-#### Changes from B2 Extended
+#### What Changed Compared to B2 Extended
 
 - Server upgraded to `app-instrumented/server.py` — now exports:
   - `active_connections` (Gauge): current number of open connections.
@@ -1005,11 +1041,15 @@ The experiments form a deliberate logical progression. Each one answers a specif
   HPA gets stuck at maxReplicas. Cannot scale down quickly enough.
   → HPA over-provisions catastrophically under real cyclic workloads.
 
-[Experiment B2 Extended] CPU HPA + Forced Scale-Down:
+[Experiment B2 Extended] CPU HPA + Forced Scale-Down:  ⚠️  PILOT RUN — NOT IN PAPER
   When HPA finally does scale down, it kills live connections.
-  → Reconnection storms begin. Qualitatively observed.
+  → Reconnection storms qualitatively observed. BUT no Prometheus metrics attached.
+  → Cannot publish: no connection counts, no storm rates, no overshoot numbers.
+  → This pilot's only job was to confirm the failure mode is real enough to merit
+     the effort of setting up Prometheus. It succeeded at that job.
+  → Superseded entirely by B2 Instrumented.
 
-[Experiment B2 Instrumented] CPU HPA + Quantification:
+[Experiment B2 Instrumented] CPU HPA + Quantification:  ← This is the one in the paper
   Reconnection storms measured: up to 1,400 connections/second.
   Connection overshoot to 1,215 (above 800 target).
   → HPA + persistent connections = quantified chaos.
@@ -1036,17 +1076,20 @@ The experiments form a deliberate logical progression. Each one answers a specif
 
 ## 10. Key Numbers Across All Experiments
 
-| Metric | Exp A | Exp B1 | Exp B2-ext | Exp B2-inst | Exp B3 | Exp C |
+The table below shows all experiments including B2 Extended LOW. The column is greyed out to indicate it is a **pilot run only** and not a standalone paper experiment.
+
+| Metric | Exp A | Exp B1 | ~~B2-ext~~ *(pilot)* | Exp B2-inst *(paper)* | Exp B3 | Exp C |
 |--------|-------|--------|-----------|------------|--------|-------|
+| **In paper?** | ✅ | ✅ | ❌ Pilot only | ✅ | ✅ | ✅ |
 | Scaler | HPA | HPA | HPA | HPA | HPA | **Custom** |
 | CPU_WORK | 1 | 1 | 1 | 1 | **1** | **0** |
 | Scale-down window | 5 min | 5 min | 5 min | 5 min | **60s** | N/A |
 | Target connections | 400 | 500 | ~500 | **800** | **800** | **800** |
-| Peak connections seen | 388 | 419 | ~500 | **1,215\*** | ~800 | 854 |
+| Peak connections seen | 388 | 419 | ~500 (no metric) | **1,215\*** | ~800 | 854 |
 | Peak replicas | 5 | **15** | 10 | **15** | 8–15 | **8–9** |
 | Scale events | 2 | 5+ | 12+ | 18+ | 3+ | 4 |
-| Reconnection storm | ❌ No | ❌ No | ✅ Yes | ✅ **1,400/s** | ✅ Yes | **❌ None** |
-| Connections killed by scale-down | 0 | 0 | Many | Many | **All** | **0** |
+| Reconnection storm | ❌ No | ❌ No | ✅ Yes (unquantified) | ✅ **1,400/s** | ✅ Yes | **❌ None** |
+| Connections killed | 0 | 0 | Many (unquantified) | Many (measured) | **All (measured)** | **0** |
 | Connection-aware | ❌ | ❌ | ❌ | ❌ | ❌ | **✅** |
 
 \* B2-inst overshoot above 800 due to reconnection storm creating zombie connections.
