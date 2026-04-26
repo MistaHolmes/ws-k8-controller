@@ -367,7 +367,7 @@ This is NOT how real WebSocket workloads behave (in practice, connections are mo
 | Parameter | Value |
 |-----------|-------|
 | `CPU_WORK` | `1` (each ping triggers spin loop) |
-| Load | 400 connections, stay connected, ping every 5s, for 330s total |
+| Load | 800 clients ramp up over ~90s, stay connected and ping for 330s total |
 | HPA target CPU | 60% average utilization |
 | minReplicas | 2 |
 | maxReplicas | 10 |
@@ -416,12 +416,12 @@ Simulate a realistic workload that alternates between high activity and idle per
 #### Load Pattern
 
 ```
-HIGH phase (60s): clients pinging heavily (CPU > 60%)
-LOW phase (60s):  clients go idle (CPU ≈ 0%), but connections stay OPEN
-... repeat
+HIGH phase (60s): 800 clients pinging heavily (CPU > 60%)
+LOW phase (30s):  clients go idle (CPU ≈ 0%), but connections stay OPEN
+... repeat × 5 cycles
 ```
 
-The 60-second HIGH/LOW cycle is shorter than HPA's 5-minute scale-down stabilization window. This means HPA can never finish a scale-down before the next HIGH phase starts.
+The total cycle period is only 90 seconds — far shorter than HPA's default **300-second (5-minute)** scale-down stabilization window. This means HPA can never finish a scale-down before the next HIGH phase starts. In fact, even after 5 full cycles (450 seconds total), the 300-second stabilization window means HPA needs yet another 300+ seconds to recover to `minReplicas` after the final cycle ends.
 
 #### What Happened
 
@@ -445,12 +445,23 @@ HPA hit the hard ceiling of 15 replicas within 99 seconds and stayed there for n
 
 #### Why This Happens
 
-The 5-minute stabilization window exists to prevent premature scale-downs. But with 60-second cycles, every LOW phase is over before the stabilization window expires. HPA keeps accumulating replicas from the HIGH phases but never gets to release them. The replica count ratchets upward.
+The 5-minute (300-second) default stabilization window exists to prevent premature scale-downs. But with 90-second cycles (60s HIGH + 30s LOW), every LOW phase (only 30 seconds long) ends before the stabilization window even begins to measure low CPU. HPA keeps accumulating replicas from the HIGH phases but never gets to release them. The replica count ratchets upward.
+
+Here is the math:
+```
+300s window to authorise scale-down.
+LOW phase = 30s.
+30s < 300s → stabilization never expires → HPA never issues a scale-down.
+Even after 5 cycles (450s total), the window must restart from the final LOW phase.
+Total convergence time ≈ 450s + 300s + scale-down steps ≈ 750–800 seconds.
+```
 
 #### Edge Cases / Caveats
 
-- **Connections dropped to ~45–55 during LOW** (not 0): some connections were still held open by clients that hadn't hit their idle timeout. HPA kept running 15 pods for these ~50 connections — massive over-provisioning.
-- **This experiment did NOT observe scale-down killing connections** because the stabilization window kept HPA from ever scaling down during the experiment window. That failure mode is covered in B2.
+- **B1 uses the DEFAULT 300-second stabilization window** (not the 60s window used by B2-Instrumented and B3). The paper explicitly chose to leave it at default to test HPA under its factory settings — not under an artificially aggressive configuration.
+- **LOW phase is only 30 seconds**: Even though the LOW phase looks long on a timeline, it's actually only 30 seconds. The 300s stabilization window means HPA would need the LOW phase to last 5 minutes before it would start scaling down. With a 30-second LOW phase, HPA never even gets close.
+- **Connections dropped to ~45–55 during LOW** (not 0): some connections may still be held open. HPA ran 15 pods for these ~50 connections — massive over-provisioning.
+- **This experiment did NOT observe scale-down killing connections** because the stabilization window kept HPA from scaling down during the experiment window. That failure mode is covered in B2.
 - **maxReplicas acts as a hard budget ceiling**: In production, this prevents runaway cost but also prevents the system from scaling to meet genuine demand.
 
 ---
@@ -543,8 +554,10 @@ Now that the failure mode is confirmed (from B2 Extended LOW), add Prometheus in
   - `active_connections` (Gauge): current number of open connections.
   - `new_connections_total` (Counter): total connections ever opened (never decreases).
   - Reconnection rate = `rate(new_connections_total[15s])` = new connections per second in the last 15s window.
-- 800 connections (doubled from B2).
-- 4 full HIGH/LOW cycles.
+- 800 connections (unchanged from B2 Extended).
+- **5 full HIGH/LOW cycles** (HIGH=60s, LOW=90s; total period=150s per cycle).
+- HPA policy: `stabilizationWindowSeconds: 0` for scale-up (react immediately to CPU), `stabilizationWindowSeconds: 60` for scale-down.
+- The 90s LOW was deliberately chosen to be greater than the 60s scale-down window, guaranteeing one full scale-down per cycle.
 - Full Prometheus + scrape pipeline at 15s.
 
 #### What Happened
@@ -571,6 +584,7 @@ Now that the failure mode is confirmed (from B2 Extended LOW), add Prometheus in
 | Cycle 2 | **1,298.3 conn/s** |
 | Cycle 3 | **1,399.5 conn/s** |
 | Cycle 4 | **1,251.8 conn/s** |
+| Cycle 5 | (partial — connection pool partially degraded by this point) |
 
 **Connection overshoot**: During Cycle 2, the active connection count spiked to **1,215** — above the 800 target. This is because clients reconnected so fast that new connections arrived before the old (dead) connections had been cleaned up server-side. The server briefly saw 1,215 connection objects, even though only 800 were genuinely active.
 
@@ -628,20 +642,25 @@ spec:
 #### What Happened
 
 ```
-t=0s:     2 pods. CONNECT phase begins.
-t=0–90s:  800 clients ramp up gradually. CPU spikes on initial pods.
-          HPA: 2 → 6 → 10 → 15 replicas.
-t=90s:    All 800 connections established, balanced across 15 pods (~53/pod).
-t=120s:   IDLE phase. Clients stop pinging. CPU: 0%. Connections: 800 (flat).
-t=180s:   60 seconds into IDLE. HPA stabilization window expires.
-          HPA: "CPU has been < 60% for 60s. Scale down."
-          HPA: 15 → 11 pods. (4 pods sent SIGTERM)
-t=180s:   Connections still show 800... (30-second limbo begins)
-t=210s:   SIGKILL fires on the 4 pods. Connections: 800 → ~680. Step-down visible.
-          HPA: "Still low CPU." 11 → 7 pods. Next batch sent SIGTERM.
-t=240s:   SIGKILL. Connections: ~680 → ~445.
-t=270s:   7 → 3 → 2 pods. Connections: ~445 → ~79 → 0.
+t=0s:      2 pods. CONNECT phase begins (CONNECT_DURATION=120s).
+t=0–90s:   800 clients ramp up gradually. CPU spikes on initial pods.
+           HPA: 2 → 6 → 10 → 15 replicas. (scaleUp window = 0s, so immediate)
+t=90s:     All 800 connections established, balanced across 15 pods (~53/pod).
+t=120s:    IDLE phase begins (IDLE_MAX_DURATION=240s).
+           Clients stop pinging. CPU: 0%. Connections: 800 (still flat — TCP sessions open).
+t=180s:    60 seconds into IDLE. HPA scale-down stabilization window expires.
+           HPA: "CPU has been < 60% for 60s. Scale down."
+           HPA: 15 → 11 pods. (4 pods sent SIGTERM + removed from endpoints)
+t=180s:    Connections still show 744... (30-second SIGTERM limbo begins)
+t=210s:    SIGKILL fires on the 4 pods. OS kernel RSTs all open TCP sockets.
+           Connections: 744 → ~697. Step-down visible in graph.
+           HPA: "Still 0% CPU." Sends 11 → 7 (4 more pods get SIGTERM).
+t=246s:    SIGKILL again. Connections: ~697 → ~445.
+t=270s+:   7 → 3 → 2 pods. Connections: ~445 → ~79 → 0.
+           All 800 original sessions permanently destroyed.
 ```
+
+**Why do connections drop in steps, not instantly?** Because of the 30-second SIGTERM grace period. Kubernetes sends SIGTERM, removes the pod from the Service endpoint slice immediately (no new connections will go there), but the OS keeps existing TCP connections alive. Only after 30 seconds does Kubernetes send SIGKILL, which forces the OS to close all file descriptors (including TCP sockets), sending a TCP RST to every connected client. So every "HPA event" you see in the graph is followed by a ~30-second delay before the connections actually fall off the cliff.
 
 #### The 30-Second Termination Limbo — A Critical Kubernetes Insight
 
