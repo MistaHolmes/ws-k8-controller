@@ -29,17 +29,53 @@ set -euo pipefail
 cleanup() {
   echo ""
   echo "[CLEANUP] Stopping background processes..."
+  # Kill any background collectors/port-forwards we started
   kill ${REPLICA_PID:-}      2>/dev/null || true
   kill ${PROM_COLLECT_PID:-} 2>/dev/null || true
   kill ${PROM_PID:-}         2>/dev/null || true
-  # If KEDA was installed via Helm, uninstall it to keep environment clean
+  # Give processes a moment to exit
+  sleep 1
+
+  echo "[CLEANUP] Removing KEDA resources (ScaledObject, managed HPA, operator)..."
+  # Delete the ScaledObject we created
+  kubectl delete scaledobject websocket-keda-scaler -n default --ignore-not-found=true || true
+  # Attempt to delete any HPA created by KEDA for this ScaledObject
+  kubectl delete hpa keda-hpa-websocket-keda-scaler -n default --ignore-not-found=true || true
+  # Try to delete any HPAs that reference websocket-server (safe cleanup)
+  for h in $(kubectl -n default get hpa -o name 2>/dev/null | grep websocket || true); do
+    kubectl -n default delete "$h" --ignore-not-found=true || true
+  done
+
+  # Uninstall KEDA operator (Helm or manifest)
   if command -v helm >/dev/null 2>&1; then
     helm -n keda uninstall keda >/dev/null 2>&1 || true
+    kubectl delete namespace keda --ignore-not-found=true || true
+  else
+    kubectl delete -f "https://github.com/kedacore/keda/releases/download/v${KEDA_VERSION}/keda-${KEDA_VERSION}.yaml" >/dev/null 2>&1 || true
+    kubectl delete namespace keda --ignore-not-found=true || true
   fi
-  # Wait only for the PIDs we started — never bare 'wait' (hangs on port-forward etc.)
+
+  echo "[CLEANUP] Removing Prometheus and monitoring stack..."
+  # Delete monitoring namespace (prometheus deployment + service)
+  kubectl delete namespace monitoring --ignore-not-found=true || true
+  # Delete Metrics Server (best-effort)
+  kubectl -n kube-system delete deployment metrics-server --ignore-not-found=true || true
+
+  echo "[CLEANUP] Deleting Kubernetes artifacts created for the experiment..."
+  # Delete websocket server deployment/service and loadgen job
+  kubectl delete -f workloads/websocket/k8s/deployment-experiment-c.yml --ignore-not-found=true || true
+  kubectl delete -f workloads/websocket/k8s/service.yml --ignore-not-found=true || true
+  kubectl delete -f "$PROJECT_ROOT/load-generator/websocket-client/k8s/job.yaml" --ignore-not-found=true || true
+
+  echo "[CLEANUP] Deleting kind cluster '$CLUSTER_NAME'..."
+  kind delete cluster --name "$CLUSTER_NAME" || true
+
+  echo "[CLEANUP] Finalizing local logfile handles and waiters..."
+  # Wait only for the PIDs we started — avoid bare wait
   for _pid in "${REPLICA_PID:-}" "${PROM_COLLECT_PID:-}" "${PROM_PID:-}"; do
     [ -n "$_pid" ] && wait "$_pid" 2>/dev/null || true
   done
+
   echo "[CLEANUP] Done."
 }
 trap cleanup EXIT
