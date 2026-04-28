@@ -22,6 +22,9 @@
    - [5.5 Experiment B2 (Instrumented) — Quantifying the Reconnection Storm](#55-experiment-b2-instrumented--quantifying-the-reconnection-storm)
    - [5.6 Experiment B3 — The Fatal Flaw (Control Baseline)](#56-experiment-b3--the-fatal-flaw-control-baseline)
    - [5.7 Experiment C — The Custom StatefulAutoscaler (The Solution)](#57-experiment-c--the-custom-statefulautoscaler-the-solution)
+   - [5.8 Experiment D — HPA with Custom Connection-Count Metric (Baseline)](#58-experiment-d--hpa-with-custom-connection-count-metric-baseline)
+   - [5.9 Experiment E — KEDA Baseline](#59-experiment-e--keda-baseline)
+   - [5.10 Failure Mode Experiments — Where the System Breaks](#510-failure-mode-experiments--where-the-system-breaks)
 6. [The Custom Controller — Architecture Deep Dive](#6-the-custom-controller--architecture-deep-dive)
 7. [Phase 2 — MQTT Experiments (Future Work)](#7-phase-2--mqtt-experiments-future-work)
 8. [Edge Cases and Caveats](#8-edge-cases-and-caveats)
@@ -801,6 +804,164 @@ FINAL DROP (t=390s to t=570s):
 
 ---
 
+### 5.8 Experiment D — HPA with Custom Connection-Count Metric (Baseline)
+
+**Location**: `scripts/run-experiment-d.sh`, `analysis/experiment-d/`
+
+#### Why This Experiment Exists
+
+After proving that the `StatefulAutoscaler` solves the problem, a natural reviewer question is: *"Why not just tell HPA to use connection count as its metric?"* Experiment D answers this directly: yes, using the right metric fixes over-provisioning — but HPA still lacks the connection-context stability window that keeps pods warm during a dropout gap.
+
+#### What Was Set Up
+
+1. **Prometheus Adapter** deployed with a custom rule that translates `sum(active_connections)` into a per-pod metric called `active_connections_per_pod` via the Kubernetes Custom Metrics API.
+2. **HPA** configured to scale on `active_connections_per_pod` with `averageValue: 100` — the same target density as the `StatefulAutoscaler` in Experiment C.
+3. Same two-cycle restorm workload: 800 clients, 90-second DROP 1 gap, `CPU_WORK=0`.
+
+```yaml
+# HPA for Experiment D
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+spec:
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: active_connections_per_pod
+        target:
+          type: AverageValue
+          averageValue: "100"
+  minReplicas: 2
+  maxReplicas: 15
+```
+
+#### What It Proves
+
+| Question | Answer from Exp D |
+|----------|------------------|
+| Can HPA scale correctly on connection count? | **Yes** — scales to ~8 pods (not 15) |
+| Does HPA hold pods warm during the 90s DROP 1 gap? | **No** — scales down to minReplicas=2 |
+| Do CYCLE 2 clients experience disruption? | **Yes** — must wait for re-provisioning |
+
+**Key insight**: Metric choice fixes over-provisioning. But _lifecycle_ — knowing when it's _safe_ to scale down — requires a stabilization mechanism that HPA cannot natively express for connection-oriented workloads.
+
+#### Status: Multi-Run Pending
+
+A single run has been completed. **5-run multi statistics (mean ± std) are pending.**
+See the `[PLACEHOLDER]` values in `Paper-Latex/paper.tex` → `\subsection{Experiment D}` for where to fill in data once `scripts/run-multi.sh` has been run 5× for this configuration.
+
+---
+
+### 5.9 Experiment E — KEDA Baseline
+
+**Location**: `scripts/run-experiment-e.sh`, `analysis/experiment-e/`
+
+#### Why This Experiment Exists
+
+**KEDA** (Kubernetes Event-Driven Autoscaling) is a popular open-source project that extends HPA with support for custom event sources and Prometheus metrics. It has a `cooldownPeriod` parameter that looks like it might solve the exact same problem as `scaleDownCooldownSeconds` in our controller.
+Experiment E honestly tests whether KEDA's cooldown is equivalent to our mechanism, or whether there are meaningful differences.
+
+#### What Was Set Up
+
+KEDA v2.13.0 installed cluster-wide. A `ScaledObject` targeting the WebSocket Deployment:
+
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: websocket-keda-scaler
+spec:
+  scaleTargetRef:
+    name: websocket-server
+  minReplicaCount: 2
+  maxReplicaCount: 15
+  cooldownPeriod: 120      # ← matches scaleDownCooldownSeconds: 120 from Exp C
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.monitoring.svc.cluster.local:9090
+        metricName: active_connections
+        threshold: "100"
+        query: sum(active_connections)
+```
+
+#### KEDA vs StatefulAutoscaler: What Is Actually Different
+
+| Feature | KEDA | StatefulAutoscaler |
+|---------|------|-------------------|
+| Prometheus trigger | ✅ Yes | ✅ Yes |
+| Cooldown period | ✅ `cooldownPeriod` param | ✅ `scaleDownCooldownSeconds` |
+| High-water-mark window | ❌ No — adjusts `spec.minReplicas` floor, doesn't hold the high-water mark exactly | ✅ Full sliding-window max over history |
+| `maxScaleDownStep` rate limiting | ❌ Not exposed | ✅ Explicit per-cycle bound |
+| Deterministic convergence bound | ❌ Depends on HPA internals | ✅ `ceil((current-desired)/maxScaleDownStep)` cycles |
+| TCP RST / 30s limbo awareness | ❌ Not modeled | ✅ Documented and designed around |
+
+**Key finding**: KEDA with matched `cooldownPeriod` provides partial pod preservation during DROP 1 — better than plain CPU HPA, but not a full warm-bridge equivalent to the `StatefulAutoscaler`. KEDA updates `spec.minReplicas` dynamically but doesn't implement a high-water-mark sliding window over per-cycle desired counts.
+
+#### Status: Multi-Run Pending
+
+A single run has been completed. **5-run multi statistics are pending.**
+See `[PLACEHOLDER]` values in `Paper-Latex/paper.tex` → `\subsection{Experiment E}` for where to fill in results.
+
+---
+
+### 5.10 Failure Mode Experiments — Where the System Breaks
+
+**Location**: `scripts/run-failure-scenarios.sh`, `analysis/failure-scenarios/`
+
+Three adversarial scenarios were run specifically to find the edges of the `StatefulAutoscaler`'s operational envelope. A research paper that only shows the happy path is less credible. These failure scenarios make the paper honest.
+
+#### Failure Scenario 1: Metric Staleness (60s Scrape Interval)
+
+**Setup**: Prometheus `scrape_interval` bumped from 15s to 60s. Same Experiment C workload.
+
+**What happened**:
+- Controller reacted with up to 60s lag (one scrape cycle) vs. 15s normally.
+- No connection loss — all 8 pods remained warm through DROP 1 because the stabilization window absorbed the scrape lag.
+- The controller degraded gracefully to a 60-second reaction lag rather than failing.
+
+**Danger zone**: If scrape interval > `scaleDownCooldownSeconds`, the cooldown would expire before fresh metrics arrived — potentially triggering premature scale-down. This invariant must be maintained: `scaleDownCooldownSeconds > scrape_interval`.
+
+**Write-up in paper**: Section `\ref{sec:failure_analysis}`, Failure Scenario 1.
+
+---
+
+#### Failure Scenario 2: Instantaneous Connection Spike (No Ramp)
+
+**Setup**: Removed the linear stagger from the load generator. All 800 clients connected simultaneously to 2 initial pods.
+
+**What happened**:
+- Controller correctly computed `ceil(800/100) = 8` pods on the next scrape cycle (15s later).
+- During those 15s, 2 pods had to absorb all 800 connection establishment requests — OS `listen()` backlog was observable.
+- Pod scheduling introduced a 22±4 second lag before all 8 pods were ready.
+- No connection loss (OS queued the connections), but connection latency spiked during the lag.
+
+**Root cause**: Kubernetes scheduling latency, not controller logic. Mitigated by setting `minReplicas` higher or using rate-based proactive scaling.
+
+**Write-up in paper**: Section `\ref{sec:failure_analysis}`, Failure Scenario 2.
+
+---
+
+#### Failure Scenario 3: Prometheus Killed Mid-Experiment
+
+**Setup**: During an active run (800 connections, 8 pods), the Prometheus pod was deleted:
+```bash
+kubectl delete pod -n monitoring -l app=prometheus
+```
+Prometheus auto-restarted via its Deployment. 2-minute outage window observed.
+
+**What happened**:
+- Controller's `queryPrometheus()` returned errors every reconciliation cycle.
+- Safe-default behaviour: controller held replicas at 8 (current value). Did NOT scale down.
+- After Prometheus recovered (~2 minutes), controller resumed normally.
+- No connection loss throughout.
+
+**Remaining risk**: If the outage is longer than `scaleDownCooldownSeconds` AND connections simultaneously reached 0, the window would eventually expire with stale/missing data. This is an acknowledged limitation in the paper.
+
+**Write-up in paper**: Section `\ref{sec:failure_analysis}`, Failure Scenario 3.
+
+---
+
 ## 6. The Custom Controller — Architecture Deep Dive
 
 The custom controller lives in `controller/` and is built using **Kubebuilder** — a Go framework for building Kubernetes operators.
@@ -817,9 +978,31 @@ This is called the **reconciliation loop**. The controller runs this loop contin
 - **Compare**: Calculate `desired_pods = ceil(connections / targetConnectionsPerPod)`. Compare with current replica count.
 - **Act**: If different, patch the Deployment's `spec.replicas`.
 
+### Controller Stability Properties (Formal Analysis)
+
+This is added to the paper in `\subsection{Controller Design and Stability Properties}`. Here's how to think about it as an engineer:
+
+**The controller is a discrete-time proportional controller with hysteresis.**
+
+The three-step loop (Observe → Compare → Act) mirrors what HPA does, but with two key upgrades:
+
+1. **Right signal**: Uses `active_connections` instead of CPU — the metric that directly encodes what you care about protecting.
+2. **Hysteresis via the sliding window**: The scale-down condition has a "dead zone" — even if math says you could scale down, the cooldown window suppresses that decision until the window's high-water mark decays. This prevents the oscillate-oscillate-oscillate pattern.
+
+**Scale-down convergence formula** (think of this like a worst-case estimate):
+```
+ceil((current_replicas - desired_replicas) / maxScaleDownStep) cycles
+```
+Each cycle ≈ 15 seconds. Example: going from 8 pods to 2 pods with `maxScaleDownStep=2`:
+```
+ceil((8 - 2) / 2) = 3 cycles = ~45 seconds
+```
+This is the maximum time it will take to scale down once the cooldown expires. It is bounded and predictable — unlike HPA which can make large jumps.
+
+**Scale-up is unbounded (no step limit)**: The controller can jump from 2 to 8 replicas in a single cycle if connections spike. Only scale-down is rate-limited to protect existing sessions.
+
 ### Key Files
 
-| File | Purpose |
 |------|---------|
 | `controller/api/v1alpha1/statefulautoscaler_types.go` | Defines the Go struct for the CRD (what fields `StatefulAutoscaler` has) |
 | `controller/internal/controller/statefulautoscaler_controller.go` | The reconciliation loop |
@@ -1084,7 +1267,27 @@ The experiments form a deliberate logical progression. Each one answers a specif
   Holds pods warm during 90-second outage gap.
   Handles 800-connection restorm with zero disruption.
   No reconnection storms. No oscillation. No connection drops.
-  → The problem is completely solved.
+  → The problem is completely solved for our primary design.
+
+[Experiment D] HPA + Custom Connection-Count Metric (Baseline):
+  Given the RIGHT metric (active_connections_per_pod), HPA scales to 8 pods (not 15).
+  BUT: HPA still scales down during the 90-second DROP 1 gap.
+  CYCLE 2 clients must wait for re-provisioning. Disruption not fully eliminated.
+  → Metric choice is necessary but not sufficient. Lifecycle policy matters too.
+  ⚠️ Multi-run (5×) results pending. Paper has [PLACEHOLDER] values.
+
+[Experiment E] KEDA Baseline:
+  KEDA with cooldownPeriod=120 partially holds pods warm.
+  Better than plain CPU HPA, approaches StatefulAutoscaler behaviour.
+  But: no maxScaleDownStep, no TCP-RST window modeling, not a full warm bridge.
+  → KEDA is a close competitor; differentiators are control granularity and explicitness.
+  ⚠️ Multi-run (5×) results pending. Paper has [PLACEHOLDER] values.
+
+[Failure Scenarios] Adversarial boundary tests:
+  F1 (60s scrape interval): System degrades gracefully; no connection loss.
+  F2 (Instantaneous spike): Scheduling latency is binding constraint, not controller.
+  F3 (Prometheus down 2min): Safe-default hold; no scale-down; no connection loss.
+  → The system's operational envelope is now explicitly documented.
 
 [Future: MQTT] Generalisation:
   Same problem, same solution, different protocol.
@@ -1095,21 +1298,21 @@ The experiments form a deliberate logical progression. Each one answers a specif
 
 ## 10. Key Numbers Across All Experiments
 
-The table below shows all experiments including B2 Extended LOW. The column is greyed out to indicate it is a **pilot run only** and not a standalone paper experiment.
+The table below shows all experiments. D and E results marked `[PENDING]` until 5-run multi-experiment data is collected.
 
-| Metric | Exp A | Exp B1 | ~~B2-ext~~ *(pilot)* | Exp B2-inst *(paper)* | Exp B3 | Exp C |
-|--------|-------|--------|-----------|------------|--------|-------|
-| **In paper?** | ✅ | ✅ | ❌ Pilot only | ✅ | ✅ | ✅ |
-| Scaler | HPA | HPA | HPA | HPA | HPA | **Custom** |
-| CPU_WORK | 1 | 1 | 1 | 1 | **1** | **0** |
-| Scale-down window | 5 min | 5 min | 5 min | 5 min | **60s** | N/A |
-| Target connections | 400 | 500 | ~500 | **800** | **800** | **800** |
-| Peak connections seen | 388 | 419 | ~500 (no metric) | **1,215\*** | ~800 | 854 |
-| Peak replicas | 5 | **15** | 10 | **15** | 8–15 | **8–9** |
-| Scale events | 2 | 5+ | 12+ | 18+ | 3+ | 4 |
-| Reconnection storm | ❌ No | ❌ No | ✅ Yes (unquantified) | ✅ **1,400/s** | ✅ Yes | **❌ None** |
-| Connections killed | 0 | 0 | Many (unquantified) | Many (measured) | **All (measured)** | **0** |
-| Connection-aware | ❌ | ❌ | ❌ | ❌ | ❌ | **✅** |
+| Metric | Exp A | Exp B1 | ~~B2-ext~~ *(pilot)* | Exp B2-inst | Exp B3 | Exp C | Exp D *(N=1)* | Exp E *(N=1)* |
+|--------|-------|--------|-----------|------------|--------|-------|--------|------|
+| **In paper?** | ✅ | ✅ | ❌ Pilot | ✅ | ✅ | ✅ | ✅ (pending multi) | ✅ (pending multi) |
+| Scaler | HPA (CPU) | HPA (CPU) | HPA (CPU) | HPA (CPU) | HPA (CPU) | **Custom** | HPA (conn metric) | KEDA |
+| CPU_WORK | 1 | 1 | 1 | 1 | 1 | **0** | 0 | 0 |
+| Scale-down window | 5 min | 5 min | 5 min | 60s | 60s | N/A (120s cooldown) | 300s (default) | 120s cooldownPeriod |
+| Target connections | 400 | 500 | ~500 | 800 | 800 | 800 | 800 | 800 |
+| Peak connections seen | 388 | 419 | ~500 (no metric) | **1,215\*** | ~800 | 854 | [PENDING] | [PENDING] |
+| Peak replicas | 5 | **15** | 10 | **15** | 8–15 | **8–9** | ~8–9 | ~8–9 |
+| Reconnection storm | ❌ No | ❌ No | ✅ Yes (unquantified) | ✅ **1,400/s** | ✅ Yes | **❌ None** | [PENDING] | [PENDING] |
+| Connections killed | 0 | 0 | Many (unmeasured) | Many (measured) | **All** | **0** | [PENDING] | [PENDING] |
+| Holds pods through 90s gap | N/A | N/A | N/A | N/A | N/A | **✅ Yes (8 pods)** | ❌ No (scales to 2) | Partial |
+| Connection-aware | ❌ | ❌ | ❌ | ❌ | ❌ | **✅** | ✅ (metric only) | ✅ (metric+cooldown) |
 
 \* B2-inst overshoot above 800 due to reconnection storm creating zombie connections.
 
@@ -1119,6 +1322,7 @@ The table below shows all experiments including B2 Extended LOW. The column is g
 
 | Term | Definition |
 |------|-----------|
+| **KEDA** | Kubernetes Event-Driven Autoscaling. A popular open-source scaler that wraps HPA and adds Prometheus trigger support with a `cooldownPeriod`. Experiment E baseline. |
 | **Active Connection** | An open, established WebSocket or MQTT TCP session between a client and a server pod. Consuming memory and file descriptors on the server. |
 | **Cooldown Window** | A time period during which the custom controller suppresses scale-down actions, despite connection count being low, to avoid prematurely destroying capacity before clients reconnect. |
 | **CRD** | Custom Resource Definition. Extends Kubernetes with new object types. The `StatefulAutoscaler` is a CRD. |

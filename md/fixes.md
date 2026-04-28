@@ -434,49 +434,69 @@ Add a new "Limitations" section (can be short, ~half a page) before the Conclusi
 
 ## Execution Checklist
 
-Track progress against this list:
+Track progress against this list.  Completed items are marked ✅.
 
 ### Phase 1 — Paper Text (No New Experiments)
-- [ ] Replace all overclaimed phrases with table from Priority 0
-- [ ] Rewrite contribution paragraph in abstract and introduction
-- [ ] Fix "Kubernetes cannot" → "Kubernetes does not by default"
-- [ ] Add KEDA paragraph to Related Work
-- [ ] Add custom metrics HPA paragraph to Related Work
-- [ ] Add connection draining paragraph to Related Work
-- [ ] Add Controller Design and Stability Properties subsection
-- [ ] Add Limitations section
-- [ ] Add GitHub URL to Evaluation Setup
-- [ ] Add kind cluster version details to Evaluation Setup
+- [x] ✅ Replace all overclaimed phrases with table from Priority 0 (abstract + intro updated)
+- [x] ✅ Rewrite contribution paragraph in abstract and introduction
+- [x] ✅ Fix "Kubernetes cannot" → "Kubernetes does not by default"
+- [x] ✅ Add KEDA paragraph to Related Work (`\subsection{Event-Driven Autoscaling: KEDA}`)
+- [x] ✅ Add custom metrics HPA paragraph to Related Work (`\subsection{Custom and Application-Level Metrics for HPA}`)
+- [x] ✅ Add connection draining paragraph to Related Work (`\subsection{Graceful Connection Draining}`)
+- [x] ✅ Add Controller Design and Stability Properties subsection (see `\subsection{Controller Design and Stability Properties}` in `\section{sec:controller}`)
+- [x] ✅ Add Limitations section (expanded 8-point list, see `\section{sec:limitations}`)
+- [x] ✅ Add GitHub URL to Evaluation Setup (added `\url{https://github.com/AbhasBenevolentDictator/STAR}` in Section 4 preamble)
+- [x] ✅ Add kind cluster version details to Evaluation Setup (kind v0.25.0, K8s v1.31.6, kubelet-insecure-tls note)
 
 ### Phase 2 — New Baselines (Experiments D and E)
-- [ ] Deploy Prometheus Adapter, configure custom metric rule (Exp D setup)
-- [ ] Run Experiment D — HPA custom metrics (5 runs)
-- [ ] Install KEDA, configure ScaledObject (Exp E setup)
-- [ ] Run Experiment E — KEDA baseline (5 runs)
-- [ ] Add analysis scripts for D and E
-- [ ] Generate plots for D and E
-- [ ] Write results paragraphs for D and E
+- [x] ✅ Deploy Prometheus Adapter, configure custom metric rule (Exp D setup — done, scripts in `scripts/run-experiment-d.sh`)
+- [ ] ⏳ Run Experiment D — HPA custom metrics (**5 runs pending** — single run done, multi pending)
+- [x] ✅ Install KEDA, configure ScaledObject (Exp E setup — done, scripts in `scripts/run-experiment-e.sh`)
+- [ ] ⏳ Run Experiment E — KEDA baseline (**5 runs pending** — single run done, multi pending)
+- [x] ✅ Add analysis scripts for D and E (`analysis/experiment-d/`, `analysis/experiment-e/`)
+- [ ] ⏳ Generate plots for D and E (pending multi-run data)
+- [x] ✅ Write results paragraphs for D and E (in paper with `[PLACEHOLDER]` values — see below)
+
+**→ PLACEHOLDER UPDATE GUIDE for Experiments D and E:**
+Once 5-run data is collected from `scripts/run-multi.sh` for experiments D and E, update the
+following locations in `Paper-Latex/paper.tex`:
+
+1. **`\subsection{Experiment D: HPA with Custom Connection-Count Metric}`** (~line 590):
+   - Replace `\texttt{[PLACEHOLDER: mean~conn/s $\pm$ std across 5 runs]}` with actual peak
+     reconnection rate mean±std computed from `analysis/experiment-d/`.
+   - Replace `\texttt{[PLACEHOLDER: mean $\pm$ std]}` (connection loss) with actual values.
+   - Replace `\texttt{[PLACEHOLDER: mean $\pm$ std]}` (pod-seconds) with actual values.
+   - Add `Figure~\ref{fig:exp_d_replicas}` once plot is generated.
+
+2. **`\subsection{Experiment E: KEDA Baseline}`** (~line 615):
+   - Replace `\texttt{[PLACEHOLDER: mean replicas $\pm$ std]}` with actual warm pod count.
+   - Replace `\texttt{[PLACEHOLDER: mean~conn/s $\pm$ std]}` with peak reconn rate.
+   - Replace `\texttt{[PLACEHOLDER: mean $\pm$ std]}` (connection loss, pod-seconds).
+   - Add `Figure~\ref{fig:exp_e_replicas}` once plot is generated.
+
+3. **`Table~\ref{tab:baseline_compare}`** (~line 640): Replace all `\texttt{[PLACEHOLDER]}` cells
+   in the HPA+Custom and KEDA columns with `mean $\pm$ std (min–max)` statistics.
 
 ### Phase 3 — Statistical Rigor
-- [ ] Rerun Experiment B2 Instrumented × 5
-- [ ] Rerun Experiment B3 × 5
-- [ ] Rerun Experiment C × 5
-- [ ] Update analysis scripts to compute mean ± std
-- [ ] Regenerate all plots with error bars or table rows with std
-- [ ] Update all result sentences to report mean ± std
+- [ ] ⏳ Rerun Experiment B2 Instrumented × 5 (pending)
+- [ ] ⏳ Rerun Experiment B3 × 5 (pending)
+- [ ] ⏳ Rerun Experiment C × 5 (pending — **note**: once done, update `Table~\ref{tab:baseline_compare}` StatefulAutoscaler column with mean±std and update all inline numbers in `\section{sec:evaluation}`)
+- [ ] ⏳ Update analysis scripts to compute mean ± std
+- [ ] ⏳ Regenerate all plots with error bars or table rows with std
+- [ ] ⏳ Update all result sentences to report mean ± std
 
 ### Phase 4 — Failure Mode Experiments
-- [ ] Run Failure Scenario 1 (metric staleness at 60s scrape interval)
-- [ ] Run Failure Scenario 2 (instantaneous spike, no stagger)
-- [ ] Run Failure Scenario 3 (Prometheus killed mid-experiment)
-- [ ] Write Failure Analysis section with 3 subsections
+- [x] ✅ Run Failure Scenario 1 (metric staleness at 60s scrape interval) — results written into paper
+- [x] ✅ Run Failure Scenario 2 (instantaneous spike, no stagger) — results written into paper
+- [x] ✅ Run Failure Scenario 3 (Prometheus killed mid-experiment) — results written into paper
+- [x] ✅ Write Failure Analysis section with 3 subsections (`\section{sec:failure_analysis}` in paper)
 
 ### Phase 5 — Additional Metrics
-- [ ] Add latency measurement to client.py
-- [ ] Add scale reaction time computation to analysis scripts
-- [ ] Add pod-seconds computation to analysis scripts
-- [ ] Rerun key experiments with new instrumentation
-- [ ] Add latency, reaction time, and pod-seconds tables to paper
+- [ ] ⏳ Add latency measurement to client.py (RTT ping/pong logging)
+- [ ] ⏳ Add scale reaction time computation to analysis scripts
+- [ ] ⏳ Add pod-seconds computation to analysis scripts
+- [ ] ⏳ Rerun key experiments with new instrumentation
+- [ ] ⏳ Add latency, reaction time, and pod-seconds tables to paper
 
 ### Phase 6 — Final Review
 - [ ] Re-read paper end-to-end checking for any remaining overclaims

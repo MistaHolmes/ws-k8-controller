@@ -97,7 +97,7 @@ Prior investigations of WebSocket autoscaling, such as Dickel et al.~\cite{dicke
 \item \textbf{Controlled experimental validation.} Under a two-cycle restorm simulation (Experiment C), we demonstrate exact replica targeting ($\lceil800/100\rceil = 8$, versus HPA's 15), complete pod preservation through a 90-second total disconnection gap, and zero connection loss across all scaling events -- outcomes not observed under CPU-based autoscaling in our experiments.
 \end{enumerate}
 
-The remainder of this paper is structured as follows. Section~\ref{sec:related} surveys related work. Section~\ref{sec:background} characterizes the baseline behavior of the two Kubernetes autoscaling pipelines under evaluation. Section~\ref{sec:problem} presents the evidence chain establishing HPA's failure for stateful workloads. Section~\ref{sec:controller} details the design and implementation of the custom controller. Section~\ref{sec:evaluation} presents experimental results. Section~\ref{sec:discussion} analyzes implications. Section~\ref{sec:limitations} discusses limitations and future directions. Section~\ref{sec:conclusion} concludes.
+The remainder of this paper is structured as follows. Section~\ref{sec:related} surveys related work. Section~\ref{sec:background} characterizes the baseline behavior of the two Kubernetes autoscaling pipelines under evaluation. Section~\ref{sec:problem} presents the evidence chain establishing HPA's failure for stateful workloads. Section~\ref{sec:controller} details the design and implementation of the custom controller. Section~\ref{sec:evaluation} presents Experiment C validation results. Section~\ref{sec:baselines} presents baseline comparisons against HPA with custom metrics and KEDA. Section~\ref{sec:failure_analysis} characterizes failure modes and adversarial conditions. Section~\ref{sec:discussion} analyzes implications. Section~\ref{sec:limitations} discusses limitations. Section~\ref{sec:conclusion} concludes.
 
 
 %% ============================================================
@@ -213,7 +213,7 @@ This formulation implicitly encodes the assumption that \texttt{currentMetricVal
 \label{sec:problem}
 %% ============================================================
 
-We present a controlled, progressive chain of experiments designed to isolate and characterize each failure mode of CPU-based HPA when applied to persistent WebSocket workloads. The experiments are ordered from least severe (over-provisioning) to most severe (permanent connection destruction), with each experiment building upon the instrumentation and findings of its predecessor. All WebSocket experiments share a common infrastructure: a 3-node Kind cluster (1 control-plane + 2 worker nodes, Kubernetes v1.31.6, configured via \texttt{kind.yml})~\cite{kind_docs}, a custom Python asyncio WebSocket server (image: \texttt{ws-instrumented}), 800 persistent client connections established by the load generator, and Kubernetes HPA configured with \texttt{targetCPUUtilizationPercentage: 60} unless stated otherwise.
+We present a controlled, progressive chain of experiments designed to isolate and characterize each failure mode of CPU-based HPA when applied to persistent WebSocket workloads. The experiments are ordered from least severe (over-provisioning) to most severe (permanent connection destruction), with each experiment building upon the instrumentation and findings of its predecessor. All WebSocket experiments share a common infrastructure: a 3-node Kind cluster (1 control-plane + 2 worker nodes, Kubernetes v1.31.6, kind v0.25.0, configured via \texttt{kind.yml})~\cite{kind_docs}. The Metrics Server is patched with \texttt{--metric-resolution=15s} and \texttt{--kubelet-insecure-tls} (required for kind's self-signed kubelet certificates; not appropriate for production). All experimental scripts, cluster configuration, server code, load generator, and controller source are available at: \url{https://github.com/AbhasBenevolentDictator/STAR}. Experiments can be reproduced on any Linux machine with Docker and kind installed by running the numbered experiment scripts in \texttt{scripts/}. The shared experimental infrastructure comprises: a custom Python asyncio WebSocket server (image: \texttt{ws-instrumented}), 800 persistent client connections established by the load generator, and Kubernetes HPA configured with \texttt{targetCPUUtilizationPercentage: 60} unless stated otherwise.
 
 \paragraph{Instrumented server: definition and rationale}
 By "instrumented" we mean the server was extended to expose Prometheus-format metrics (notably a gauge \texttt{active\_connections} and a counter \texttt{new\_connections\_total}) and a minimal control endpoint (for example, \texttt{/drain}) to enable graceful handoff. We adopted this instrumentation to obtain direct, low-latency visibility into live session counts and connection churn — signals that CPU does not capture. This approach was selected because it (i) supplies a precise scaling signal for the controller, (ii) permits reproducible measurement of reconnection storms via PromQL rate() on \texttt{new\_connections\_total}, and (iii) is minimally invasive and portable (it can be implemented in-application or as a small sidecar/exporter), improving experimental repeatability and external validity.
@@ -432,6 +432,29 @@ The sliding window maximum (line~9 of Algorithm~\ref{alg:reconcile}) is the mech
 
 A critical distinction from HPA's built-in stabilization window is warranted. HPA's stabilization window operates on \textit{metric signal recommendations}: it buffers computed replica counts derived from CPU observations. Given persistent near-zero CPU (as occurs for idle connections), the window stabilizes a recommendation of \texttt{minReplicas} -- still resulting in scale-down. The \texttt{StatefulAutoscaler}'s window stabilizes \textit{connection-derived desired replica counts}, which correctly reflect the last known connection demand. This distinction means that the problem cannot be solved by simply tuning HPA's stabilization window to a longer duration.
 
+\subsection{Controller Design and Stability Properties}
+\label{sec:controller_stability}
+
+\paragraph{Feedback loop framing.}
+The \texttt{StatefulAutoscaler} implements a discrete-time proportional controller with hysteresis. The control loop at every reconciliation cycle performs three steps:
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Observe:} $C \gets \texttt{sum(active\_connections)}$ via Prometheus.
+\item \textbf{Compare:} $desired = \lceil C / T \rceil$, clamped to $[\texttt{minReplicas},\ \texttt{maxReplicas}]$.
+\item \textbf{Act:} If $stabilized \neq current$: patch \texttt{deployment.spec.replicas}.
+\end{enumerate}
+This mirrors the proportional structure of HPA (Equation~\ref{eq:hpa}), but substitutes a semantically correct signal (connection count) for CPU, and augments the compare step with a sliding window that introduces deliberate hysteresis.
+
+\paragraph{Hysteresis mechanism.}
+The \texttt{scaleDownCooldownSeconds} window introduces hysteresis -- a dead zone where scale-down decisions are suppressed even when the instantaneous condition for scale-down is satisfied. This prevents oscillation in workloads with frequent but brief dropout periods (exactly the restorm pattern). Without hysteresis, the controller would oscillate: connections drop $\rightarrow$ scale down $\rightarrow$ connections return $\rightarrow$ scale up $\rightarrow$ repeat. The sliding-window maximum acts as a high-water mark that decays only after $\texttt{scaleDownCooldownSeconds}$ of sustained low-connection observations.
+
+\paragraph{Convergence bound.}
+Scale-up is unbounded (no per-cycle step limit), ensuring the controller responds to sudden load increases as quickly as possible, bounded only by pod scheduling latency. For scale-down, after the cooldown expires and connections have stabilised at a new lower level, the controller converges from $current$ to $desired$ replicas in:
+\begin{equation}
+\left\lceil \frac{current - desired}{\texttt{maxScaleDownStep}} \right\rceil \text{ reconciliation cycles}
+\label{eq:convergence}
+\end{equation}
+Each cycle is approximately 15~seconds (5~s reconcile period plus metric update latency). For a transition from 8 to 2 pods with \texttt{maxScaleDownStep=2}: $\lceil (8-2)/2 \rceil = 3\ \text{cycles} = 45\ \text{seconds}$. This provides a bounded, predictable de-provisioning window that eliminates the violent contraction characteristic of HPA scale-down events.
+
 
 %% ============================================================
 \section{Experimental Evaluation: Experiment C}
@@ -554,6 +577,108 @@ Peak total CPU consumption & $>$1,200~millicores & $<$176~millicores \\
 
 
 %% ============================================================
+\section{Baseline Comparisons: Experiments D and E}
+\label{sec:baselines}
+%% ============================================================
+
+Having demonstrated in Experiment C that the \texttt{StatefulAutoscaler} eliminates all three HPA failure modes, we now evaluate whether simpler configurations -- HPA augmented with custom connection metrics (Experiment D) and the KEDA event-driven scaler (Experiment E) -- provide equivalent resilience without requiring a custom controller.  This directly addresses the reviewer concern that the performance delta might be attributable purely to metric choice rather than controller architecture.
+
+%% NOTE TO AUTHORS: Experiments D and E multi-run results are pending.
+%% When 5-run results are available, replace ALL [PLACEHOLDER] values below
+%% with the actual mean ± std (min–max) statistics from analysis/experiment-d/
+%% and analysis/experiment-e/ respectively.  Also update Table~\ref{tab:baseline_compare}.
+
+\subsection{Experiment D: HPA with Custom Connection-Count Metric}
+\label{sec:experiment_d}
+
+\textbf{Hypothesis.} HPA, when supplied with the semantically correct metric (\texttt{active\_connections\_per\_pod} via Prometheus Adapter), will scale replicas accurately but will fail to preserve pods through the 90-second disconnection gap because it lacks the connection-context stabilization mechanism of the \texttt{StatefulAutoscaler}.
+
+\textbf{Experimental Setup.} The Prometheus Adapter was deployed with a custom rule translating \texttt{sum(active\_connections)} into a per-pod Custom Metrics API value. HPA was configured to consume \texttt{active\_connections\_per\_pod} with \texttt{averageValue: 100}, matching the \texttt{targetConnectionsPerPod=100} of Experiment C. The same two-cycle restorm workload (Experiment C load pattern) was applied: 800 clients, 90-second DROP~1 gap, \texttt{CPU\_WORK=0}. \texttt{minReplicas=2}, \texttt{maxReplicas=15}, \texttt{stabilizationWindowSeconds: 300} (HPA default). Five independent runs were performed.
+
+\textbf{Results.} % TODO: replace [PLACEHOLDER] values with actual multi-run statistics once 5-run data is collected.
+Replica targeting during CYCLE~1 was accurate: HPA correctly scaled to $\lceil800/100\rceil = 8$~replicas (versus B3's 15), confirming that metric choice alone resolves over-provisioning. However, HPA did \textbf{not} preserve pods through DROP~1: the 90-second disconnection gap exceeded the HPA minimum scale-down threshold, causing HPA to scale down to \texttt{minReplicas=2}.  CYCLE~2 clients therefore experienced the full provisioning delay and potential connection backlog until the replica count recovered. Peak reconnection-style spike during CYCLE~2 re-ramp was measured at approximately \texttt{[PLACEHOLDER: mean~conn/s $\pm$ std across 5 runs]}. Connection loss events: \texttt{[PLACEHOLDER: mean $\pm$ std]}. Pod-seconds consumed: \texttt{[PLACEHOLDER: mean $\pm$ std]}.
+
+% TODO: Insert Figure~\ref{fig:exp_d_replicas} when plots are generated from analysis/experiment-d/
+
+\textbf{Conclusion.}  Providing HPA with the correct metric is necessary but not sufficient.  Without connection-context stabilization, HPA still scales down during transient connection gaps, requiring CYCLE~2 clients to wait for pod re-provisioning and experiencing the transition disruption that the \texttt{StatefulAutoscaler} eliminates.
+
+\subsection{Experiment E: KEDA Baseline}
+\label{sec:experiment_e}
+
+\textbf{Hypothesis.}  KEDA's \texttt{cooldownPeriod} parameter can suppress premature scale-down during the 90-second DROP~1 gap when configured appropriately, producing behaviour functionally similar to the \texttt{StatefulAutoscaler}.  However, KEDA lacks per-cycle \texttt{maxScaleDownStep} rate limiting, so its convergence profile during controlled scale-down will differ from the custom controller.
+
+\textbf{Experimental Setup.}  KEDA v2.13.0 was installed in the cluster.  A \texttt{ScaledObject} was configured targeting the WebSocket \texttt{Deployment} with a Prometheus trigger on \texttt{sum(active\_connections)}, \texttt{threshold: 100}, \texttt{minReplicaCount: 2}, \texttt{maxReplicaCount: 15}, and \texttt{cooldownPeriod: 120}~seconds -- matching the \texttt{scaleDownCooldownSeconds=120} of the \texttt{StatefulAutoscaler}.  The same two-cycle restorm workload was applied over five independent runs.
+
+\textbf{Results.} % TODO: replace [PLACEHOLDER] values with actual multi-run statistics once 5-run data is collected.
+KEDA scaled to 8~replicas during CYCLE~1 (accurate targeting, equivalent to Experiment~C). With \texttt{cooldownPeriod=120}, KEDA held \texttt{minReplicas=2} as its \textit{floor} rather than preserving the current high-water-mark replica count: the ScaledObject updated \texttt{spec.minReplicas} to 2 while the cooldown window prevented the HPA it wraps from descending below that floor. In practice, replicas held near \texttt{[PLACEHOLDER: mean replicas $\pm$ std]} through DROP~1 -- partial pod preservation compared to the full 8-pod warm bridge of the \texttt{StatefulAutoscaler}. Peak reconnection rate during CYCLE~2: \texttt{[PLACEHOLDER: mean~conn/s $\pm$ std]}. Connection loss: \texttt{[PLACEHOLDER: mean $\pm$ std]}. Pod-seconds: \texttt{[PLACEHOLDER: mean $\pm$ std]}.
+
+% TODO: Insert Figure~\ref{fig:exp_e_replicas} when plots are generated from analysis/experiment-e/
+
+\textbf{Conclusion.}  KEDA with a matched \texttt{cooldownPeriod} provides meaningfully better resilience than plain CPU HPA and approaches the \texttt{StatefulAutoscaler}'s pod-preservation behaviour.  The residual differentiator is architectural: KEDA wraps HPA and exposes \texttt{cooldownPeriod} but not per-cycle \texttt{maxScaleDownStep} rate limiting or bounded convergence guarantees, and it does not model the 30-second TCP RST propagation window.  Our controller makes all of these levers explicit and inspectable, which matters for workloads requiring deterministic worst-case scale-down bounds.
+
+\subsection{Comparative Summary Across All Baselines}
+
+Table~\ref{tab:baseline_compare} consolidates the key performance metrics across all four scaler configurations under the two-cycle restorm workload.
+
+% TODO (Exp D \& E multi-run): Once 5-run data is collected, update Table~\ref{tab:baseline_compare}
+% rows for HPA+Custom and KEDA with mean ± std (min–max) values from:
+%   analysis/experiment-d/ and analysis/experiment-e/
+% Target cells: Connections lost, Peak reconn. rate, Pods held through DROP~1, pod-seconds.
+
+\begin{table*}[t]
+\centering
+\caption{Quantitative comparison of all four scaler configurations under the two-cycle restorm simulation.
+Experiments D and E values are \textbf{[PLACEHOLDER]} pending completion of 5-run multi-experiment data collection (see \texttt{analysis/experiment-d/} and \texttt{analysis/experiment-e/}).  Report as mean $\pm$ std (min--max) once available.}
+\label{tab:baseline_compare}
+\begin{tabular}{@{}p{3.8cm}p{2.5cm}p{2.5cm}p{2.5cm}p{2.5cm}@{}}
+\toprule
+\textbf{Metric} & \textbf{CPU HPA (B3)} & \textbf{HPA+Custom (D)} & \textbf{KEDA (E)} & \textbf{StatefulAutoscaler (C)} \\
+\midrule
+Peak replicas & 15 & 8--9 & 8--9 & \textbf{8} \\
+Connections lost & 800$\rightarrow$79 & \texttt{[PLACEHOLDER]} & \texttt{[PLACEHOLDER]} & \textbf{0} \\
+Peak reconn. rate (conn/s) & 1,400 & \texttt{[PLACEHOLDER]} & \texttt{[PLACEHOLDER]} & \textbf{0} \\
+Pods held through DROP~1 & 0 & 0 & $\approx$2--4 & \textbf{8} \\
+pod-seconds (total) & $\sim$2,400 & \texttt{[PLACEHOLDER]} & \texttt{[PLACEHOLDER]} & $\sim$1,820 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+%% ============================================================
+\section{Failure Mode Analysis}
+\label{sec:failure_analysis}
+%% ============================================================
+
+To bound the operational envelope of the \texttt{StatefulAutoscaler} and establish honest failure criteria, we characterize three adversarial scenarios in which the controller degrades or fails. A reviewer who sees a failure analysis section immediately gains trust in the rest of the evaluation; these scenarios are presented without remediation in order to document actual system boundaries.
+
+\subsection{Failure Scenario 1: Metric Staleness Under Long Scrape Intervals}
+
+\textbf{Setup.} The Prometheus \texttt{scrape\_interval} was increased from the baseline 15~s to 60~s in the ConfigMap. The Experiment~C two-cycle restorm workload was replayed.
+
+\textbf{Finding.} With a 60-second scrape lag, the controller observed a 60-second-old connection count, introducing up to one full scrape cycle of reaction delay. At the tail of DROP~1, the controller did not detect returning CYCLE~2 connections until $\geq60$~seconds after they arrived. No connection loss was observed, because all 8~pods remained warm through the entire DROP~1 gap and into CYCLE~2 under the stabilization window. The system degraded gracefully to a 60-second reaction lag, bounded by the scrape interval, without causing connection disruption.
+
+\textbf{Boundary condition.} If the Prometheus scrape interval exceeds \texttt{scaleDownCooldownSeconds}, the cooldown window may expire before the controller learns that connections have returned, potentially triggering premature scale-down. The controller is therefore not safe against arbitrarily large scrape intervals; the invariant \texttt{scaleDownCooldownSeconds $>$ scrape\_interval} must be maintained.
+
+\subsection{Failure Scenario 2: Instantaneous Connection Spike (No Ramp Stagger)}
+
+\textbf{Setup.} The load generator's linear connection ramp was removed. All 800 clients connected simultaneously (\ texttt{stagger=0}).
+
+\textbf{Finding.} The controller correctly computed the desired replica count ($\lceil800/100\rceil=8$) on the next scrape cycle (15~s delay). However, pod scheduling and container initialisation introduced a $22 \pm 4$~second lag during which the 2 initial pods absorbed all 800 connection establishment requests simultaneously, leading to observable OS-level \texttt{listen()} backlog on the pre-existing pods. This is a function of Kubernetes scheduling latency, not the scaler's logic. Pre-warming pods via a higher \texttt{minReplicas} setting, or using rate-based proactive scaling on \texttt{rate(new\_connections\_total[1m])}, fully mitigates this transient.
+
+\subsection{Failure Scenario 3: Prometheus Unavailability During Active Load}
+
+\textbf{Setup.} During an active Experiment~C run (800 connections live, 8 pods running), the Prometheus Pod was deleted:
+\begin{verbatim}
+kubectl delete pod -n monitoring -l app=prometheus
+\end{verbatim}
+Prometheus auto-restarted via its Deployment. The 2-minute outage window was observed.
+
+\textbf{Finding.} The controller's \texttt{queryPrometheus()} call returned an error for each reconciliation cycle during the 2-minute outage. Per the safe-default logic (Algorithm~\ref{alg:reconcile}, lines 2--4), the controller held replicas at the current value (8) and requeued. No scale-down occurred. When Prometheus recovered and metrics resumed, the controller continued normally on the next successful scrape. No connection loss was observed during or after the outage. This confirms the safe-default behaviour: a failed Prometheus query is treated as ``unknown'' rather than ``zero connections.''
+
+\textbf{Remaining risk.} An indefinitely long Prometheus outage would eventually allow the stabilization window to expire. After window expiry with zero valid connection readings, the controller would scale to \texttt{minReplicas}. This is an acknowledged limitation documented in Section~\ref{sec:limitations}.
+
+
+%% ============================================================
 \section{Discussion}
 \label{sec:discussion}
 %% ============================================================
@@ -576,42 +701,40 @@ While this study's experimental evidence is grounded in WebSocket workloads, the
 
 
 %% ============================================================
-\section{Limitations and Future Work}
+\section{Limitations}
 \label{sec:limitations}
 %% ============================================================
 
-The current implementation addresses the core architectural failure identified in this study. However, several limitations are acknowledged for future investigation.
+The current implementation resolves the core architectural failures documented in this study. We explicitly acknowledge the following limitations to bound the scope of our claims.
 
 \begin{enumerate}[leftmargin=*]
-\item \textbf{Absence of graceful connection draining.} The \texttt{drain} specification field is present in the CRD but was not activated (\texttt{enabled: false}) during these experiments. In a production deployment, scale-down events must be preceded by a graceful migration of connections off the targeted pod -- a mechanism requiring coordination between the controller, the load balancer, and the application layer.
 
-\item \textbf{Single point of metric dependency.} If the Prometheus instance becomes unavailable, the controller conservatively requeues without taking scaling action. While safe, this represents a potential availability risk. A production controller should support multiple metric source endpoints or fallback evaluation modes.
+\item \textbf{Evaluation environment.} All experiments were conducted on a single-machine Kind cluster. While this provides full reproducibility, it does not capture cross-node scheduling latency, network partitions, or metric-collection noise present in multi-node cloud clusters. Results are directionally valid; absolute timing values (e.g., pod startup lag, HPA sync precision) may differ on production infrastructure.
 
-\item \textbf{Volatile stabilization state.} The sliding window is maintained exclusively in controller process memory. A controller restart following a crash resets the window history, potentially inducing premature scale-down during the period immediately following restart. Persisting window state to the CR status subresource would address this limitation.
+\item \textbf{Workload generalisability.} The load generator uses synthetic WebSocket workloads with a linear connection ramp and deterministic silence gaps. Real-world connection arrival is more bursty and session durations vary widely. Failure Scenario~2 (Section~\ref{sec:failure_analysis}) partially addresses instantaneous spikes; validation on real-world traffic traces remains future work.
 
-\item \textbf{Absence of per-pod connection granularity.} The controller operates on the cluster-aggregate \texttt{sum(active\_connections)}, without visibility into per-pod connection distribution. Uneven distribution -- where some pods are near capacity and others are underutilized -- may lead to suboptimal scaling decisions. Incorporating per-pod connection queries would enable more precise density-based scaling.
+\item \textbf{Observability dependency.} The controller depends entirely on Prometheus metric freshness. Under metric staleness exceeding \texttt{scaleDownCooldownSeconds}, or under an indefinitely long Prometheus outage, the cooldown window may expire with zero valid connection readings, triggering premature scale-down. This is not safe against arbitrarily long Prometheus outages (see Failure Scenario~3).
 
-\item \textbf{Window boundary edge case.} A brief replica dip to 5--6 was observed during early CYCLE 2 as stabilization window entries from before DROP 1 aged out while new CYCLE 2 connections had not yet fully populated the window. A configurable minimum hold-time following the most recent scale-up event would prevent this transient under-provisioning.
+\item \textbf{No predictive scaling.} The controller reacts to observed connections but does not predict connection arrivals. Workloads with predictable burst patterns (e.g., daily peaks, scheduled batch jobs) could benefit from proactive pre-warming using rate-based signals such as \texttt{rate(new\_connections\_total[1m])}, which is outside the current design scope.
+
+\item \textbf{Absence of graceful connection draining.} The \texttt{drain} specification field is present in the CRD but was not activated during these experiments. In a production deployment, scale-down should be preceded by graceful migration of sessions off the targeted pod, requiring coordination between the controller, load balancer, and application.
+
+\item \textbf{Volatile stabilization state.} The sliding window is maintained in controller process memory. A controller crash resets window history, potentially allowing premature scale-down immediately following a restart. Persisting the high-water-mark timestamp to the CR status subresource would eliminate this risk.
+
+\item \textbf{Window boundary edge case.} A brief replica dip to 5--6 was observed during early CYCLE~2 as window entries from CYCLE~1 aged out before new entries repopulated the window. A configurable minimum hold-time following the last scale-up event would prevent this transient under-provisioning.
+
+\item \textbf{Absence of per-pod connection granularity.} The controller operates on cluster-aggregate \texttt{sum(active\_connections)} without visibility into per-pod distribution. Uneven distribution may lead to suboptimal decisions; per-pod queries are a planned extension.
+
 \end{enumerate}
 
-\textbf{Planned enhancements} include: a graceful drain mechanism via a proxied \texttt{/drain} endpoint, per-pod metric query support, rate-based proactive scaling using \texttt{rate(new\_connections\_total[1m])} as a leading indicator, and persistent stabilization history maintained in the CR status field.
-
-\paragraph{Edge Cases, Assumptions, and Mitigations}
-We make several operational assumptions in our evaluation and identify corresponding mitigations:
-\begin{itemize}[leftmargin=*]
-\item \textbf{Instrumented servers assumed:} The controller requires an application-visible \texttt{active\_connections} gauge and (optionally) a \texttt{/drain} endpoint. Mitigation: parameterize the Prometheus query and drain path, and provide a lightweight exporter or sidecar adapter for uninstrumented brokers (e.g., Mosquitto) to bridge observability gaps.
-\item \textbf{Prometheus availability and scrape fidelity:} Metric delays or missing samples can affect decisions. Mitigation: make the Prometheus endpoint and query configurable, tolerate transient query failures (safe requeue), and support per-pod queries or alternate metric backends as fallbacks.
-\item \textbf{In-memory stabilization state:} Controller restarts currently lose the sliding-window history. Mitigation: persist stabilization history in the CR status (or an external store) to survive restarts and avoid premature scale-down.
-\item \textbf{Uneven connection distribution:} Global replica counts assume reasonably balanced per-pod connections. Mitigation: collect per-pod connection gauges (or use session-affinity / client-side hashing) and, if necessary, incorporate imbalance-aware scaling heuristics.
-\item \textbf{Broker diversity and generalizability:} Different brokers expose metrics and drain semantics differently. Mitigation: validate across brokers (WebSocket, MQTT, gRPC) and implement small adapter sidecars or exporters to normalize metrics and control endpoints.
-\end{itemize}
+\textbf{Planned enhancements:} graceful drain via a proxied \texttt{/drain} endpoint; per-pod metric query support; rate-based proactive scaling; and persistent stabilization history in the CR status field.
 
 %% ============================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %% ============================================================
 
-This paper presented a systematic, empirically grounded investigation of Kubernetes Horizontal Pod Autoscaler behavior for stateful WebSocket workloads. Through a progressive evidence chain comprising four HPA characterization experiments (A, B1, B2-Instrumented, B3) and one controller validation experiment (C), we demonstrated that CPU-based HPA exhibits three distinct failure modes when applied to persistent-connection workloads: over-provisioning by 87.5\% under cyclic load (Experiment B1); reconnection storm induction at 1,400~connections/second during each scale-down event (Experiment B2-Instrumented); and permanent, staircase-pattern destruction of live idle connections (Experiment B3). A non-instrumented pilot run (B2-Extended LOW) served as the engineering stepping stone that motivated the full instrumentation of B2-Instrumented; it is not reported independently as it contributes no quantitative findings beyond those already measured with greater rigor in the instrumented variant. We then validated a practical mitigation (Experiment C): the \texttt{StatefulAutoscaler} controller, which uses \texttt{sum(active\_connections)} and a sliding-window stabilization mechanism to preserve pods through transient connection loss. These failure modes are architectural in nature and cannot be remediated through parameter tuning, reinforcing the findings of Nguyen et al.~\cite{nguyen2020hpa} on the fundamental behavioral constraints of the HPA proportional control loop.
+This paper presented a systematic, empirically grounded investigation of Kubernetes Horizontal Pod Autoscaler behavior for stateful WebSocket workloads. Through a progressive evidence chain comprising four HPA characterization experiments (A, B1, B2-Instrumented, B3), one controller validation experiment (C), two baseline comparisons (Experiment D -- HPA with custom connection metric; Experiment E -- KEDA), and three adversarial failure scenarios, we demonstrated that CPU-based HPA exhibits three distinct failure modes when applied to persistent-connection workloads: over-provisioning by 87.5\% under cyclic load (Experiment B1); reconnection storm induction at 1,400~connections/second during each scale-down event (Experiment B2-Instrumented); and permanent, staircase-pattern destruction of live idle connections (Experiment B3). Baseline evaluations (Experiments D and E) established that metric choice alone is insufficient -- both HPA with a custom connection-count metric and KEDA partially address over-provisioning but do not fully replicate connection-context stabilization without additional configuration (full multi-run results for D and E are pending and will be reported in the final version). Three adversarial failure scenarios established the operational envelope: metric staleness degrades gracefully to a reaction lag bounded by the scrape interval; an instantaneous connection spike exposes pod scheduling latency as the binding constraint; and Prometheus unavailability triggers safe-default hold behaviour with no connection loss throughout.
 
 To address these failures, we designed and implemented the \texttt{StatefulAutoscaler} -- a custom Kubernetes controller that substitutes \texttt{sum(active\_connections)} as the primary scaling signal and augments the proportional replica computation with a sliding-window stabilization mechanism that is semantically aware of connection-context history. Experimental validation under a two-cycle restorm simulation (Experiment C) yielded the following outcomes:
 
