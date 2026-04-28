@@ -127,7 +127,7 @@ spec:
         image: registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.2
         args:
           - --prometheus-url=http://prometheus.monitoring.svc:9090
-          - --metrics-relist-interval=30s
+          - --metrics-relist-interval=10s
           - --config=/etc/adapter/config.yaml
           - --secure-port=6443
           - --cert-dir=/tmp/cert

@@ -1,0 +1,5 @@
+RAW_DIR:       /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-d-hpa-custom-metric
+PROCESSED_DIR: /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-d-hpa-custom-metric
+  Parsed replicas.csv: 51 rows
+  Parsed connections.csv: 114 rows
+Done.
