@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY client.py .
 
-RUN pip install websockets
+RUN pip install websockets numpy
 
 CMD ["python", "client.py"]

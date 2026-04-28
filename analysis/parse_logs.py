@@ -11,7 +11,10 @@ if RAW_DIR is None or PROCESSED_DIR is None:
     raise RuntimeError("RAW_DIR and PROCESSED_DIR must be set as environment variables.")
 
 if os.path.exists(PROCESSED_DIR):
-    shutil.rmtree(PROCESSED_DIR)
+    if os.environ.get("MULTI_RUN", "0") in ("1", "true", "True"):
+        print("  MULTI_RUN detected: preserving existing PROCESSED_DIR")
+    else:
+        shutil.rmtree(PROCESSED_DIR)
 
 os.makedirs(PROCESSED_DIR, exist_ok=True)
 

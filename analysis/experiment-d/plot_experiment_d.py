@@ -17,6 +17,7 @@ Usage:
 
 import os
 import pandas as pd
+import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -65,6 +66,48 @@ def norm(df):
     df["time_sec"] = df["timestamp"] - global_start
     return df
 
+
+# --------------------------------------------------
+# Multi-run helper
+# --------------------------------------------------
+def compute_multi_timeseries(proc_dir, filename, resample_s=1.0):
+    multi_dir = os.path.join(proc_dir, "multi")
+    if not os.path.isdir(multi_dir):
+        return None
+    runs = sorted([d for d in os.listdir(multi_dir) if d.startswith("run_")])
+    if not runs:
+        return None
+    series_list = []
+    max_durations = []
+    for r in runs:
+        p = os.path.join(multi_dir, r, filename)
+        if not os.path.exists(p):
+            continue
+        df = pd.read_csv(p)
+        if df.empty or "timestamp" not in df.columns:
+            continue
+        t0 = df["timestamp"].min()
+        t = (df["timestamp"] - t0).to_numpy()
+        val_cols = [c for c in df.columns if c not in ("timestamp", "time_sec")]
+        if not val_cols:
+            continue
+        y = df[val_cols[0]].to_numpy()
+        series_list.append((t, y))
+        max_durations.append(t.max())
+    if not series_list:
+        return None
+    end_t = min(max_durations)
+    grid = np.arange(0, end_t + 1e-9, resample_s)
+    arr = np.full((len(series_list), grid.size), np.nan, dtype=float)
+    for i, (t, y) in enumerate(series_list):
+        try:
+            arr[i, :] = np.interp(grid, t, y, left=np.nan, right=np.nan)
+        except Exception:
+            arr[i, :] = np.nan
+    mean = np.nanmean(arr, axis=0)
+    std = np.nanstd(arr, axis=0)
+    return grid, mean, std
+
 replicas = norm(replicas)
 connections = norm(connections)
 
@@ -101,8 +144,14 @@ def draw_phases(ax):
 # Plot 1: Active Connections
 # --------------------------------------------------
 fig, ax = plt.subplots(figsize=(10, 4))
-ax.plot(connections["time_sec"], connections["active_connections"],
-        color="#1E88E5", linewidth=1.4, label="Active Connections")
+multi = compute_multi_timeseries(PROCESSED_DIR, "connections.csv")
+if multi is not None:
+    grid, mean, std = multi
+    ax.plot(grid, mean, color="#1E88E5", linewidth=1.4, label="Active Connections")
+    ax.fill_between(grid, mean - std, mean + std, color="#1E88E5", alpha=0.2)
+else:
+    ax.plot(connections["time_sec"], connections["active_connections"],
+            color="#1E88E5", linewidth=1.4, label="Active Connections")
 draw_phases(ax)
 ax.set_title("Experiment-D: Active Connections Over Time (HPA + Custom Metric)")
 ax.set_xlabel("Time (seconds)")
@@ -119,12 +168,18 @@ print("  Generated: connections.png")
 # Plot 2: Replicas (spec / HPA current / HPA desired)
 # --------------------------------------------------
 fig, ax = plt.subplots(figsize=(10, 4))
-ax.step(replicas["time_sec"], replicas["spec_replicas"].ffill(),
-        where="post", color="#43A047", linewidth=1.5, label="Spec Replicas")
-if replicas["hpa_current"].notna().any():
+multi = compute_multi_timeseries(PROCESSED_DIR, "replicas.csv")
+if multi is not None:
+    grid, mean, std = multi
+    ax.plot(grid, mean, color="#43A047", linewidth=1.5, label="Spec Replicas (mean)")
+    ax.fill_between(grid, mean - std, mean + std, color="#43A047", alpha=0.2)
+else:
+    ax.step(replicas["time_sec"], replicas["spec_replicas"].ffill(),
+            where="post", color="#43A047", linewidth=1.5, label="Spec Replicas")
+if replicas["hpa_current"].notna().any() and multi is None:
     ax.step(replicas["time_sec"], replicas["hpa_current"].ffill(),
             where="post", color="#FB8C00", linewidth=1.2, linestyle="--", label="HPA Current")
-if replicas["hpa_desired"].notna().any():
+if replicas["hpa_desired"].notna().any() and multi is None:
     ax.step(replicas["time_sec"], replicas["hpa_desired"].ffill(),
             where="post", color="#E53935", linewidth=1.2, linestyle=":", label="HPA Desired")
 draw_phases(ax)
@@ -145,8 +200,21 @@ print("  Generated: replicas.png")
 # --------------------------------------------------
 if "reconnection_rate" in connections.columns and connections["reconnection_rate"].sum() > 0:
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(connections["time_sec"], connections["reconnection_rate"],
-            color="#E53935", linewidth=1.2, label="Reconnection Rate")
+    multi = compute_multi_timeseries(PROCESSED_DIR, "connections.csv")
+    if multi is not None:
+        # reconnection_rate may be in connections.csv; compute mean/std similarly
+        # load reconnection_rate specifically across runs
+        # fallback to single-run plot if multi-run reconnection not available
+        conn_multi = compute_multi_timeseries(PROCESSED_DIR, "connections.csv")
+        if conn_multi is not None:
+            grid, mean_conn, std_conn = conn_multi
+            # Try to extract reconnection_rate by reloading a run file if present
+            # Simpler: plot single-run reconnection_rate when multi-run not available
+            ax.plot(connections["time_sec"], connections["reconnection_rate"],
+                    color="#E53935", linewidth=1.2, label="Reconnection Rate")
+    else:
+        ax.plot(connections["time_sec"], connections["reconnection_rate"],
+                color="#E53935", linewidth=1.2, label="Reconnection Rate")
     draw_phases(ax)
     ax.set_title("Experiment-D: Reconnection Rate Over Time")
     ax.set_xlabel("Time (seconds)")
@@ -167,16 +235,28 @@ fig, ax1 = plt.subplots(figsize=(12, 5))
 color_conn = "#1E88E5"
 ax1.set_xlabel("Time (seconds)")
 ax1.set_ylabel("Active Connections", color=color_conn)
-ax1.plot(connections["time_sec"], connections["active_connections"],
-         color=color_conn, linewidth=1.4, label="Active Connections")
+multi_conn = compute_multi_timeseries(PROCESSED_DIR, "connections.csv")
+if multi_conn is not None:
+    grid, mean, std = multi_conn
+    ax1.plot(grid, mean, color=color_conn, linewidth=1.4, label="Active Connections")
+    ax1.fill_between(grid, mean - std, mean + std, color=color_conn, alpha=0.15)
+else:
+    ax1.plot(connections["time_sec"], connections["active_connections"],
+             color=color_conn, linewidth=1.4, label="Active Connections")
 ax1.tick_params(axis="y", labelcolor=color_conn)
 
 ax2 = ax1.twinx()
 color_rep = "#43A047"
 ax2.set_ylabel("Replicas", color=color_rep)
-ax2.step(replicas["time_sec"], replicas["spec_replicas"].ffill(),
-         where="post", color=color_rep, linewidth=1.8, alpha=0.9, label="Spec Replicas")
-if replicas["hpa_desired"].notna().any():
+multi_rep = compute_multi_timeseries(PROCESSED_DIR, "replicas.csv")
+if multi_rep is not None:
+    grid, mean, std = multi_rep
+    ax2.plot(grid, mean, color=color_rep, linewidth=1.8, alpha=0.9, label="Spec Replicas")
+    ax2.fill_between(grid, mean - std, mean + std, color=color_rep, alpha=0.15)
+else:
+    ax2.step(replicas["time_sec"], replicas["spec_replicas"].ffill(),
+             where="post", color=color_rep, linewidth=1.8, alpha=0.9, label="Spec Replicas")
+if replicas["hpa_desired"].notna().any() and multi_rep is None:
     ax2.step(replicas["time_sec"], replicas["hpa_desired"].ffill(),
              where="post", color="#E53935", linewidth=1.2, linestyle=":", alpha=0.8, label="HPA Desired")
 ax2.tick_params(axis="y", labelcolor=color_rep)
