@@ -33,6 +33,7 @@ cleanup() {
   kill ${REPLICA_PID:-}      2>/dev/null || true
   kill ${PROM_COLLECT_PID:-} 2>/dev/null || true
   kill ${PROM_PID:-}         2>/dev/null || true
+  kill ${KEDA_COLLECT_PID:-} 2>/dev/null || true
   # Give processes a moment to exit
   sleep 1
 
@@ -72,7 +73,7 @@ cleanup() {
 
   echo "[CLEANUP] Finalizing local logfile handles and waiters..."
   # Wait only for the PIDs we started — avoid bare wait
-  for _pid in "${REPLICA_PID:-}" "${PROM_COLLECT_PID:-}" "${PROM_PID:-}"; do
+  for _pid in "${REPLICA_PID:-}" "${PROM_COLLECT_PID:-}" "${PROM_PID:-}" "${KEDA_COLLECT_PID:-}"; do
     [ -n "$_pid" ] && wait "$_pid" 2>/dev/null || true
   done
 
@@ -268,6 +269,7 @@ done) >> "$PROM_LOG" &
 PROM_COLLECT_PID=$!
 
 # Collect KEDA ScaledObject status periodically
+# Collect KEDA ScaledObject status periodically
 (set +eu; set +o pipefail; while true; do
   TS=$(date +%s)
   STATUS=$(kubectl get scaledobject websocket-keda-scaler \
@@ -276,6 +278,7 @@ PROM_COLLECT_PID=$!
   echo "$TS,${STATUS:-Unknown}"
   sleep "$SCRAPE_INTERVAL"
 done) >> "$KEDA_LOG" &
+KEDA_COLLECT_PID=$!
 
 # ==============================================================
 #  10. EXPERIMENT EXECUTION
