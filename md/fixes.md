@@ -506,6 +506,226 @@ following locations in `Paper-Latex/paper.tex`:
 
 ---
 
+## Revision Round 2 — Reviewer Concerns (Paper-Text First Approach)
+
+The following items address a second round of reviewer feedback. The guiding principle for all
+responses is: **prefer paper-text responses (discussion, acknowledgement, framing) over new
+experiments wherever the study's integrity allows it.** Only propose a new experiment when
+purely textual handling would be an obvious dodge.
+
+---
+
+### R2-1 — Limited Baseline Configurations (Major)
+
+**Reviewer concern:** Experiment D uses a fixed 300 s HPA scale-down window. A reviewer might
+argue "just set stabilizationWindowSeconds=60 to match the StatefulAutoscaler and you get the
+same result — so the custom controller adds nothing."
+
+**Response strategy (paper-text only):**
+
+Add a short paragraph to the Experiment D Discussion (or the Comparative Summary) making the
+following argument explicitly:
+
+> Setting `stabilizationWindowSeconds` to 60 s in HPA would shorten scale-down latency but
+> **would not survive DROP~1** (90 s gap > 60 s window). HPA's stabilization window is a
+> trailing buffer of *desired-replica values*, not a high-water mark of connection state. When
+> connections fall to zero for 90 s with a 60 s window, the window fills entirely with
+> `minReplicas` recommendations and scale-down proceeds. This is not a tuning problem; it is
+> a semantic mismatch: the window stabilises the wrong quantity. The StatefulAutoscaler's
+> sliding window retains **connection-derived high-water marks** — so even 90 s of zero
+> connections does not cause scale-down as long as 800 connections existed within the window.
+> This is the architectural distinction that cannot be replicated by adjusting `stabilizationWindowSeconds`.
+
+Similarly for KEDA with `cooldownPeriod=0`: explicitly state in the Experiment E conclusion
+that removing the cooldown causes immediate scale-down on DROP~1, confirming that the
+`cooldownPeriod` and `scaleDownCooldownSeconds` are directly equivalent for *this* workload —
+and that the difference emerges only when the gap exceeds the cooldown, or when bounded
+per-cycle convergence is required.
+
+**Where to add in paper:**
+- End of `\subsection{Comparative Summary Across All Baselines}` — add a short paragraph titled
+  "Sensitivity to HPA stabilization window setting" making the semantic argument above.
+- End of `\textbf{Conclusion}` of Experiment E — one sentence: "Reducing KEDA's
+  `cooldownPeriod` below the disconnection gap (i.e., <90 s) would cause scale-down during
+  DROP~1, confirming that the parameter match used here is necessary rather than conservative."
+
+**Do NOT run a new experiment for this.** The argument is architectural and can be made
+analytically from existing data. If a reviewer insists, the response is: "we agree and will
+run as a camera-ready addition" — but the textual argument is sufficient for most venues.
+
+---
+
+### R2-2 — Parameter Sensitivity (Major)
+
+**Reviewer concern:** `targetConnectionsPerPod=100`, `maxScaleDownStep=2`, and
+`scaleDownCooldownSeconds=120` were fixed. Are results only valid for this choice?
+
+**Response strategy (paper-text only):**
+
+Add a `\paragraph{Parameter selection rationale}` to the Controller Design section explaining:
+
+1. **`targetConnectionsPerPod=100`** was chosen to yield exactly 8 pods for 800 connections,
+   making the experiment's "correct answer" unambiguous and easy to audit. A value of 50 would
+   require 16 pods (within `maxReplicas=15`); a value of 200 would require 4 pods (above
+   `minReplicas=2`). Both would still produce stable, exact-integer scaling — the controller
+   does not oscillate because the desired-replica formula is deterministic and monotone.
+
+2. **`maxScaleDownStep=2`** was chosen conservatively: it bounds the blast radius of any
+   single scale-down event. The value could be 1 (slower, safer) or 3 (faster, larger blast
+   radius). The convergence formula `ceil((current−desired)/step)` is explicit; there is no
+   hidden sensitivity.
+
+3. **`scaleDownCooldownSeconds=120`** was chosen to comfortably exceed the 90 s DROP~1 gap
+   plus one Prometheus scrape cycle (15 s). Any value ≥ 105 s would achieve the same
+   pod-preservation result for this workload. Values below 90 s would allow scale-down to
+   begin during DROP~1.
+
+4. **Stability argument:** The controller cannot oscillate in the classical sense because
+   scale-down is gated by the cooldown window. Oscillation requires scale-down to trigger new
+   scale-up; the cooldown prevents scale-down from firing unless load has been low for the
+   entire window. The only edge case is the window-boundary dip observed in CYCLE~2
+   (documented in Limitations), which is a transient under-provisioning rather than sustained
+   oscillation.
+
+**Where to add in paper:**
+- New `\paragraph{Parameter selection and sensitivity}` inside
+  `\subsection{Controller Design and Stability Properties}` (~line 440).
+- Cross-reference to Limitations item 7 (window boundary edge case) to show known sensitivity.
+
+---
+
+### R2-3 — Control-Theoretic Rigor (Major/Minor)
+
+**Reviewer concern:** The feedback-loop description is heuristic. Is the loop stable? How does
+the 15 s scrape delay affect oscillation?
+
+**Response strategy (paper-text only, expand existing subsection):**
+
+The existing `\subsection{Controller Design and Stability Properties}` already contains the
+convergence formula. Expand it with two additional paragraphs:
+
+**Paragraph 1 — Delay margin:**
+> With a scrape interval of T=15 s and a reconciliation period of T_r=15 s, the maximum
+> observation lag is 2T = 30 s. Because the scale-down cooldown (120 s) >> 2T, the system
+> absorbs the worst-case lag and never acts on a stale "zero connections" reading within the
+> cooldown window. For scale-up, no cooldown is applied; a stale reading of high connection
+> count would produce a scale-up, which is safe (over-provisioning rather than under).
+
+**Paragraph 2 — Oscillation condition:**
+> Oscillation would require: (1) scale-down fires, (2) a connection spike arrives before
+> new replicas are ready, (3) scale-down fires again. The cooldown prevents (1) from
+> happening within 120 s of any connection activity. The `maxScaleDownStep` limit ensures
+> that even if scale-down does begin, at most 2 pods are removed per cycle, avoiding
+> a catastrophic sudden capacity drop. Together, these two parameters form a dead-zone
+> + damping pair analogous to integral anti-windup in classical PID control.
+
+**Where to add in paper:**
+- Append both paragraphs to `\subsection{Controller Design and Stability Properties}`.
+- No new figure required; the existing formula and block-description already satisfy most venues.
+
+---
+
+### R2-4 — Metrics and Units Consistency (Minor)
+
+**Reviewer concern:** Inconsistent reporting of mean±std vs mean(range); unclear definition
+of pod-seconds; inconsistent scale-up measurement baseline.
+
+**Fixes in paper text (all small, no new experiments):**
+
+1. **Define pod-seconds** explicitly in the Evaluation Setup section:
+   > "Pod-seconds is defined as $\sum_{\text{pods}} \text{(time pod was Running during the
+   > experiment window)}$, measured in seconds. It serves as a proxy for compute cost: lower
+   > pod-seconds for equivalent connection service implies better resource efficiency."
+
+2. **Standardise reporting** to `mean ± std (median; range)` throughout. Where range was
+   previously omitted (e.g., scale-down 119±2), add the range in parentheses.
+
+3. **Clarify scale-up reaction time baseline** — add one sentence in the metrics definition:
+   > "Scale-up reaction time is measured from the first Prometheus scrape reporting
+   > connections > `targetConnectionsPerPod × minReplicas` to the moment
+   > `deployment.status.readyReplicas` first reaches the expected count."
+
+**Where to add in paper:**
+- Pod-seconds definition: `\subsection{Experimental Configuration}` in Experiment C section.
+- Standardisation: sweep Table 1 caption and all inline result sentences.
+
+---
+
+### R2-5 — Workload Generalisability (Minor, already in Limitations)
+
+**Reviewer concern:** Results may not hold for non-deterministic load patterns.
+
+**Response strategy:** The Limitations section already addresses this (item 2). Strengthen it
+with one sentence explicitly naming what *would* change vs what *would not*:
+
+> "For stationary random load (Poisson arrivals), the controller's proportional replica formula
+> and cooldown mechanism apply unchanged; only the observed peak connection count would vary.
+> For adversarial patterns (instantaneous spikes), Failure Scenario~2 demonstrates that the
+> binding constraint is pod scheduling latency, not controller logic. The one pattern not tested
+> is gradual long-term drift; in that case the cooldown window degrades gracefully — scale-down
+> simply lags by up to `scaleDownCooldownSeconds` after the true load drop."
+
+**Where to add in paper:**
+- Replace or extend Limitations item 2 (`\item \textbf{Workload generalisability}`) with the
+  sentence above.
+
+---
+
+### R2-6 — Novelty / Positioning (Major)
+
+**Reviewer concern:** "Use connection count instead of CPU" is not novel. The paper should
+reframe contribution as empirical validation + measurement, not algorithmic novelty.
+
+**Response strategy:** The abstract and introduction were already partially reframed in
+Revision Round 1. Tighten the framing further:
+
+**Abstract:** Replace any remaining "we demonstrate X is possible" sentences with
+"we quantify X through controlled experiments" or "we provide empirical evidence that X
+occurs under Y conditions."
+
+**Contributions list (Introduction):** Revise phrasing:
+- "We present the StatefulAutoscaler" → "We implement and experimentally validate..."
+- "We demonstrate that" → "Controlled experiments demonstrate that..."
+- Do NOT claim the architecture is novel — claim the *empirical measurement* of failure modes
+  and the *comparative evaluation* across four scaler configurations is the contribution.
+
+**Related Work:** Add one sentence clearly separating your work from KEDA:
+> "To the best of our knowledge, no prior work simultaneously quantifies HPA failure modes
+> at connection-second granularity, compares four scaler configurations under identical
+> WebSocket workloads with statistical replication, and characterises the OS-level termination
+> window as a design constraint."
+
+**Conclusion:** Replace "addressing all failure modes" with "eliminating all three documented
+failure modes under our evaluated synthetic workload" to be accurate about scope.
+
+**Where to add in paper:**
+- Abstract: 2–3 phrase-level edits (search for "we demonstrate" and "we present").
+- Contribution item 2: reword the opening line.
+- Related Work: append one sentence to `\subsection{Research Gap}`.
+- Conclusion: add scope qualifier "under our evaluated synthetic workload" to the final claim.
+
+---
+
+### Execution Checklist — Revision Round 2
+
+All items below are paper-text only (no new experiments required unless marked ⚗️).
+
+- [x] R2-1a: Add "HPA window semantic mismatch" paragraph to Comparative Summary
+- [x] R2-1b: Add KEDA cooldown sensitivity sentence to Experiment E Conclusion
+- [x] R2-2: Add `\paragraph{Parameter selection and sensitivity}` to Controller Design
+- [x] R2-3a: Add delay-margin paragraph to Stability Properties subsection
+- [x] R2-3b: Add oscillation-condition paragraph to Stability Properties subsection
+- [x] R2-4a: Define pod-seconds in Experiment C setup
+- [ ] R2-4b: Standardise mean±std(median;range) in Table 1 and inline text — minor sweep, defer to final proofread
+- [x] R2-4c: Clarify scale-up reaction time baseline definition
+- [x] R2-5: Strengthen Limitations item 2 with drift/random-load sentence
+- [x] R2-6a: Sweep abstract for overclaims ("we demonstrate" → "experiments show")
+- [x] R2-6b: Reword Contribution item 2 in Introduction
+- [x] R2-6c: Append Research Gap sentence to Related Work
+- [x] R2-6d: Add scope qualifier to Conclusion final claim
+
+---
+
 ## Expected Outcome After All Fixes
 
 | Aspect | Before | After |

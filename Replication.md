@@ -1,4 +1,8 @@
 
+**Repository**
+- GitHub: <https://github.com/MistaHolmes/ws-k8-controller>
+- Clone: `git clone https://github.com/MistaHolmes/ws-k8-controller.git`
+
 **Overview**
 - **Purpose:** How to run each experiment in this workspace, common debug commands, and cleanup steps to remove Kind clusters when finished.
 
