@@ -29,8 +29,12 @@ if [ -d "$RESULT_DIR" ] && [ "$(ls -A "$RESULT_DIR")" ]; then
   mkdir -p "$ARCHIVE_DIR"
   TS=$(date +%Y%m%d_%H%M%S)
   tar -czf "$ARCHIVE_DIR/experiment-b1_${TS}.tgz" -C "$RESULT_DIR" .
-  rm -rf "$RESULT_DIR"
-  mkdir -p "$RESULT_DIR"
+    if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+      echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+    else
+      rm -rf "$RESULT_DIR"
+      mkdir -p "$RESULT_DIR"
+    fi
   echo "[*] Archived previous results"
 fi
 

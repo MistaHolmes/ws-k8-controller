@@ -223,7 +223,11 @@ start_collectors() {
 section "SCENARIO 1 — Metric Staleness (scrape_interval=60s)"
 
 RESULT_DIR="$PROJECT_ROOT/results/raw/websocket/failure-1-metric-staleness"
-rm -rf "$RESULT_DIR"; mkdir -p "$RESULT_DIR"
+if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+  echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+else
+  rm -rf "$RESULT_DIR"; mkdir -p "$RESULT_DIR"
+fi
 
 # Patch Prometheus configmap to use 60s scrape interval
 kubectl -n monitoring create configmap prometheus-config \
@@ -319,7 +323,11 @@ log "Scenario 1 complete → $RESULT_DIR"
 section "SCENARIO 2 — Instant Spike (RAMP_UP_DURATION=0)"
 
 RESULT_DIR="$PROJECT_ROOT/results/raw/websocket/failure-2-instant-spike"
-rm -rf "$RESULT_DIR"; mkdir -p "$RESULT_DIR"
+if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+  echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+else
+  rm -rf "$RESULT_DIR"; mkdir -p "$RESULT_DIR"
+fi
 
 deploy_workload
 start_prom_forward
@@ -355,7 +363,11 @@ log "Scenario 2 complete → $RESULT_DIR"
 section "SCENARIO 3 — Prometheus Outage (killed at t=75s into CYCLE_1, restored at t=195s)"
 
 RESULT_DIR="$PROJECT_ROOT/results/raw/websocket/failure-3-prometheus-outage"
-rm -rf "$RESULT_DIR"; mkdir -p "$RESULT_DIR"
+if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+  echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+else
+  rm -rf "$RESULT_DIR"; mkdir -p "$RESULT_DIR"
+fi
 
 deploy_workload
 start_prom_forward

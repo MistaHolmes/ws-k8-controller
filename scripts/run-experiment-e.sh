@@ -118,8 +118,12 @@ log() {
 # ==============================================================
 section "1. Cleaning Previous Results"
 
-rm -rf "$RESULT_DIR"
-mkdir -p "$RESULT_DIR"
+if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+  echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+else
+  rm -rf "$RESULT_DIR"
+  mkdir -p "$RESULT_DIR"
+fi
 
 # ==============================================================
 #  2. CREATE FRESH KIND CLUSTER

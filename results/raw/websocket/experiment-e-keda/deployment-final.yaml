@@ -5,14 +5,14 @@ metadata:
     deployment.kubernetes.io/revision: "1"
     kubectl.kubernetes.io/last-applied-configuration: |
       {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app":"websocket-server"},"name":"websocket-server","namespace":"default"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"websocket-server"}},"template":{"metadata":{"annotations":{"prometheus.io/path":"/metrics","prometheus.io/port":"8080","prometheus.io/scrape":"true"},"labels":{"app":"websocket-server"}},"spec":{"containers":[{"env":[{"name":"CPU_WORK","value":"0"}],"image":"websocket-server-instrumented:latest","imagePullPolicy":"IfNotPresent","name":"websocket-server","ports":[{"containerPort":8765},{"containerPort":8080}],"resources":{"limits":{"cpu":"500m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}]}}}}
-  creationTimestamp: "2026-04-28T14:52:41Z"
+  creationTimestamp: "2026-04-29T03:53:37Z"
   generation: 5
   labels:
     app: websocket-server
   name: websocket-server
   namespace: default
-  resourceVersion: "1370"
-  uid: 9a5319ec-044a-4275-abd3-bd6b2f8cd0ad
+  resourceVersion: "1379"
+  uid: 41bc3ed7-2b43-4848-a7db-94292e74e439
 spec:
   progressDeadlineSeconds: 600
   replicas: 8
@@ -64,14 +64,14 @@ spec:
 status:
   availableReplicas: 8
   conditions:
-  - lastTransitionTime: "2026-04-28T14:52:41Z"
-    lastUpdateTime: "2026-04-28T14:52:42Z"
+  - lastTransitionTime: "2026-04-29T03:53:37Z"
+    lastUpdateTime: "2026-04-29T03:53:39Z"
     message: ReplicaSet "websocket-server-56c97f4c7" has successfully progressed.
     reason: NewReplicaSetAvailable
     status: "True"
     type: Progressing
-  - lastTransitionTime: "2026-04-28T14:53:59Z"
-    lastUpdateTime: "2026-04-28T14:53:59Z"
+  - lastTransitionTime: "2026-04-29T03:55:10Z"
+    lastUpdateTime: "2026-04-29T03:55:10Z"
     message: Deployment has minimum availability.
     reason: MinimumReplicasAvailable
     status: "True"

@@ -29,7 +29,8 @@ def normalize_time(df, global_start):
 # Multi-run helper
 # ---------------------------------------------------
 def compute_multi_timeseries(proc_dir, filename, resample_s=1.0):
-    multi_dir = os.path.join(proc_dir, "multi")
+    # Centralized layout: results/processed/<workload>/multi/<experiment>/run_*/<file>
+    multi_dir = os.path.join(os.path.dirname(proc_dir), "multi", os.path.basename(proc_dir))
     if not os.path.isdir(multi_dir):
         return None
     runs = sorted([d for d in os.listdir(multi_dir) if d.startswith("run_")])

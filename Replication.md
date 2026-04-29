@@ -43,7 +43,7 @@
 EXPERIMENT=c N=5 ./scripts/run-multi.sh
 ```
 
-  This runs the chosen experiment script N times and aggregates `summary.csv` across runs (writes `aggregate_stats.csv`).
+	This runs the chosen experiment script N times and saves per-run raw/processed results under `results/raw/websocket/multi/<experiment>/run_<i>` and `results/processed/websocket/multi/<experiment>/run_<i>`. Use `analysis/multi_run_stats.py` separately to aggregate `summary.csv` files when desired.
 
 - **Failure scenarios (three scenarios in one run):**
 	- Run:
@@ -180,7 +180,7 @@ Add this to CI or manual teardown steps to avoid leftover clusters consuming loc
 **Notes & Best Practices**
 - Always inspect `results/raw/websocket/<experiment>` and `results/processed/websocket/<experiment>` after a run. The `summary.csv` in the processed directory contains derived metrics used by the analysis tools.
 - If a run fails mid-way, copy the raw `results/raw/websocket/...` folder off the machine before re-running to preserve logs for debugging.
-- Use `EXPERIMENT` and `N` with `run-multi.sh` for reproducible multi-run experiments; `analysis/multi_run_stats.py` aggregates `summary.csv` into `aggregate_stats.csv` with mean±std.
+-- Use `EXPERIMENT` and `N` with `run-multi.sh` for reproducible multi-run experiments; per-run results are saved under `results/.../multi/<experiment>/run_<i>`. Aggregate manually with `analysis/multi_run_stats.py` if you want `aggregate_stats.csv`.
 
 **Files**
 - Run scripts: [scripts/run-experiment-c.sh](scripts/run-experiment-c.sh), [scripts/run-experiment-d.sh](scripts/run-experiment-d.sh), [scripts/run-experiment-e.sh](scripts/run-experiment-e.sh), [scripts/run-failure-scenarios.sh](scripts/run-failure-scenarios.sh)

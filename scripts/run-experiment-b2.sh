@@ -24,8 +24,12 @@ HIGH_DURATION=60
 LOW_DURATION=90
 CYCLES=5
 
-rm -rf "$RESULT_DIR"
-mkdir -p "$RESULT_DIR"
+if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+  echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+else
+  rm -rf "$RESULT_DIR"
+  mkdir -p "$RESULT_DIR"
+fi
 echo "=============================================="
 echo " Running $EXPERIMENT_NAME"
 echo "=============================================="

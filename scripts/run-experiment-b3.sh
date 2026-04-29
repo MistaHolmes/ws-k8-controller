@@ -20,7 +20,7 @@ set -euo pipefail
 #
 #    3. PERMANENT CONNECTION DROP: As HPA scales down, pods holding the idle
 #       connections are terminated. Clients hard-disconnect and are programmed
-#       to NEVER reconnect. This explicitly proves connections are lost ONLY 
+#       to NEVER reconnect. This explicitly proves connections are lost ONLY
 #       because of scaling, leaving a clear step-down graph.
 #
 #  Key demonstration:
@@ -89,11 +89,19 @@ if [ -d "$RESULT_DIR" ] && [ "$(ls -A "$RESULT_DIR" 2>/dev/null)" ]; then
   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
   ARCHIVE_NAME="${EXPERIMENT_NAME}_${TIMESTAMP}.tgz"
   tar -czf "$ARCHIVE_DIR/$ARCHIVE_NAME" -C "$RESULT_DIR" .
-  rm -rf "$RESULT_DIR"
-  log "Archived previous results -> $ARCHIVE_NAME"
+  if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+    echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+  else
+    rm -rf "$RESULT_DIR"
+    log "Archived previous results -> $ARCHIVE_NAME"
+  fi
 else
-  rm -rf "$RESULT_DIR"
-  log "No previous results to archive."
+  if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+    echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+  else
+    rm -rf "$RESULT_DIR"
+    log "No previous results to archive."
+  fi
 fi
 
 mkdir -p "$RESULT_DIR"

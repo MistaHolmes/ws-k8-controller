@@ -39,12 +39,20 @@ if [ -d "$RESULT_DIR" ] && [ "$(ls -A "$RESULT_DIR")" ]; then
   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
   ARCHIVE_NAME="${EXPERIMENT_NAME}_${TIMESTAMP}.tgz"
   tar -czf "$ARCHIVE_DIR/$ARCHIVE_NAME" -C "$RESULT_DIR" .
-  rm -rf "$RESULT_DIR"
-  mkdir -p "$RESULT_DIR"
+  if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+    echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+  else
+    rm -rf "$RESULT_DIR"
+    mkdir -p "$RESULT_DIR"
+  fi
   echo "[*] Archived previous results"
 else
-  rm -rf "$RESULT_DIR"
-  mkdir -p "$RESULT_DIR"
+  if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+    echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+  else
+    rm -rf "$RESULT_DIR"
+    mkdir -p "$RESULT_DIR"
+  fi
 fi
 
 echo "=============================================="

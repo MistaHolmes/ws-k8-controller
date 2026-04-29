@@ -8,12 +8,8 @@
 #
 # What it does:
 #   1. Runs scripts/run-experiment-${EXPERIMENT}.sh N times.
-#   2. After each run moves:
-#        results/raw/websocket/<name>        → results/raw/websocket/<name>/multi/run_<i>
-#        results/processed/websocket/<name>  → results/processed/websocket/<name>/multi/run_<i>
-#      so consecutive runs don't clobber each other.
-#   3. After all runs, calls analysis/multi_run_stats.py to aggregate
-#      summary.csv files across runs.
+#   2. After each run moves raw + processed results into a centralized
+#      `multi/<experiment>/run_<i>` folder so consecutive runs don't clobber each other.
 #
 # Environment variables:
 #   EXPERIMENT  single letter/tag that selects the run script (default: c)
@@ -42,8 +38,12 @@ fi
 
 RAW_BASE="$PROJECT_ROOT/results/raw/websocket"
 PROC_BASE="$PROJECT_ROOT/results/processed/websocket"
-MULTI_RAW="$RAW_BASE/$EXPERIMENT_NAME/multi"
-MULTI_PROC="$PROC_BASE/$EXPERIMENT_NAME/multi"
+# New layout: group multi-run results under a central 'multi' folder so that
+# runs are organized as:
+#   results/raw/websocket/multi/<experiment>/run_<i>
+#   results/processed/websocket/multi/<experiment>/run_<i>
+MULTI_RAW="$RAW_BASE/multi/$EXPERIMENT_NAME"
+MULTI_PROC="$PROC_BASE/multi/$EXPERIMENT_NAME"
 
 mkdir -p "$MULTI_RAW" "$MULTI_PROC"
 
@@ -74,8 +74,9 @@ for i in $(seq 1 "$N"); do
     # Run the experiment. MULTI_RUN=1 prevents parse scripts from deleting PROCESSED_DIR.
     MULTI_RUN=1 bash "$RUN_SCRIPT"
 
-    # Archive raw results — move every entry in the experiment dir *except* the
-    # 'multi' subfolder (which lives inside it) into run_i.
+    # Archive raw results — move every entry in the experiment dir *except*
+    # the 'multi' subfolder (when present) into run_i. We keep a single
+    # centralized multi directory at results/raw/websocket/multi/<experiment>.
     SRC_RAW="$RAW_BASE/$EXPERIMENT_NAME"
     if [ -d "$SRC_RAW" ]; then
         rm -rf "$MULTI_RAW/run_${i}"
@@ -87,7 +88,8 @@ for i in $(seq 1 "$N"); do
         echo "  WARNING: raw dir $SRC_RAW not found after run $i"
     fi
 
-    # Archive processed results — same approach.
+    # Archive processed results — same approach. Processed 'multi' dirs are
+    # centralized under results/processed/websocket/multi/<experiment>.
     SRC_PROC="$PROC_BASE/$EXPERIMENT_NAME"
     if [ -d "$SRC_PROC" ]; then
         rm -rf "$MULTI_PROC/run_${i}"
@@ -104,11 +106,7 @@ done
 
 echo ""
 echo "=========================================="
-echo "All $N runs complete. Computing aggregate statistics…"
+echo "All $N runs complete. Multi-run results saved under:"
+echo "  raw:  $MULTI_RAW"
+echo "  proc: $MULTI_PROC"
 echo "=========================================="
-
-python3 "$PROJECT_ROOT/analysis/multi_run_stats.py" \
-    --experiment "$EXPERIMENT_NAME" \
-    --multi-proc-dir "$MULTI_PROC"
-
-echo "Done. Aggregate stats written to $MULTI_PROC/aggregate_stats.csv"

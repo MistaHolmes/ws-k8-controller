@@ -76,8 +76,12 @@ log() {
 section "1. Cleaning Previous Results"
 
 if [ -d "$RESULT_DIR" ]; then
-  rm -rf "$RESULT_DIR"
-  log "Cleared previous raw results."
+  if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+    echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+  else
+    rm -rf "$RESULT_DIR"
+    log "Cleared previous raw results."
+  fi
 fi
 
 mkdir -p "$RESULT_DIR"
@@ -127,7 +131,10 @@ while ! kubectl top pods >/dev/null 2>&1; do
 done
 log "Metrics API ready (${WAITED}s)."
 
-# ==============================================================
+      if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
+        echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
+      else
+        rm -rf "$RESULT_DIR"
 #  4. DEPLOY PROMETHEUS
 # ==============================================================
 section "4. Deploying Prometheus"
@@ -384,7 +391,7 @@ while [ "$ELAPSED" -lt "$FINAL_DROP_DURATION" ]; do
   REPLICAS=$(kubectl get deployment websocket-server -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "?")
   CONNS=$(curl -s "http://localhost:9090/api/v1/query?query=sum(active_connections)" | jq -r '.data.result[0].value[1] // "?"' 2>/dev/null || echo "?")
   log "  [FINAL_DROP +${ELAPSED}s] replicas=$REPLICAS connections=$CONNS"
-  
+
   if [ "$REPLICAS" = "2" ] && [ "$ELAPSED" -ge 120 ]; then
     log "  Controller successfully scaled down to 2 replicas after cooldown expired!"
     sleep 30
