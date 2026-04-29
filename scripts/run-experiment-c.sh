@@ -135,6 +135,7 @@ log "Metrics API ready (${WAITED}s)."
         echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
       else
         rm -rf "$RESULT_DIR"
+      fi
 #  4. DEPLOY PROMETHEUS
 # ==============================================================
 section "4. Deploying Prometheus"
