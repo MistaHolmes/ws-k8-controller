@@ -131,11 +131,7 @@ while ! kubectl top pods >/dev/null 2>&1; do
 done
 log "Metrics API ready (${WAITED}s)."
 
-      if [ "${MULTI_RUN:-0}" = "1" ] || [ "${MULTI_RUN:-}" = "true" ]; then
-        echo "[*] MULTI_RUN=1 -> preserving $RESULT_DIR"
-      else
-        rm -rf "$RESULT_DIR"
-      fi
+# ==============================================================
 #  4. DEPLOY PROMETHEUS
 # ==============================================================
 section "4. Deploying Prometheus"

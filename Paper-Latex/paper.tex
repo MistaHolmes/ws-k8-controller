@@ -162,12 +162,12 @@ In the KRM pipeline, CPU and memory consumption are collected by \texttt{cAdviso
 \item \textbf{Stable convergence:} Despite transient deviations, the closed-loop system reaches steady state without oscillatory instability under unimodal load transitions.
 \end{itemize}
 
-\begin{figure}[ht]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{processed-results-websockets/krm-results/cpu_over_time.png}
+\includegraphics[width=0.85\textwidth]{processed-results-websockets/krm-results/cpu_over_time.png}
 \caption{KRM baseline: Observed CPU utilization over time. Significant overshoot above the 60\% target threshold occurs at burst onset, reflecting the inherent actuation delay of the discrete-time proportional control loop.}
 \label{fig:krm_cpu}
-\end{figure}
+\end{figure*}
 
 \begin{figure*}[t]
 \centering
@@ -304,12 +304,12 @@ Understanding the exact Kubernetes pod termination sequence is essential for int
 
 \textbf{Results.} The active connection count (Figure~\ref{fig:exp_b3_connections}) exhibits a characteristic \textbf{staircase step-down} pattern. Each step corresponds precisely to an HPA scale-down decision: when a pod is terminated, the full contents of its connection table are permanently destroyed. Successive scale-down events cause monotonically fewer active connections, with no mechanism for recovery.
 
-\begin{figure}[ht]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{processed-results-websockets/experiment-b3-hpa-idle-connections/connections.png}
+\includegraphics[width=0.85\textwidth]{processed-results-websockets/experiment-b3-hpa-idle-connections/connections.png}
 \caption{Experiment B3: Active connection count exhibits permanent staircase destruction (800$\rightarrow$744$\rightarrow$697$\rightarrow$445$\rightarrow$79). Each step-down is precisely synchronized with an HPA scale-down event. The connections are irrecoverable under the \texttt{reconnect: false} regimen.}
 \label{fig:exp_b3_connections}
-\end{figure}
+\end{figure*}
 
 The combined view in Figure~\ref{fig:exp_b3_combined} provides the definitive causal chain: (1)~connections become idle and cease to generate CPU load; (2)~HPA, observing near-zero CPU, decides to scale down; (3)~the terminated pod destroys all connections it hosts permanently. This is not a failure of any particular configuration parameter -- it is an architectural failure arising from HPA's inability to observe connection state as a first-class scaling signal.
 
@@ -500,12 +500,12 @@ The experiment imposes a two-cycle connection pattern designed to exercise both 
 
 The controller scaled monotonically from 2 to 8 replicas along the trajectory 2$\rightarrow$3$\rightarrow$4$\rightarrow$5$\rightarrow$6$\rightarrow$7$\rightarrow$8 as connections ramped toward 800, completing full provisioning in approximately 60~seconds. Total CPU consumption remained below 176~millicores throughout CYCLE 1, confirming that the controller's decisions were made entirely without CPU signal dependency.
 
-\begin{figure}[ht]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{processed-results-websockets/experiment-c-stateful/connections.png}
+\includegraphics[width=0.85\textwidth]{processed-results-websockets/experiment-c-stateful/connections.png}
 \caption{Experiment C: Active connection count over the full experiment timeline. Two distinct connection populations (CYCLE 1 and CYCLE 2) are clearly demarcated by the 90-second DROP 1 gap. The CYCLE 2 clients achieve full connection ramp almost immediately, reflecting the availability of pre-warmed pods.}
 \label{fig:exp_c_connections}
-\end{figure}
+\end{figure*}
 
 Figure~\ref{fig:exp_c_connections} shows the two-block connection profile characteristic of the restorm simulation. The rapid CYCLE 2 connection ramp is a direct consequence of pod pre-provisioning during DROP 1.
 
@@ -520,12 +520,12 @@ At $t \approx 200$~s, all clients were deleted. The active connection count conv
 \item \texttt{PatchDeployment} is not invoked; replicas remain at 8
 \end{itemize}
 
-\begin{figure}[ht]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{processed-results-websockets/experiment-c-stateful/replicas.png}
+\includegraphics[width=0.85\textwidth]{processed-results-websockets/experiment-c-stateful/replicas.png}
 \caption{Experiment C: Replica count over the experiment timeline. The ``flat bridge'' maintained at 8~replicas across DROP~1 ($t \approx 160$--$260$~s) is the primary empirical evidence of correct stabilization window operation. For comparison, at the equivalent elapsed time in Experiment B3, the HPA had already permanently destroyed 56 client connections via pod termination. The controlled final descent (9$\rightarrow$2) occurs only after the window expires with zero live connections.}
 \label{fig:exp_c_replicas}
-\end{figure}
+\end{figure*}
 
 The ``flat bridge'' pattern in Figure~\ref{fig:exp_c_replicas} is entirely absent from every HPA experiment in this study. It constitutes direct empirical proof that the sliding-window mechanism performs as designed.
 
@@ -680,12 +680,12 @@ Peak connections & 800 & $937 \pm 43$ & $800 \pm 0$ & $893 \pm 39$ \\
 
 Figure~\ref{fig:comparison_c_vs_d} shows a representative side-by-side comparison of Experiment~C (run~4, \texttt{StatefulAutoscaler}) and Experiment~D (run~2, HPA+Custom), illustrating the divergence in replica count during DROP~1.
 
-\begin{figure}[h]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{processed-results-websockets/comparison-c-d/comparison_c_vs_d.png}
+\includegraphics[width=0.85\textwidth]{processed-results-websockets/comparison-c-d/comparison_c_vs_d.png}
 \caption{Representative side-by-side comparison of Experiment~C (\texttt{StatefulAutoscaler}) and Experiment~D (HPA with custom connection metric).  Both controllers scale to~8 replicas in CYCLE~1 and hold~8 replicas through the DROP~1 zero-window (\textasciitilde50~s).  Key differences: Experiment~C scales up faster (22~s vs.~54~s in CYCLE~1) but exhibits a brief CYCLE~2 transition dip to 5--6 replicas as the sliding window ages out; Experiment~D remains flat at~8 throughout, owing to its wider 300-second stabilization window, but holds replicas 2.6$\times$ longer during the FINAL DROP.}
 \label{fig:comparison_c_vs_d}
-\end{figure}
+\end{figure*}
 
 
 %% ============================================================
