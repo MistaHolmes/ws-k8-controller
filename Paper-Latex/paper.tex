@@ -73,11 +73,13 @@ C V Raman Global University, Bhubaneswar 752054, India \\
 \and
 Suprit Kumar Naik \at
 Department of Computer Science and Engineering, \\
-C V Raman Global University, Bhubaneswar 752054, India
+C V Raman Global University, Bhubaneswar 752054, India \\
+\email{supritkumarnaik17@gmail.com}
 \and
 Ritesh Kumar Singh \at
 Department of Computer Science and Engineering, \\
-C V Raman Global University, Bhubaneswar 752054, India
+C V Raman Global University, Bhubaneswar 752054, India \\
+\email{rihankumar2004@gmail.com}
 }
 
 
@@ -655,7 +657,7 @@ Replica targeting during CYCLE~1 was accurate across all five runs: HPA consiste
 
 Contrary to an initial hypothesis, HPA with a custom connection-count metric \textbf{did preserve all~8 replicas through DROP~1} in all five runs.  Inspection of the \texttt{spec.replicas} time series confirmed that replicas remained at~8 throughout the DROP~1 zero-connection window ($\approx$50~s as measured from last disconnection to first CYCLE~2 reconnection).  This result is explained by HPA's configured \texttt{stabilizationWindowSeconds:~300}: the window far exceeds the DROP~1 duration, so the lower replica recommendation of~2 never persisted long enough to trigger scale-down.
 
-However, Experiment~D exposed a distinct robustness difference relative to the \texttt{StatefulAutoscaler} during the \textit{CYCLE~2 transition}.  In all five Experiment~C runs, a brief transient dip in replicas (to 5--6) was observed at the start of CYCLE~2, approximately 50~s after connections returned.  This is the window-boundary edge case acknowledged in Section~\ref{sec:limitations}: as stabilization-window entries from CYCLE~1 age out and fresh CYCLE~2 entries build up, $\exists$ a brief interval where the effective high-water-mark decreases.  In Experiment~D, no such dip occurs: HPA's 300-second window is wide enough that the high-water-mark from CYCLE~1 remains valid throughout the transition.
+However, Experiment~D exposed a distinct robustness difference relative to the \texttt{StatefulAutoscaler} during the \textit{CYCLE~2 transition}.  In all five Experiment-C runs, a brief transient dip in replicas (to 5--6) was observed at the start of CYCLE~2, approximately 50~s after connections returned.  This is the window-boundary edge case acknowledged in Section~\ref{sec:limitations}: as stabilization-window entries from CYCLE~1 age out and fresh CYCLE~2 entries build up, a brief interval where the effective high-water-mark decreases.  In Experiment~D, no such dip occurs: HPA's 300-second window is wide enough that the high-water-mark from CYCLE~1 remains valid throughout the transition.
 
 The second key differentiation is final scale-down efficiency.  After the experiment's FINAL DROP (permanent connection loss), Experiment~D replicas remained at~8 for a mean of $313 \pm 96$~s (median~355~s) before descending to \texttt{minReplicas=2}.  The \texttt{StatefulAutoscaler} released replicas in $119 \pm 2$~s.  Experiment~D therefore consumed surplus compute for $\approx$2.6$\times$ longer during controlled teardown.
 
