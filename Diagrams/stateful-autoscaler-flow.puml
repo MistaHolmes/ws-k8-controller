@@ -1,0 +1,79 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #93C5FD
+  FontColor #111827
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #93C5FD
+  DiamondFontColor #111827
+  StartColor #111827
+  EndColor #111827
+  BarColor #94A3B8
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #FCD34D
+  FontColor #111827
+}
+
+start
+
+:Read StatefulAutoscaler resource;
+
+:Read target Deployment;
+
+:Query Prometheus:\nsum(active_connections);
+
+if (Query successful?) then (Yes)
+
+  :Compute rawDesired =\nceil(connections /\ntargetConnectionsPerPod);
+
+  :Clamp to\nminReplicas / maxReplicas;
+
+  :Append desired count\nto sliding window history;
+
+floating note left
+    Key stabilization mechanism.
+    Preserves warm pods through
+    transient connection drops.
+end note
+
+  :Evict entries older than\nscaleDownCooldownSeconds;
+
+  :stabilized = max(window);
+
+  if (stabilized > current replicas?) then (Scale Up)
+
+    :Apply maxScaleUpStep bound;
+
+  else (No)
+
+    if (stabilized < current replicas?) then (Scale Down)
+
+      :Apply maxScaleDownStep bound;
+
+    else (No Change)
+
+      :Keep current replicas\n(no change);
+
+    endif
+
+  endif
+
+  :Patch Deployment.spec.replicas\nif target changed;
+
+  :Requeue after 5s;
+
+else (No)
+
+  :Requeue after 10s\n(no replica change);
+
+endif
+
+stop
+@enduml
