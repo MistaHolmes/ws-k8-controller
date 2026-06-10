@@ -119,7 +119,7 @@ workloads and are unlikely to be remediated by HPA parameter tuning alone. The f
 motivate the design of connection-aware autoscaling policies, as pursued in the companion
 paper.
 
-\keywords{Kubernetes \and
+\keywords{Kubernetes \and 
 Horizontal Pod Autoscaler \and
 WebSocket \and
 Stateful Workloads \and
@@ -164,7 +164,7 @@ is disruptive to the affected clients. HPA does not distinguish an
 \textit{idle-but-connected} server from a \textit{genuinely unloaded} one, and will
 therefore terminate pods that are essential to live client sessions.
 
-Prior investigations of WebSocket autoscaling, such as Dickel et al.~\cite{dickel2019stateful},
+Prior investigations of WebSocket autoscaling, such as Dickel et al.~\cite{dickel2019evaluation},
 have acknowledged the additional complexity of stateful protocols compared to stateless HTTP
 workloads. However, that work neither quantifies the failure modes of CPU-based HPA with
 empirical precision, nor provides a measured reconnection storm rate. This paper addresses
@@ -245,7 +245,7 @@ companion paper.
 
 \subsection{Stateful Workloads and Protocol-Aware Autoscaling}
 
-Dickel et al.~\cite{dickel2019stateful} identified stateful autoscaling as an open research
+Dickel et al.~\cite{dickel2019evaluation} identified stateful autoscaling as an open research
 challenge specific to IoT gateway deployments using WebSocket and MQTT. While their work
 motivates the need for protocol-aware scaling and proposes monitoring active connections via
 Prometheus, it provides no quantitative characterization of HPA failure modes and no
@@ -340,7 +340,7 @@ control-plane + 2 worker nodes, Kubernetes v1.31.6, kind v0.25.0, configured via
 \texttt{--metric-resolution=15s} and \texttt{--kubelet-insecure-tls} (required for kind's
 self-signed kubelet certificates; not appropriate for production). All experimental scripts,
 cluster configuration, server code, load generator, and raw results are available at:
-\url{https://github.com/AbhasBenevolentDictator/STAR}. The shared experimental infrastructure
+\url{https://github.com/MistaHolmes/ws-k8-controller.git}. The shared experimental infrastructure
 comprises: a custom Python asyncio WebSocket server (image: \texttt{ws-instrumented}), 800
 persistent client connections established by the load generator, and Kubernetes HPA configured
 with \texttt{targetCPUUtilizationPercentage: 60} unless stated otherwise.
@@ -772,30 +772,33 @@ sliding-window stabilization.
 
 
 
-%% ============================================================
 \section*{Data Availability}
-%% ============================================================
 
-The complete source code for all experiment run scripts, load-generator workloads, Prometheus
-manifests, cluster configuration, raw and processed results, and analysis scripts for
-Experiments~A, B1, B2-Instrumented, and B3 are publicly available at:
+The source code, experimental workloads, Kubernetes manifests,
+Prometheus configurations, analysis scripts, and processed results
+required to reproduce Experiments~A, B1, B2-Instrumented, and B3
+are publicly available at:
 
 \begin{center}
 \url{https://github.com/MistaHolmes/ws-k8-controller.git}
 \end{center}
 
-Each experiment can be reproduced on any Linux machine with Docker and kind installed by
-running the numbered experiment scripts in \texttt{scripts/}. Replication instructions are
-provided in \texttt{Replication.md}. All figures in this paper were generated from the
-archived results using the scripts in \texttt{analysis/}.
+The repository includes deployment manifests, load-generation
+workloads, raw measurement data, figure-generation scripts, and
+step-by-step replication instructions. All figures presented in this
+paper were generated directly from the archived experimental results.
 
 \section*{Acknowledgements}
-The authors gratefully acknowledge Dr.\ Rakesh Kumar Ranjan for his supervision and sustained
-guidance throughout this project. His strategic input on experimental design, measurement
-methodology, and manuscript feedback improved the rigor and presentation of this study.
-We also thank him for facilitating access to institutional compute resources used to run the
-Kind clusters and collect metrics.
 
+The authors express their sincere gratitude to Dr.\ Rakesh Kumar Ranjan
+for his supervision, guidance, and constructive feedback throughout this research. His insights into experimental design, measurement methodology, and research structuring played an important role in improving both the technical rigor and presentation of this work.
+
+The authors also thank him for his continued encouragement during the
+development of the experimental framework and for facilitating access to the computational resources used to conduct the experiments and collect the reported results.
+
+Finally, the authors acknowledge the Department of Computer Science and
+Engineering, C V Raman Global University, for providing an academic
+environment that supported this research.
 
 
 %% ============================================================
