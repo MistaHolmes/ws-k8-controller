@@ -1,0 +1,102 @@
+1781204414
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          32s
+1781204419
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          37s
+1781204424
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          42s
+1781204429
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          47s
+1781204434
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          52s
+1781204439
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          58s
+1781204445
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          63s
+1781204450
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          68s
+1781204455
+NAME            REFERENCE                     TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 1%/60%   2         15        2          73s
+1781204460
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 13%/60%   2         15        2          78s
+1781204465
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 13%/60%   2         15        2          83s
+1781204470
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 13%/60%   2         15        2          88s
+1781204475
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 48%/60%   2         15        2          93s
+1781204480
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 48%/60%   2         15        2          98s
+1781204485
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 48%/60%   2         15        2          103s
+1781204490
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 65%/60%   2         15        2          108s
+1781204495
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 65%/60%   2         15        2          113s
+1781204500
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 65%/60%   2         15        2          118s
+1781204505
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 116%/60%   2         15        2          2m3s
+1781204510
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 116%/60%   2         15        2          2m8s
+1781204515
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 116%/60%   2         15        2          2m13s
+1781204520
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 141%/60%   2         15        4          2m18s
+1781204525
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 141%/60%   2         15        4          2m23s
+1781204530
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 141%/60%   2         15        4          2m28s
+1781204535
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 97%/60%   2         15        5          2m33s
+1781204540
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 97%/60%   2         15        5          2m38s
+1781204545
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 97%/60%   2         15        5          2m43s
+1781204550
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 104%/60%   2         15        7          2m48s
+1781204555
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 104%/60%   2         15        7          2m53s
+1781204560
+NAME            REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 104%/60%   2         15        7          2m59s
+1781204566
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 72%/60%   2         15        7          3m4s
+1781204571
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 72%/60%   2         15        7          3m9s
+1781204576
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 72%/60%   2         15        7          3m14s
+1781204581
+NAME            REFERENCE                     TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+websocket-hpa   Deployment/websocket-server   cpu: 37%/60%   2         15        7          3m19s

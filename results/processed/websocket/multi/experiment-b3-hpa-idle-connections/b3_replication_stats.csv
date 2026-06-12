@@ -1,0 +1,8 @@
+mean,std,min,max,n,metric
+800.0,0.0,800.0,800.0,5,peak_connections
+649.4,8.763560920082657,637.0,658.0,5,final_connections
+150.6,8.763560920082659,142.0,163.0,5,connections_lost
+18.84,1.0922453936730512,17.8,20.4,5,pct_lost
+3.6,1.3416407864998738,3.0,6.0,5,scale_down_events
+8.8,3.492849839314596,7.0,15.0,5,peak_replicas
+2.0,0.0,2.0,2.0,5,final_replicas

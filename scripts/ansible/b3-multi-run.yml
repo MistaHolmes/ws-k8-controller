@@ -1,0 +1,98 @@
+---
+# ==============================================================================
+# b3-multi-run.yml — Ansible playbook: Replicate Experiment B3 five times
+#
+# Usage:
+#   ansible-playbook scripts/ansible/b3-multi-run.yml
+#
+# What it does:
+#   1. Runs Experiment B3 five times via the existing run-multi.sh wrapper
+#   2. Aggregates per-run summary statistics (multi_run_stats.py)
+#   3. Builds the B3 replication table with mean ± std (b3_multi_run_analysis.py)
+#
+# Prerequisites:
+#   - Docker, kind, kubectl, jq, curl must be installed
+#   - Python 3 with pandas, numpy, matplotlib
+# ==============================================================================
+
+- name: "Experiment B3 — Five-Run Replication"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    project_root: "{{ playbook_dir }}/../.."
+    experiment_tag: "b3"
+    num_runs: 5
+    experiment_name: "experiment-b3-hpa-idle-connections"
+    multi_proc_dir: "{{ project_root }}/results/processed/websocket/multi/{{ experiment_name }}"
+
+  tasks:
+
+    # ------------------------------------------------------------------
+    # Step 1: Run B3 five times
+    # ------------------------------------------------------------------
+    - name: "Run Experiment B3 {{ num_runs }} times via run-multi.sh (Tailing log file: b3_multi_run.log)"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        export EXPERIMENT="{{ experiment_tag }}"
+        export N="{{ num_runs }}"
+        export CLEAN_MULTI=1
+        bash "{{ project_root }}/scripts/run-multi.sh" > "{{ project_root }}/logs/b3_multi_run.log" 2>&1
+      args:
+        chdir: "{{ project_root }}"
+        executable: /bin/bash
+      register: multi_run_result
+      timeout: 14400  # 4 hours max for 5 runs
+
+    - name: "Display multi-run output (last 50 lines)"
+      ansible.builtin.debug:
+        msg: "{{ multi_run_result.stdout_lines[-50:] }}"
+
+    # ------------------------------------------------------------------
+    # Step 2: Aggregate summary statistics
+    # ------------------------------------------------------------------
+    - name: "Aggregate summary.csv files across all runs"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        python3 "{{ project_root }}/analysis/multi_run_stats.py" \
+          --experiment "{{ experiment_name }}" \
+          --multi-proc-dir "{{ multi_proc_dir }}"
+      args:
+        chdir: "{{ project_root }}"
+        executable: /bin/bash
+      register: stats_result
+
+    - name: "Display aggregate statistics"
+      ansible.builtin.debug:
+        msg: "{{ stats_result.stdout_lines }}"
+
+    # ------------------------------------------------------------------
+    # Step 3: Build B3 replication table
+    # ------------------------------------------------------------------
+    - name: "Build B3 replication table (per-run staircase metrics)"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        python3 "{{ project_root }}/analysis/experiment-b3/b3_multi_run_analysis.py" \
+          --multi-dir "{{ multi_proc_dir }}"
+      args:
+        chdir: "{{ project_root }}"
+        executable: /bin/bash
+      register: replication_result
+
+    - name: "Display B3 replication table"
+      ansible.builtin.debug:
+        msg: "{{ replication_result.stdout_lines }}"
+
+    # ------------------------------------------------------------------
+    # Summary
+    # ------------------------------------------------------------------
+    - name: "Print results locations"
+      ansible.builtin.debug:
+        msg:
+          - "===== B3 Five-Run Replication Complete ====="
+          - "Multi-run raw:        {{ project_root }}/results/raw/websocket/multi/{{ experiment_name }}/"
+          - "Multi-run processed:  {{ multi_proc_dir }}/"
+          - "Aggregate stats:      {{ multi_proc_dir }}/aggregate_stats.csv"
+          - "Replication table:    {{ multi_proc_dir }}/b3_replication_table.csv"
+          - "Replication stats:    {{ multi_proc_dir }}/b3_replication_stats.csv"

@@ -1,0 +1,2 @@
+stabilization_window_s,gap_duration_s,gap_relation,connections_before,connections_after,connections_survived,pct_lost,replicas_before,replicas_after
+60,120,above,800,761,true,4.9,4,3

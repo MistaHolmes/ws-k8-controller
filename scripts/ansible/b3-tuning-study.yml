@@ -1,0 +1,119 @@
+---
+# ==============================================================================
+# b3-tuning-study.yml — Ansible playbook: HPA Stabilization Window Tuning Study
+#
+# Usage:
+#   ansible-playbook scripts/ansible/b3-tuning-study.yml
+#
+# What it does:
+#   1. Iterates over 4 stabilization window values × 2 gap conditions = 8 configs
+#   2. Runs each configuration 3 times (N=3)
+#   3. Aggregates results into a consolidated tuning_results.csv
+#
+# Test matrix:
+#   Window=30s   Gap=15s  (below → safe)     Gap=90s  (above → fail)
+#   Window=60s   Gap=45s  (below → safe)     Gap=120s (above → fail)
+#   Window=120s  Gap=105s (below → safe)     Gap=180s (above → fail)
+#   Window=300s  Gap=285s (below → safe)     Gap=360s (above → fail)
+#
+# Prerequisites:
+#   - Docker, kind, kubectl, jq, curl must be installed
+#   - Python 3 with pandas, numpy, matplotlib
+# ==============================================================================
+
+- name: "Experiment B3-Tuning — HPA Stabilization Window Study"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    project_root: "{{ playbook_dir }}/../.."
+    num_runs_per_config: 3
+    experiment_name: "experiment-b3-tuning"
+    processed_dir: "{{ project_root }}/results/processed/websocket/{{ experiment_name }}"
+
+    # Test matrix: 4 windows × 2 gap conditions
+    tuning_configs:
+      - { window: 30,  gap: 15,  label: "window30s_gap15s (safe)" }
+      - { window: 30,  gap: 90,  label: "window30s_gap90s (fail)" }
+      - { window: 60,  gap: 45,  label: "window60s_gap45s (safe)" }
+      - { window: 60,  gap: 120, label: "window60s_gap120s (fail)" }
+      - { window: 120, gap: 105, label: "window120s_gap105s (safe)" }
+      - { window: 120, gap: 180, label: "window120s_gap180s (fail)" }
+      - { window: 300, gap: 285, label: "window300s_gap285s (safe)" }
+      - { window: 300, gap: 360, label: "window300s_gap360s (fail)" }
+
+  tasks:
+
+    # ------------------------------------------------------------------
+    # Step 0: Create results directories
+    # ------------------------------------------------------------------
+    - name: "Create processed results directory"
+      ansible.builtin.file:
+        path: "{{ processed_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: "Clear previous log file"
+      ansible.builtin.file:
+        path: "{{ project_root }}/b3_tuning_run.log"
+        state: absent
+
+    - name: "Touch log file"
+      ansible.builtin.file:
+        path: "{{ project_root }}/b3_tuning_run.log"
+        state: touch
+        mode: '0644'
+
+    # ------------------------------------------------------------------
+    # Step 1: Run each configuration N times
+    # ------------------------------------------------------------------
+    - name: "Run tuning config: {{ item.0.label }} — Run {{ item.1 }}/{{ num_runs_per_config }} (Tailing log file: b3_tuning_run.log)"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        export STABILIZATION_WINDOW="{{ item.0.window }}"
+        export GAP_DURATION="{{ item.0.gap }}"
+        export RUN_ID="{{ item.1 }}"
+        echo -e "\n=== STARTING: {{ item.0.label }} — Run {{ item.1 }}/{{ num_runs_per_config }} ===" >> "{{ project_root }}/logs/b3_tuning_run.log" 2>&1
+        bash "{{ project_root }}/scripts/run-experiment-b3-tuning.sh" >> "{{ project_root }}/logs/b3_tuning_run.log" 2>&1
+      args:
+        chdir: "{{ project_root }}"
+        executable: /bin/bash
+      loop: "{{ tuning_configs | product(range(1, num_runs_per_config + 1) | list) | list }}"
+      loop_control:
+        label: "{{ item.0.label }} run {{ item.1 }}"
+      register: tuning_results
+      timeout: 3600  # 1 hour per run
+
+    # ------------------------------------------------------------------
+    # Step 2: Aggregate all tuning results
+    # ------------------------------------------------------------------
+    - name: "Aggregate tuning study results (multi-run)"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        python3 "{{ project_root }}/analysis/experiment-b3/b3_tuning_analysis.py" \
+          --results-dir "{{ processed_dir }}" \
+          --multi-run
+      args:
+        chdir: "{{ project_root }}"
+        executable: /bin/bash
+      register: analysis_result
+
+    - name: "Display tuning study results"
+      ansible.builtin.debug:
+        msg: "{{ analysis_result.stdout_lines }}"
+
+    # ------------------------------------------------------------------
+    # Summary
+    # ------------------------------------------------------------------
+    - name: "Print results locations"
+      ansible.builtin.debug:
+        msg:
+          - "===== HPA Tuning Study Complete ====="
+          - "Processed results: {{ processed_dir }}/"
+          - "Tuning results:    {{ processed_dir }}/tuning_results.csv"
+          - "All runs data:     {{ processed_dir }}/tuning_all_runs.csv"
+          - ""
+          - "Total configs tested: {{ tuning_configs | length }}"
+          - "Runs per config:      {{ num_runs_per_config }}"
+          - "Total runs:           {{ tuning_configs | length * num_runs_per_config }}"

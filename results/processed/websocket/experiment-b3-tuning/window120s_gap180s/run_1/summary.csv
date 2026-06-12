@@ -1,0 +1,2 @@
+pod_seconds,scale_up_reaction_s,scale_down_reaction_s,peak_connections,peak_replicas
+1588.0,55.0,,800.0,7.0

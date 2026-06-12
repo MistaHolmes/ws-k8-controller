@@ -1,0 +1,1582 @@
+CLEAN_MULTI=1 -> removing previous multi-run folders
+  Removed /home/abhas/node/STAR/future-work/results/raw/websocket/multi/experiment-b3-hpa-idle-connections
+  Removed /home/abhas/node/STAR/future-work/results/processed/websocket/multi/experiment-b3-hpa-idle-connections
+==========================================
+  Multi-run: experiment=b3  N=5
+  Script:    /home/abhas/node/STAR/future-work/scripts/run-experiment-b3.sh
+  Experiment name: experiment-b3-hpa-idle-connections
+  Results → results/raw/websocket/experiment-b3-hpa-idle-connections/multi/run_<i>
+==========================================
+
+-------- Run 1 / 5 --------
+
+============================================================
+  1. Archiving Previous Results
+============================================================
+[*] MULTI_RUN=1 -> preserving /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+
+============================================================
+  2. Creating Fresh Kind Cluster
+============================================================
+[23:38:35] Old cluster deleted (if existed).
+Creating cluster "stateful-exp" ...
+ • Ensuring node image (kindest/node:v1.31.6) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.31.6) 🖼
+ • Preparing nodes 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-stateful-exp"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-stateful-exp
+
+Not sure what to do next? 😅  Check out https://kind.sigs.k8s.io/docs/user/quick-start/
+[23:38:59] Kind cluster 'stateful-exp' created.
+
+============================================================
+  3. Installing Metrics Server
+============================================================
+serviceaccount/metrics-server created
+clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader created
+clusterrole.rbac.authorization.k8s.io/system:metrics-server created
+rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader created
+clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator created
+clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
+service/metrics-server created
+deployment.apps/metrics-server created
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io created
+deployment.apps/metrics-server patched
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+deployment "metrics-server" successfully rolled out
+[23:39:42] Metrics server ready.
+[23:39:42] Waiting for metrics API...
+[23:39:47] Metrics API ready (5s).
+
+============================================================
+  4. Deploying Prometheus
+============================================================
+namespace/monitoring created
+serviceaccount/prometheus created
+clusterrole.rbac.authorization.k8s.io/prometheus created
+clusterrolebinding.rbac.authorization.k8s.io/prometheus created
+configmap/prometheus-config created
+deployment.apps/prometheus created
+service/prometheus created
+Waiting for deployment "prometheus" rollout to finish: 0 of 1 updated replicas are available...
+deployment "prometheus" successfully rolled out
+[23:40:21] Prometheus ready.
+
+============================================================
+  5. Building Docker Images
+============================================================
+[23:40:21] Building instrumented websocket-server (CPU_WORK=1)...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 DONE 0.0s
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 200B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 1.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#4 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 31B done
+#5 DONE 0.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] COPY server.py .
+#7 CACHED
+
+#8 [4/4] RUN pip install websockets aiohttp prometheus_client
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 exporting manifest sha256:a7b2d10e97d7b680fb34bc9bb14694bf2c786f085aa2dc26043661d531ee9905 done
+#9 exporting config sha256:1c40956e18bd23d87f95b5955f137f90265ce679282cb4712ef60c99edc7d33b done
+#9 exporting attestation manifest sha256:8796bc177e0946fc5666b0cdd64c063101457a6b1cd10bab4178f826bdb4acff 0.0s done
+#9 exporting manifest list sha256:bc02310949bf2b1f11fad5fe5dd72a5b03c5fdb8da26c59db54110edcfa10a9d 0.0s done
+#9 naming to docker.io/library/websocket-server-instrumented:latest
+#9 naming to docker.io/library/websocket-server-instrumented:latest done
+#9 unpacking to docker.io/library/websocket-server-instrumented:latest done
+#9 DONE 0.1s
+Image: "websocket-server-instrumented:latest" with ID "sha256:bc02310949bf2b1f11fad5fe5dd72a5b03c5fdb8da26c59db54110edcfa10a9d" not yet present on node "stateful-exp-worker", loading...
+Image: "websocket-server-instrumented:latest" with ID "sha256:bc02310949bf2b1f11fad5fe5dd72a5b03c5fdb8da26c59db54110edcfa10a9d" not yet present on node "stateful-exp-control-plane", loading...
+[23:40:25] websocket-server-instrumented loaded.
+[23:40:25] Building active load generator...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 153B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#4 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#4 DONE 0.0s
+
+#5 [2/4] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 31B done
+#6 DONE 0.0s
+
+#7 [3/4] COPY client.py .
+#7 DONE 0.4s
+
+#8 [4/4] RUN pip install websockets numpy
+#8 1.581 Collecting websockets
+#8 1.627   Downloading websockets-16.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.8 kB)
+#8 1.846 Collecting numpy
+#8 1.854   Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+#8 1.867 Downloading websockets-16.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (184 kB)
+#8 1.888    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 184.6/184.6 kB 9.0 MB/s eta 0:00:00
+#8 1.895 Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.9 MB)
+#8 6.171    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.9/16.9 MB 3.9 MB/s eta 0:00:00
+#8 6.248 Installing collected packages: websockets, numpy
+#8 7.782 Successfully installed numpy-2.4.6 websockets-16.0
+#8 7.782 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#8 7.874 
+#8 7.874 [notice] A new release of pip is available: 24.0 -> 26.1.2
+#8 7.874 [notice] To update, run: pip install --upgrade pip
+#8 DONE 8.1s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 2.9s done
+#9 exporting manifest sha256:91cfd3317719b5b19e6284fd3d9b3d49da45f045fd4c730032004a0691686ecb done
+#9 exporting config sha256:b3bcceff6fed730c57676a791815fbb083c6ac6deb873d9654fcb132a38e2039 done
+#9 exporting attestation manifest sha256:4e1fc12ea974d683b83f5dae7134403b8d5dd18970e9a81ed7e29603663dd8d0 0.0s done
+#9 exporting manifest list sha256:8466eedad0723be7650b7afe91148001dda9c34d8b32eb9a0b594934711c9d34 done
+#9 naming to docker.io/library/websocket-loadgen:latest done
+#9 unpacking to docker.io/library/websocket-loadgen:latest
+#9 unpacking to docker.io/library/websocket-loadgen:latest 0.4s done
+#9 DONE 3.4s
+Image: "websocket-loadgen:latest" with ID "sha256:8466eedad0723be7650b7afe91148001dda9c34d8b32eb9a0b594934711c9d34" not yet present on node "stateful-exp-worker", loading...
+Image: "websocket-loadgen:latest" with ID "sha256:8466eedad0723be7650b7afe91148001dda9c34d8b32eb9a0b594934711c9d34" not yet present on node "stateful-exp-control-plane", loading...
+[23:40:40] websocket-loadgen loaded.
+
+============================================================
+  6. Deploying WebSocket Workload (CPU_WORK=1)
+============================================================
+deployment.apps/websocket-server created
+service/websocket-service created
+pod/websocket-server-8585946c55-5gslv condition met
+pod/websocket-server-8585946c55-bbfft condition met
+[23:40:42] WebSocket server pods ready (CPU_WORK=1).
+
+============================================================
+  7. Applying CPU-Based HPA
+============================================================
+horizontalpodautoscaler.autoscaling/websocket-hpa created
+[23:40:42] HPA applied.
+[23:40:42]   targetCPU:              60%
+[23:40:42]   scaleUp stabilization:  0s  (fast scale-up)
+[23:40:42]   scaleDown stabilization: 60s (aggressive scale-down)
+
+============================================================
+  8. Waiting for HPA Metrics
+============================================================
+[23:40:42] Waiting for HPA to report valid CPU metrics...
+[23:40:42] Waiting... (0s)
+[23:40:52] Metrics API ready for HPA.
+
+============================================================
+  9. Prometheus Port-Forward
+============================================================
+[23:40:54] Prometheus API ready.
+[23:40:54] Prometheus scraping websocket pods.
+
+============================================================
+  10. Starting Metric Collectors
+============================================================
+[23:40:54] HPA collector started (PID 45905).
+[23:40:54] CPU collector started (PID 45908).
+[23:40:54] Pod lifecycle collector started (PID 45913).
+[23:40:54] Prometheus collector started (PID 45923).
+
+============================================================
+  11. Running Load Phases
+============================================================
+[23:41:09] PHASE: CONNECT -- Deploying 800 websocket clients (CPU_WORK=1)
+[23:41:09]   Note: Clients linearly stagger connecting over 90s, then stop pinging at 120s.
+job.batch/websocket-loadgen created
+[23:41:09]   [CONNECT +0s] replicas=2 cpu=% connections=0
+[23:41:24]   [CONNECT +15s] replicas=2 cpu=1% connections=81
+[23:41:39]   [CONNECT +30s] replicas=2 cpu=2% connections=218
+[23:41:54]   [CONNECT +45s] replicas=2 cpu=28% connections=345
+[23:42:09]   [CONNECT +60s] replicas=2 cpu=70% connections=462
+[23:42:25]   [CONNECT +75s] replicas=3 cpu=104% connections=582
+[23:42:40]   [CONNECT +90s] replicas=4 cpu=121% connections=727
+[23:42:55]   [CONNECT +105s] replicas=4 cpu=102% connections=800
+[23:43:10] PHASE: IDLE -- Clients automatically stop sending pings. CPUs will drop.
+[23:43:10] Waiting for HPA to observe low CPU and scale down to 2 replicas (should take ~60-90s)...
+[23:43:10]   [IDLE +0s] replicas=6 cpu=100% connections=800
+[23:43:25]   [IDLE +15s] replicas=7 cpu=87% connections=800
+[23:43:40]   [IDLE +30s] replicas=7 cpu=56% connections=800
+[23:43:55]   [IDLE +45s] replicas=7 cpu=3% connections=800
+[23:44:10]   [IDLE +60s] replicas=7 cpu=3% connections=800
+[23:44:25]   [IDLE +75s] replicas=7 cpu=2% connections=800
+[23:44:40]   [IDLE +90s] replicas=7 cpu=2% connections=800
+[23:44:55]   [IDLE +105s] replicas=3 cpu=4% connections=800
+[23:45:10]   [IDLE +120s] replicas=3 cpu=4% connections=740
+[23:45:26]   [IDLE +135s] replicas=3 cpu=4% connections=740
+[23:45:41]   [IDLE +150s] replicas=3 cpu=4% connections=740
+[23:45:56]   [IDLE +165s] replicas=2! HPA successfully scaled down, dropping the 800 live connections!
+[23:46:11]   [STORM_CAPTURE +180s] replicas=2 connections=740
+[23:46:26]   [STORM_CAPTURE +195s] replicas=2 connections=740
+[23:46:41]   [STORM_CAPTURE +210s] replicas=2 connections=637
+
+============================================================
+  12. Stopping Collectors
+============================================================
+[23:46:41] All collectors stopped.
+
+============================================================
+  13. Running Analysis Pipeline
+============================================================
+[23:46:41] Parsing raw logs...
+  MULTI_RUN detected: preserving existing PROCESSED_DIR
+Parsing experiment-b3 logs...
+  Parsed cpu.csv: 144 rows
+  Parsed replicas.csv: 144 rows
+  Parsed connections.csv: 70 rows
+  Wrote summary.csv → /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/summary.csv
+  Summary: pod_seconds=24248554.0  scale_up=41.0s  peak_replicas=15.0
+Experiment-B3 log parsing complete.
+[23:46:41] Parsing complete.
+[23:46:41] Generating plots...
+  Generated: cpu.png
+  Generated: connections.png
+  Generated: replicas.png
+  Generated: combined.png
+
+  --- Summary ---
+  Peak connections:  800
+  Peak CPU:          1068m
+  Peak replicas:     15
+  Min replicas:      0
+  Scaling events:    18
+  (Expected: scale UP on CONNECT, then scale DOWN on IDLE killing connections)
+
+  connections lost due to scale-down: N/A (could not find matching connection windows)
+
+Experiment-B3 plots generated successfully.
+[23:46:43] Plots generated.
+
+============================================================
+  14. Archiving Results
+============================================================
+[23:46:43] Archived -> experiment-b3-hpa-idle-connections_final_20260611_234643.tgz
+
+============================================================
+  15. Deleting Kind Cluster
+============================================================
+Deleting cluster "stateful-exp" ...
+Deleted nodes: ["stateful-exp-worker" "stateful-exp-control-plane"]
+[23:46:44] Cluster deleted.
+
+============================================================
+  Experiment-B3 Complete
+============================================================
+
+  Raw results:       /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+  Processed results: /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections
+  Plots:             /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/plots/
+
+  What to look for in the plots:
+    - cpu.png:          CPU spikes during CONNECT, drops to 0% at 120s
+    - replicas.png:     Replicas scale UP on CPU, then DOWN quickly (60s window)
+    - connections.png:  Connections hold perfectly flat at 800 natively... until HPA terminates the pods.
+                        The graph will step down permanently, proving HPA kills live connections.
+    - combined.png:     Explicit proof that connection drop is tied 100% to pod scale-down.
+
+  Compare with Experiment-C:
+    Custom controller held replicas proportional to connections throughout.
+
+
+[CLEANUP] Stopping background processes...
+[CLEANUP] Done.
+  Saved raw   → /home/abhas/node/STAR/future-work/results/raw/websocket/multi/experiment-b3-hpa-idle-connections/run_1
+  Saved proc  → /home/abhas/node/STAR/future-work/results/processed/websocket/multi/experiment-b3-hpa-idle-connections/run_1
+  Run 1 complete.
+
+-------- Run 2 / 5 --------
+
+============================================================
+  1. Archiving Previous Results
+============================================================
+[*] MULTI_RUN=1 -> preserving /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+
+============================================================
+  2. Creating Fresh Kind Cluster
+============================================================
+[23:46:44] Old cluster deleted (if existed).
+Creating cluster "stateful-exp" ...
+ • Ensuring node image (kindest/node:v1.31.6) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.31.6) 🖼
+ • Preparing nodes 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-stateful-exp"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-stateful-exp
+
+Have a nice day! 👋
+[23:47:03] Kind cluster 'stateful-exp' created.
+
+============================================================
+  3. Installing Metrics Server
+============================================================
+serviceaccount/metrics-server created
+clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader created
+clusterrole.rbac.authorization.k8s.io/system:metrics-server created
+rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader created
+clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator created
+clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
+service/metrics-server created
+deployment.apps/metrics-server created
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io created
+deployment.apps/metrics-server patched
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+deployment "metrics-server" successfully rolled out
+[23:47:46] Metrics server ready.
+[23:47:46] Waiting for metrics API...
+[23:47:51] Metrics API ready (5s).
+
+============================================================
+  4. Deploying Prometheus
+============================================================
+namespace/monitoring created
+serviceaccount/prometheus created
+clusterrole.rbac.authorization.k8s.io/prometheus created
+clusterrolebinding.rbac.authorization.k8s.io/prometheus created
+configmap/prometheus-config created
+deployment.apps/prometheus created
+service/prometheus created
+Waiting for deployment "prometheus" rollout to finish: 0 of 1 updated replicas are available...
+deployment "prometheus" successfully rolled out
+[23:48:25] Prometheus ready.
+
+============================================================
+  5. Building Docker Images
+============================================================
+[23:48:25] Building instrumented websocket-server (CPU_WORK=1)...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 200B done
+#1 DONE 0.0s
+
+#2 [auth] library/python:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.11-slim
+#3 DONE 1.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#5 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 31B done
+#6 DONE 0.0s
+
+#7 [2/4] WORKDIR /app
+#7 CACHED
+
+#8 [3/4] COPY server.py .
+#8 CACHED
+
+#9 [4/4] RUN pip install websockets aiohttp prometheus_client
+#9 CACHED
+
+#10 exporting to image
+#10 exporting layers done
+#10 exporting manifest sha256:a7b2d10e97d7b680fb34bc9bb14694bf2c786f085aa2dc26043661d531ee9905 done
+#10 exporting config sha256:1c40956e18bd23d87f95b5955f137f90265ce679282cb4712ef60c99edc7d33b done
+#10 exporting attestation manifest sha256:4105a8c6f99fa162042c6f0d713176767d5ad45b37af0a0b855ad61835fdc77c 0.0s done
+#10 exporting manifest list sha256:a38f74c7c7539d32ee4de6665c435b885c02c23ab6146b2e0e8c4ea418adb525 0.0s done
+#10 naming to docker.io/library/websocket-server-instrumented:latest done
+#10 unpacking to docker.io/library/websocket-server-instrumented:latest done
+#10 DONE 0.1s
+Image: "websocket-server-instrumented:latest" with ID "sha256:a38f74c7c7539d32ee4de6665c435b885c02c23ab6146b2e0e8c4ea418adb525" not yet present on node "stateful-exp-worker", loading...
+Image: "websocket-server-instrumented:latest" with ID "sha256:a38f74c7c7539d32ee4de6665c435b885c02c23ab6146b2e0e8c4ea418adb525" not yet present on node "stateful-exp-control-plane", loading...
+[23:48:29] websocket-server-instrumented loaded.
+[23:48:29] Building active load generator...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 153B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#4 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 31B done
+#5 DONE 0.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] COPY client.py .
+#7 CACHED
+
+#8 [4/4] RUN pip install websockets numpy
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 exporting manifest sha256:91cfd3317719b5b19e6284fd3d9b3d49da45f045fd4c730032004a0691686ecb done
+#9 exporting config sha256:b3bcceff6fed730c57676a791815fbb083c6ac6deb873d9654fcb132a38e2039 done
+#9 exporting attestation manifest sha256:bcae539ec484e942ac8d21d2909a6c61c05d1fe3d0076ff93900bc71c49842cb 0.0s done
+#9 exporting manifest list sha256:4b711c2407bea096ed29e143cd9f762418880e9b0718099db1d676e66cd66213 done
+#9 naming to docker.io/library/websocket-loadgen:latest done
+#9 unpacking to docker.io/library/websocket-loadgen:latest done
+#9 DONE 0.1s
+Image: "websocket-loadgen:latest" with ID "sha256:4b711c2407bea096ed29e143cd9f762418880e9b0718099db1d676e66cd66213" not yet present on node "stateful-exp-worker", loading...
+Image: "websocket-loadgen:latest" with ID "sha256:4b711c2407bea096ed29e143cd9f762418880e9b0718099db1d676e66cd66213" not yet present on node "stateful-exp-control-plane", loading...
+[23:48:33] websocket-loadgen loaded.
+
+============================================================
+  6. Deploying WebSocket Workload (CPU_WORK=1)
+============================================================
+deployment.apps/websocket-server created
+service/websocket-service created
+pod/websocket-server-8585946c55-b2n9p condition met
+pod/websocket-server-8585946c55-ffktt condition met
+[23:48:34] WebSocket server pods ready (CPU_WORK=1).
+
+============================================================
+  7. Applying CPU-Based HPA
+============================================================
+horizontalpodautoscaler.autoscaling/websocket-hpa created
+[23:48:34] HPA applied.
+[23:48:34]   targetCPU:              60%
+[23:48:34]   scaleUp stabilization:  0s  (fast scale-up)
+[23:48:34]   scaleDown stabilization: 60s (aggressive scale-down)
+
+============================================================
+  8. Waiting for HPA Metrics
+============================================================
+[23:48:34] Waiting for HPA to report valid CPU metrics...
+[23:48:34] Waiting... (0s)
+[23:48:44] Waiting... (10s)
+[23:48:54] Waiting... (20s)
+[23:49:04] Metrics API ready for HPA.
+
+============================================================
+  9. Prometheus Port-Forward
+============================================================
+[23:49:06] Prometheus API ready.
+[23:49:06] Prometheus scraping websocket pods.
+
+============================================================
+  10. Starting Metric Collectors
+============================================================
+[23:49:06] HPA collector started (PID 58211).
+[23:49:06] CPU collector started (PID 58214).
+[23:49:06] Pod lifecycle collector started (PID 58219).
+[23:49:06] Prometheus collector started (PID 58229).
+
+============================================================
+  11. Running Load Phases
+============================================================
+[23:49:21] PHASE: CONNECT -- Deploying 800 websocket clients (CPU_WORK=1)
+[23:49:21]   Note: Clients linearly stagger connecting over 90s, then stop pinging at 120s.
+job.batch/websocket-loadgen created
+[23:49:21]   [CONNECT +0s] replicas=2 cpu=1% connections=0
+[23:49:36]   [CONNECT +15s] replicas=2 cpu=1% connections=53
+[23:49:52]   [CONNECT +30s] replicas=2 cpu=7% connections=187
+[23:50:07]   [CONNECT +45s] replicas=2 cpu=43% connections=315
+[23:50:22]   [CONNECT +60s] replicas=2 cpu=83% connections=448
+[23:50:37]   [CONNECT +75s] replicas=3 cpu=123% connections=616
+[23:50:52]   [CONNECT +90s] replicas=5 cpu=159% connections=738
+[23:51:07]   [CONNECT +105s] replicas=5 cpu=85% connections=800
+[23:51:22] PHASE: IDLE -- Clients automatically stop sending pings. CPUs will drop.
+[23:51:22] Waiting for HPA to observe low CPU and scale down to 2 replicas (should take ~60-90s)...
+[23:51:22]   [IDLE +0s] replicas=8 cpu=89% connections=800
+[23:51:37]   [IDLE +15s] replicas=8 cpu=56% connections=800
+[23:51:52]   [IDLE +30s] replicas=8 cpu=32% connections=800
+[23:52:07]   [IDLE +45s] replicas=8 cpu=2% connections=800
+[23:52:22]   [IDLE +60s] replicas=8 cpu=2% connections=800
+[23:52:38]   [IDLE +75s] replicas=8 cpu=2% connections=800
+[23:52:53]   [IDLE +90s] replicas=5 cpu=2% connections=800
+[23:53:08]   [IDLE +105s] replicas=4 cpu=3% connections=800
+[23:53:23]   [IDLE +120s] replicas=4 cpu=3% connections=718
+[23:53:38]   [IDLE +135s] replicas=4 cpu=2% connections=718
+[23:53:53]   [IDLE +150s] replicas=2! HPA successfully scaled down, dropping the 800 live connections!
+[23:54:08]   [STORM_CAPTURE +165s] replicas=2 connections=718
+[23:54:23]   [STORM_CAPTURE +180s] replicas=2 connections=686
+[23:54:38]   [STORM_CAPTURE +195s] replicas=2 connections=652
+
+============================================================
+  12. Stopping Collectors
+============================================================
+[23:54:38] All collectors stopped.
+
+============================================================
+  13. Running Analysis Pipeline
+============================================================
+[23:54:38] Parsing raw logs...
+  MULTI_RUN detected: preserving existing PROCESSED_DIR
+Parsing experiment-b3 logs...
+  Parsed cpu.csv: 66 rows
+  Parsed replicas.csv: 66 rows
+  Parsed connections.csv: 67 rows
+  Wrote summary.csv → /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/summary.csv
+  Summary: pod_seconds=1451.0  scale_up=56.0s  peak_replicas=8.0
+Experiment-B3 log parsing complete.
+[23:54:38] Parsing complete.
+[23:54:38] Generating plots...
+  Generated: cpu.png
+  Generated: connections.png
+  Generated: replicas.png
+  Generated: combined.png
+
+  --- Summary ---
+  Peak connections:  800
+  Peak CPU:          451m
+  Peak replicas:     8
+  Min replicas:      2
+  Scaling events:    6
+  (Expected: scale UP on CONNECT, then scale DOWN on IDLE killing connections)
+
+  connections_before_scale_down: 800
+  connections_after_scale_down:  718
+  connections lost due to scale-down: 82
+
+Experiment-B3 plots generated successfully.
+[23:54:54] Plots generated.
+
+============================================================
+  14. Archiving Results
+============================================================
+[23:54:54] Archived -> experiment-b3-hpa-idle-connections_final_20260611_235454.tgz
+
+============================================================
+  15. Deleting Kind Cluster
+============================================================
+Deleting cluster "stateful-exp" ...
+Deleted nodes: ["stateful-exp-worker" "stateful-exp-control-plane"]
+[23:54:55] Cluster deleted.
+
+============================================================
+  Experiment-B3 Complete
+============================================================
+
+  Raw results:       /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+  Processed results: /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections
+  Plots:             /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/plots/
+
+  What to look for in the plots:
+    - cpu.png:          CPU spikes during CONNECT, drops to 0% at 120s
+    - replicas.png:     Replicas scale UP on CPU, then DOWN quickly (60s window)
+    - connections.png:  Connections hold perfectly flat at 800 natively... until HPA terminates the pods.
+                        The graph will step down permanently, proving HPA kills live connections.
+    - combined.png:     Explicit proof that connection drop is tied 100% to pod scale-down.
+
+  Compare with Experiment-C:
+    Custom controller held replicas proportional to connections throughout.
+
+
+[CLEANUP] Stopping background processes...
+[CLEANUP] Done.
+  Saved raw   → /home/abhas/node/STAR/future-work/results/raw/websocket/multi/experiment-b3-hpa-idle-connections/run_2
+  Saved proc  → /home/abhas/node/STAR/future-work/results/processed/websocket/multi/experiment-b3-hpa-idle-connections/run_2
+  Run 2 complete.
+
+-------- Run 3 / 5 --------
+
+============================================================
+  1. Archiving Previous Results
+============================================================
+[*] MULTI_RUN=1 -> preserving /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+
+============================================================
+  2. Creating Fresh Kind Cluster
+============================================================
+[23:54:55] Old cluster deleted (if existed).
+Creating cluster "stateful-exp" ...
+ • Ensuring node image (kindest/node:v1.31.6) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.31.6) 🖼
+ • Preparing nodes 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-stateful-exp"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-stateful-exp
+
+Have a nice day! 👋
+[23:55:14] Kind cluster 'stateful-exp' created.
+
+============================================================
+  3. Installing Metrics Server
+============================================================
+serviceaccount/metrics-server created
+clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader created
+clusterrole.rbac.authorization.k8s.io/system:metrics-server created
+rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader created
+clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator created
+clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
+service/metrics-server created
+deployment.apps/metrics-server created
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io created
+deployment.apps/metrics-server patched
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+deployment "metrics-server" successfully rolled out
+[23:55:57] Metrics server ready.
+[23:55:57] Waiting for metrics API...
+[23:56:02] Metrics API ready (5s).
+
+============================================================
+  4. Deploying Prometheus
+============================================================
+namespace/monitoring created
+serviceaccount/prometheus created
+clusterrole.rbac.authorization.k8s.io/prometheus created
+clusterrolebinding.rbac.authorization.k8s.io/prometheus created
+configmap/prometheus-config created
+deployment.apps/prometheus created
+service/prometheus created
+Waiting for deployment "prometheus" rollout to finish: 0 of 1 updated replicas are available...
+deployment "prometheus" successfully rolled out
+[23:56:36] Prometheus ready.
+
+============================================================
+  5. Building Docker Images
+============================================================
+[23:56:36] Building instrumented websocket-server (CPU_WORK=1)...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 200B done
+#1 DONE 0.0s
+
+#2 [auth] library/python:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.11-slim
+#3 DONE 1.3s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#5 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 31B done
+#6 DONE 0.0s
+
+#7 [2/4] WORKDIR /app
+#7 CACHED
+
+#8 [3/4] COPY server.py .
+#8 CACHED
+
+#9 [4/4] RUN pip install websockets aiohttp prometheus_client
+#9 CACHED
+
+#10 exporting to image
+#10 exporting layers done
+#10 exporting manifest sha256:a7b2d10e97d7b680fb34bc9bb14694bf2c786f085aa2dc26043661d531ee9905 done
+#10 exporting config sha256:1c40956e18bd23d87f95b5955f137f90265ce679282cb4712ef60c99edc7d33b done
+#10 exporting attestation manifest sha256:69d3b95be57bd33b9d94620d7e39d3bb17e1e89df7d70c2743d8c698caa2ea0a 0.0s done
+#10 exporting manifest list sha256:5e6977afbfd8c3ad9507db86e803fe4fa84dc554bda466597d52107adb5d6567 done
+#10 naming to docker.io/library/websocket-server-instrumented:latest done
+#10 unpacking to docker.io/library/websocket-server-instrumented:latest done
+#10 DONE 0.1s
+Image: "websocket-server-instrumented:latest" with ID "sha256:5e6977afbfd8c3ad9507db86e803fe4fa84dc554bda466597d52107adb5d6567" not yet present on node "stateful-exp-worker", loading...
+Image: "websocket-server-instrumented:latest" with ID "sha256:5e6977afbfd8c3ad9507db86e803fe4fa84dc554bda466597d52107adb5d6567" not yet present on node "stateful-exp-control-plane", loading...
+[23:56:40] websocket-server-instrumented loaded.
+[23:56:40] Building active load generator...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 153B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#4 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 31B done
+#5 DONE 0.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] COPY client.py .
+#7 CACHED
+
+#8 [4/4] RUN pip install websockets numpy
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 exporting manifest sha256:91cfd3317719b5b19e6284fd3d9b3d49da45f045fd4c730032004a0691686ecb done
+#9 exporting config sha256:b3bcceff6fed730c57676a791815fbb083c6ac6deb873d9654fcb132a38e2039 done
+#9 exporting attestation manifest sha256:9f6c3f831e78c8ba71084ca2da656e3ff2b68dc7f9ce1dd9e1839cf498370ef6 0.0s done
+#9 exporting manifest list sha256:f39604fda8727d40e8a3300f5e59e0dceb5878602d8893b8324a7763d123b524 done
+#9 naming to docker.io/library/websocket-loadgen:latest done
+#9 unpacking to docker.io/library/websocket-loadgen:latest done
+#9 DONE 0.1s
+Image: "websocket-loadgen:latest" with ID "sha256:f39604fda8727d40e8a3300f5e59e0dceb5878602d8893b8324a7763d123b524" not yet present on node "stateful-exp-worker", loading...
+Image: "websocket-loadgen:latest" with ID "sha256:f39604fda8727d40e8a3300f5e59e0dceb5878602d8893b8324a7763d123b524" not yet present on node "stateful-exp-control-plane", loading...
+[23:56:44] websocket-loadgen loaded.
+
+============================================================
+  6. Deploying WebSocket Workload (CPU_WORK=1)
+============================================================
+deployment.apps/websocket-server created
+service/websocket-service created
+pod/websocket-server-8585946c55-6v84t condition met
+pod/websocket-server-8585946c55-hn4n9 condition met
+[23:56:45] WebSocket server pods ready (CPU_WORK=1).
+
+============================================================
+  7. Applying CPU-Based HPA
+============================================================
+horizontalpodautoscaler.autoscaling/websocket-hpa created
+[23:56:45] HPA applied.
+[23:56:45]   targetCPU:              60%
+[23:56:45]   scaleUp stabilization:  0s  (fast scale-up)
+[23:56:45]   scaleDown stabilization: 60s (aggressive scale-down)
+
+============================================================
+  8. Waiting for HPA Metrics
+============================================================
+[23:56:45] Waiting for HPA to report valid CPU metrics...
+[23:56:45] Waiting... (0s)
+[23:56:55] Waiting... (10s)
+[23:57:05] Waiting... (20s)
+[23:57:15] Metrics API ready for HPA.
+
+============================================================
+  9. Prometheus Port-Forward
+============================================================
+[23:57:17] Prometheus API ready.
+[23:57:17] Prometheus scraping websocket pods.
+
+============================================================
+  10. Starting Metric Collectors
+============================================================
+[23:57:17] HPA collector started (PID 70398).
+[23:57:17] CPU collector started (PID 70401).
+[23:57:17] Pod lifecycle collector started (PID 70406).
+[23:57:17] Prometheus collector started (PID 70417).
+
+============================================================
+  11. Running Load Phases
+============================================================
+[23:57:32] PHASE: CONNECT -- Deploying 800 websocket clients (CPU_WORK=1)
+[23:57:32]   Note: Clients linearly stagger connecting over 90s, then stop pinging at 120s.
+job.batch/websocket-loadgen created
+[23:57:32]   [CONNECT +0s] replicas=2 cpu=1% connections=0
+[23:57:47]   [CONNECT +15s] replicas=2 cpu=1% connections=110
+[23:58:03]   [CONNECT +30s] replicas=2 cpu=11% connections=232
+[23:58:18]   [CONNECT +45s] replicas=2 cpu=40% connections=361
+[23:58:33]   [CONNECT +60s] replicas=2 cpu=78% connections=496
+[23:58:48]   [CONNECT +75s] replicas=3 cpu=117% connections=628
+[23:59:03]   [CONNECT +90s] replicas=4 cpu=154% connections=768
+[23:59:18]   [CONNECT +105s] replicas=6 cpu=101% connections=800
+[23:59:33] PHASE: IDLE -- Clients automatically stop sending pings. CPUs will drop.
+[23:59:33] Waiting for HPA to observe low CPU and scale down to 2 replicas (should take ~60-90s)...
+[23:59:33]   [IDLE +0s] replicas=7 cpu=106% connections=800
+[23:59:48]   [IDLE +15s] replicas=7 cpu=69% connections=800
+[00:00:03]   [IDLE +30s] replicas=7 cpu=38% connections=800
+[00:00:18]   [IDLE +45s] replicas=7 cpu=2% connections=800
+[00:00:33]   [IDLE +60s] replicas=7 cpu=2% connections=800
+[00:00:48]   [IDLE +75s] replicas=7 cpu=2% connections=800
+[00:01:04]   [IDLE +90s] replicas=5 cpu=2% connections=800
+[00:01:19]   [IDLE +105s] replicas=3 cpu=3% connections=800
+[00:01:34]   [IDLE +120s] replicas=3 cpu=3% connections=761
+[00:01:49]   [IDLE +135s] replicas=3 cpu=3% connections=668
+[00:02:04]   [IDLE +150s] replicas=2! HPA successfully scaled down, dropping the 800 live connections!
+[00:02:19]   [STORM_CAPTURE +165s] replicas=2 connections=658
+[00:02:34]   [STORM_CAPTURE +180s] replicas=2 connections=658
+[00:02:49]   [STORM_CAPTURE +195s] replicas=2 connections=658
+
+============================================================
+  12. Stopping Collectors
+============================================================
+[00:02:49] All collectors stopped.
+
+============================================================
+  13. Running Analysis Pipeline
+============================================================
+[00:02:49] Parsing raw logs...
+  MULTI_RUN detected: preserving existing PROCESSED_DIR
+Parsing experiment-b3 logs...
+  Parsed cpu.csv: 66 rows
+  Parsed replicas.csv: 66 rows
+  Parsed connections.csv: 67 rows
+  Wrote summary.csv → /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/summary.csv
+  Summary: pod_seconds=1316.0  scale_up=61.0s  peak_replicas=7.0
+Experiment-B3 log parsing complete.
+[00:02:49] Parsing complete.
+[00:02:49] Generating plots...
+  Generated: cpu.png
+  Generated: connections.png
+  Generated: replicas.png
+  Generated: combined.png
+
+  --- Summary ---
+  Peak connections:  800
+  Peak CPU:          470m
+  Peak replicas:     7
+  Min replicas:      2
+  Scaling events:    7
+  (Expected: scale UP on CONNECT, then scale DOWN on IDLE killing connections)
+
+  connections_before_scale_down: 800
+  connections_after_scale_down:  658
+  connections lost due to scale-down: 142
+
+Experiment-B3 plots generated successfully.
+[00:02:50] Plots generated.
+
+============================================================
+  14. Archiving Results
+============================================================
+[00:02:50] Archived -> experiment-b3-hpa-idle-connections_final_20260612_000250.tgz
+
+============================================================
+  15. Deleting Kind Cluster
+============================================================
+Deleting cluster "stateful-exp" ...
+Deleted nodes: ["stateful-exp-worker" "stateful-exp-control-plane"]
+[00:02:51] Cluster deleted.
+
+============================================================
+  Experiment-B3 Complete
+============================================================
+
+  Raw results:       /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+  Processed results: /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections
+  Plots:             /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/plots/
+
+  What to look for in the plots:
+    - cpu.png:          CPU spikes during CONNECT, drops to 0% at 120s
+    - replicas.png:     Replicas scale UP on CPU, then DOWN quickly (60s window)
+    - connections.png:  Connections hold perfectly flat at 800 natively... until HPA terminates the pods.
+                        The graph will step down permanently, proving HPA kills live connections.
+    - combined.png:     Explicit proof that connection drop is tied 100% to pod scale-down.
+
+  Compare with Experiment-C:
+    Custom controller held replicas proportional to connections throughout.
+
+
+[CLEANUP] Stopping background processes...
+[CLEANUP] Done.
+  Saved raw   → /home/abhas/node/STAR/future-work/results/raw/websocket/multi/experiment-b3-hpa-idle-connections/run_3
+  Saved proc  → /home/abhas/node/STAR/future-work/results/processed/websocket/multi/experiment-b3-hpa-idle-connections/run_3
+  Run 3 complete.
+
+-------- Run 4 / 5 --------
+
+============================================================
+  1. Archiving Previous Results
+============================================================
+[*] MULTI_RUN=1 -> preserving /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+
+============================================================
+  2. Creating Fresh Kind Cluster
+============================================================
+[00:02:51] Old cluster deleted (if existed).
+Creating cluster "stateful-exp" ...
+ • Ensuring node image (kindest/node:v1.31.6) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.31.6) 🖼
+ • Preparing nodes 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-stateful-exp"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-stateful-exp
+
+Thanks for using kind! 😊
+[00:03:11] Kind cluster 'stateful-exp' created.
+
+============================================================
+  3. Installing Metrics Server
+============================================================
+serviceaccount/metrics-server created
+clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader created
+clusterrole.rbac.authorization.k8s.io/system:metrics-server created
+rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader created
+clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator created
+clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
+service/metrics-server created
+deployment.apps/metrics-server created
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io created
+deployment.apps/metrics-server patched
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+deployment "metrics-server" successfully rolled out
+[00:03:55] Metrics server ready.
+[00:03:55] Waiting for metrics API...
+[00:04:00] Metrics API ready (5s).
+
+============================================================
+  4. Deploying Prometheus
+============================================================
+namespace/monitoring created
+serviceaccount/prometheus created
+clusterrole.rbac.authorization.k8s.io/prometheus created
+clusterrolebinding.rbac.authorization.k8s.io/prometheus created
+configmap/prometheus-config created
+deployment.apps/prometheus created
+service/prometheus created
+Waiting for deployment "prometheus" rollout to finish: 0 of 1 updated replicas are available...
+deployment "prometheus" successfully rolled out
+[00:04:34] Prometheus ready.
+
+============================================================
+  5. Building Docker Images
+============================================================
+[00:04:34] Building instrumented websocket-server (CPU_WORK=1)...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 200B done
+#1 DONE 0.0s
+
+#2 [auth] library/python:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.11-slim
+#3 DONE 1.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#5 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 31B done
+#6 DONE 0.0s
+
+#7 [2/4] WORKDIR /app
+#7 CACHED
+
+#8 [3/4] COPY server.py .
+#8 CACHED
+
+#9 [4/4] RUN pip install websockets aiohttp prometheus_client
+#9 CACHED
+
+#10 exporting to image
+#10 exporting layers done
+#10 exporting manifest sha256:a7b2d10e97d7b680fb34bc9bb14694bf2c786f085aa2dc26043661d531ee9905 done
+#10 exporting config sha256:1c40956e18bd23d87f95b5955f137f90265ce679282cb4712ef60c99edc7d33b done
+#10 exporting attestation manifest sha256:2394584b65edd4d76338408966ea107fe04e39fac0177a79378ddf4a789268c9 0.0s done
+#10 exporting manifest list sha256:a493b97a334b6d4e9b00b2f8a422b8ae97dded391165d68da4a14d1ca0f785ec
+#10 exporting manifest list sha256:a493b97a334b6d4e9b00b2f8a422b8ae97dded391165d68da4a14d1ca0f785ec 0.0s done
+#10 naming to docker.io/library/websocket-server-instrumented:latest done
+#10 unpacking to docker.io/library/websocket-server-instrumented:latest done
+#10 DONE 0.1s
+Image: "websocket-server-instrumented:latest" with ID "sha256:a493b97a334b6d4e9b00b2f8a422b8ae97dded391165d68da4a14d1ca0f785ec" not yet present on node "stateful-exp-worker", loading...
+Image: "websocket-server-instrumented:latest" with ID "sha256:a493b97a334b6d4e9b00b2f8a422b8ae97dded391165d68da4a14d1ca0f785ec" not yet present on node "stateful-exp-control-plane", loading...
+[00:04:38] websocket-server-instrumented loaded.
+[00:04:38] Building active load generator...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 DONE 0.0s
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 153B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#4 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 31B done
+#5 DONE 0.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] COPY client.py .
+#7 CACHED
+
+#8 [4/4] RUN pip install websockets numpy
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 exporting manifest sha256:91cfd3317719b5b19e6284fd3d9b3d49da45f045fd4c730032004a0691686ecb done
+#9 exporting config sha256:b3bcceff6fed730c57676a791815fbb083c6ac6deb873d9654fcb132a38e2039 done
+#9 exporting attestation manifest sha256:48017bbd77b4f4f42fa23b98aa6ebe62d5d9846235b90c2446e9477fff5fe67d 0.0s done
+#9 exporting manifest list sha256:0bc4c57c08e32b79dd05160eee2046abb277417c40ca382d686b6dc977206080 0.0s done
+#9 naming to docker.io/library/websocket-loadgen:latest done
+#9 unpacking to docker.io/library/websocket-loadgen:latest done
+#9 DONE 0.1s
+Image: "websocket-loadgen:latest" with ID "sha256:0bc4c57c08e32b79dd05160eee2046abb277417c40ca382d686b6dc977206080" not yet present on node "stateful-exp-worker", loading...
+Image: "websocket-loadgen:latest" with ID "sha256:0bc4c57c08e32b79dd05160eee2046abb277417c40ca382d686b6dc977206080" not yet present on node "stateful-exp-control-plane", loading...
+[00:04:41] websocket-loadgen loaded.
+
+============================================================
+  6. Deploying WebSocket Workload (CPU_WORK=1)
+============================================================
+deployment.apps/websocket-server created
+service/websocket-service created
+pod/websocket-server-8585946c55-26zgt condition met
+pod/websocket-server-8585946c55-bw888 condition met
+[00:04:43] WebSocket server pods ready (CPU_WORK=1).
+
+============================================================
+  7. Applying CPU-Based HPA
+============================================================
+horizontalpodautoscaler.autoscaling/websocket-hpa created
+[00:04:43] HPA applied.
+[00:04:43]   targetCPU:              60%
+[00:04:43]   scaleUp stabilization:  0s  (fast scale-up)
+[00:04:43]   scaleDown stabilization: 60s (aggressive scale-down)
+
+============================================================
+  8. Waiting for HPA Metrics
+============================================================
+[00:04:43] Waiting for HPA to report valid CPU metrics...
+[00:04:43] Waiting... (0s)
+[00:04:53] Waiting... (10s)
+[00:05:03] Waiting... (20s)
+[00:05:13] Metrics API ready for HPA.
+
+============================================================
+  9. Prometheus Port-Forward
+============================================================
+[00:05:15] Prometheus API ready.
+[00:05:15] Prometheus scraping websocket pods.
+
+============================================================
+  10. Starting Metric Collectors
+============================================================
+[00:05:15] HPA collector started (PID 82505).
+[00:05:15] CPU collector started (PID 82508).
+[00:05:15] Pod lifecycle collector started (PID 82513).
+[00:05:15] Prometheus collector started (PID 82524).
+
+============================================================
+  11. Running Load Phases
+============================================================
+[00:05:30] PHASE: CONNECT -- Deploying 800 websocket clients (CPU_WORK=1)
+[00:05:30]   Note: Clients linearly stagger connecting over 90s, then stop pinging at 120s.
+job.batch/websocket-loadgen created
+[00:05:30]   [CONNECT +0s] replicas=2 cpu=1% connections=0
+[00:05:45]   [CONNECT +15s] replicas=2 cpu=1% connections=47
+[00:06:00]   [CONNECT +30s] replicas=2 cpu=20% connections=180
+[00:06:15]   [CONNECT +45s] replicas=2 cpu=60% connections=313
+[00:06:30]   [CONNECT +60s] replicas=2 cpu=101% connections=447
+[00:06:46]   [CONNECT +75s] replicas=4 cpu=140% connections=583
+[00:07:01]   [CONNECT +90s] replicas=5 cpu=90% connections=731
+[00:07:16]   [CONNECT +105s] replicas=6 cpu=101% connections=800
+[00:07:31] PHASE: IDLE -- Clients automatically stop sending pings. CPUs will drop.
+[00:07:31] Waiting for HPA to observe low CPU and scale down to 2 replicas (should take ~60-90s)...
+[00:07:31]   [IDLE +0s] replicas=7 cpu=90% connections=800
+[00:07:46]   [IDLE +15s] replicas=7 cpu=65% connections=800
+[00:08:01]   [IDLE +30s] replicas=7 cpu=29% connections=800
+[00:08:16]   [IDLE +45s] replicas=7 cpu=8% connections=800
+[00:08:31]   [IDLE +60s] replicas=7 cpu=2% connections=800
+[00:08:46]   [IDLE +75s] replicas=7 cpu=2% connections=800
+[00:09:01]   [IDLE +90s] replicas=4 cpu=3% connections=800
+[00:09:16]   [IDLE +105s] replicas=3 cpu=3% connections=800
+[00:09:31]   [IDLE +120s] replicas=3 cpu=3% connections=771
+[00:09:47]   [IDLE +135s] replicas=3 cpu=3% connections=708
+[00:10:02]   [IDLE +150s] replicas=2! HPA successfully scaled down, dropping the 800 live connections!
+[00:10:17]   [STORM_CAPTURE +165s] replicas=2 connections=708
+[00:10:32]   [STORM_CAPTURE +180s] replicas=2 connections=708
+[00:10:47]   [STORM_CAPTURE +195s] replicas=2 connections=644
+
+============================================================
+  12. Stopping Collectors
+============================================================
+[00:10:47] All collectors stopped.
+
+============================================================
+  13. Running Analysis Pipeline
+============================================================
+[00:10:47] Parsing raw logs...
+  MULTI_RUN detected: preserving existing PROCESSED_DIR
+Parsing experiment-b3 logs...
+  Parsed cpu.csv: 66 rows
+  Parsed replicas.csv: 66 rows
+  Parsed connections.csv: 67 rows
+  Wrote summary.csv → /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/summary.csv
+  Summary: pod_seconds=1331.0  scale_up=51.0s  peak_replicas=7.0
+Experiment-B3 log parsing complete.
+[00:10:47] Parsing complete.
+[00:10:47] Generating plots...
+  Generated: cpu.png
+  Generated: connections.png
+  Generated: replicas.png
+  Generated: combined.png
+
+  --- Summary ---
+  Peak connections:  800
+  Peak CPU:          477m
+  Peak replicas:     7
+  Min replicas:      2
+  Scaling events:    7
+  (Expected: scale UP on CONNECT, then scale DOWN on IDLE killing connections)
+
+  connections_before_scale_down: 800
+  connections_after_scale_down:  708
+  connections lost due to scale-down: 92
+
+Experiment-B3 plots generated successfully.
+[00:10:48] Plots generated.
+
+============================================================
+  14. Archiving Results
+============================================================
+[00:10:48] Archived -> experiment-b3-hpa-idle-connections_final_20260612_001048.tgz
+
+============================================================
+  15. Deleting Kind Cluster
+============================================================
+Deleting cluster "stateful-exp" ...
+Deleted nodes: ["stateful-exp-worker" "stateful-exp-control-plane"]
+[00:10:49] Cluster deleted.
+
+============================================================
+  Experiment-B3 Complete
+============================================================
+
+  Raw results:       /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+  Processed results: /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections
+  Plots:             /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/plots/
+
+  What to look for in the plots:
+    - cpu.png:          CPU spikes during CONNECT, drops to 0% at 120s
+    - replicas.png:     Replicas scale UP on CPU, then DOWN quickly (60s window)
+    - connections.png:  Connections hold perfectly flat at 800 natively... until HPA terminates the pods.
+                        The graph will step down permanently, proving HPA kills live connections.
+    - combined.png:     Explicit proof that connection drop is tied 100% to pod scale-down.
+
+  Compare with Experiment-C:
+    Custom controller held replicas proportional to connections throughout.
+
+
+[CLEANUP] Stopping background processes...
+[CLEANUP] Done.
+  Saved raw   → /home/abhas/node/STAR/future-work/results/raw/websocket/multi/experiment-b3-hpa-idle-connections/run_4
+  Saved proc  → /home/abhas/node/STAR/future-work/results/processed/websocket/multi/experiment-b3-hpa-idle-connections/run_4
+  Run 4 complete.
+
+-------- Run 5 / 5 --------
+
+============================================================
+  1. Archiving Previous Results
+============================================================
+[*] MULTI_RUN=1 -> preserving /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+
+============================================================
+  2. Creating Fresh Kind Cluster
+============================================================
+[00:10:49] Old cluster deleted (if existed).
+Creating cluster "stateful-exp" ...
+ • Ensuring node image (kindest/node:v1.31.6) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.31.6) 🖼
+ • Preparing nodes 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
+Set kubectl context to "kind-stateful-exp"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-stateful-exp
+
+Have a nice day! 👋
+[00:11:13] Kind cluster 'stateful-exp' created.
+
+============================================================
+  3. Installing Metrics Server
+============================================================
+serviceaccount/metrics-server created
+clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader created
+clusterrole.rbac.authorization.k8s.io/system:metrics-server created
+rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader created
+clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator created
+clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
+service/metrics-server created
+deployment.apps/metrics-server created
+apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io created
+deployment.apps/metrics-server patched
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "metrics-server" rollout to finish: 1 old replicas are pending termination...
+deployment "metrics-server" successfully rolled out
+[00:11:56] Metrics server ready.
+[00:11:56] Waiting for metrics API...
+[00:12:01] Metrics API ready (5s).
+
+============================================================
+  4. Deploying Prometheus
+============================================================
+namespace/monitoring created
+serviceaccount/prometheus created
+clusterrole.rbac.authorization.k8s.io/prometheus created
+clusterrolebinding.rbac.authorization.k8s.io/prometheus created
+configmap/prometheus-config created
+deployment.apps/prometheus created
+service/prometheus created
+Waiting for deployment "prometheus" rollout to finish: 0 of 1 updated replicas are available...
+deployment "prometheus" successfully rolled out
+[00:12:36] Prometheus ready.
+
+============================================================
+  5. Building Docker Images
+============================================================
+[00:12:36] Building instrumented websocket-server (CPU_WORK=1)...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 200B done
+#1 DONE 0.0s
+
+#2 [auth] library/python:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.11-slim
+#3 DONE 1.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#5 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 31B done
+#6 DONE 0.0s
+
+#7 [2/4] WORKDIR /app
+#7 CACHED
+
+#8 [3/4] COPY server.py .
+#8 CACHED
+
+#9 [4/4] RUN pip install websockets aiohttp prometheus_client
+#9 CACHED
+
+#10 exporting to image
+#10 exporting layers done
+#10 exporting manifest sha256:a7b2d10e97d7b680fb34bc9bb14694bf2c786f085aa2dc26043661d531ee9905 done
+#10 exporting config sha256:1c40956e18bd23d87f95b5955f137f90265ce679282cb4712ef60c99edc7d33b done
+#10 exporting attestation manifest sha256:c31d9adbc5be20a3008840ad4bd6a8f73b96a95bd49814dfcdd993032fb085b7 0.0s done
+#10 exporting manifest list sha256:8818cee923f0d27d996d45357c660e08055a62cc1badb3e95c2413c98769aa27 done
+#10 naming to docker.io/library/websocket-server-instrumented:latest done
+#10 unpacking to docker.io/library/websocket-server-instrumented:latest done
+#10 DONE 0.1s
+Image: "websocket-server-instrumented:latest" with ID "sha256:8818cee923f0d27d996d45357c660e08055a62cc1badb3e95c2413c98769aa27" not yet present on node "stateful-exp-control-plane", loading...
+Image: "websocket-server-instrumented:latest" with ID "sha256:8818cee923f0d27d996d45357c660e08055a62cc1badb3e95c2413c98769aa27" not yet present on node "stateful-exp-worker", loading...
+[00:12:40] websocket-server-instrumented loaded.
+[00:12:40] Building active load generator...
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 153B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457
+#4 resolve docker.io/library/python:3.11-slim@sha256:f9fa7f851e38bfb19c9de3afbc4b86ae7176ea7aaf94535c31df5458d5849457 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 31B done
+#5 DONE 0.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] COPY client.py .
+#7 CACHED
+
+#8 [4/4] RUN pip install websockets numpy
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 exporting manifest sha256:91cfd3317719b5b19e6284fd3d9b3d49da45f045fd4c730032004a0691686ecb done
+#9 exporting config sha256:b3bcceff6fed730c57676a791815fbb083c6ac6deb873d9654fcb132a38e2039 done
+#9 exporting attestation manifest sha256:b591a842afb4a7e11d23c9fabb34b07a6754c0c32fd0652941d2a8e6774490c6 0.0s done
+#9 exporting manifest list sha256:b20858d87ef930d95721e32b4336415ebbe642e537a8b4b24ca3f7f3e8c0a373 done
+#9 naming to docker.io/library/websocket-loadgen:latest done
+#9 unpacking to docker.io/library/websocket-loadgen:latest done
+#9 DONE 0.1s
+Image: "websocket-loadgen:latest" with ID "sha256:b20858d87ef930d95721e32b4336415ebbe642e537a8b4b24ca3f7f3e8c0a373" not yet present on node "stateful-exp-control-plane", loading...
+Image: "websocket-loadgen:latest" with ID "sha256:b20858d87ef930d95721e32b4336415ebbe642e537a8b4b24ca3f7f3e8c0a373" not yet present on node "stateful-exp-worker", loading...
+[00:12:43] websocket-loadgen loaded.
+
+============================================================
+  6. Deploying WebSocket Workload (CPU_WORK=1)
+============================================================
+deployment.apps/websocket-server created
+service/websocket-service created
+pod/websocket-server-8585946c55-mcfcf condition met
+pod/websocket-server-8585946c55-q2pkd condition met
+[00:12:45] WebSocket server pods ready (CPU_WORK=1).
+
+============================================================
+  7. Applying CPU-Based HPA
+============================================================
+horizontalpodautoscaler.autoscaling/websocket-hpa created
+[00:12:45] HPA applied.
+[00:12:45]   targetCPU:              60%
+[00:12:45]   scaleUp stabilization:  0s  (fast scale-up)
+[00:12:45]   scaleDown stabilization: 60s (aggressive scale-down)
+
+============================================================
+  8. Waiting for HPA Metrics
+============================================================
+[00:12:45] Waiting for HPA to report valid CPU metrics...
+[00:12:45] Waiting... (0s)
+[00:12:55] Waiting... (10s)
+[00:13:05] Metrics API ready for HPA.
+
+============================================================
+  9. Prometheus Port-Forward
+============================================================
+[00:13:07] Prometheus API ready.
+[00:13:07] Prometheus scraping websocket pods.
+
+============================================================
+  10. Starting Metric Collectors
+============================================================
+[00:13:07] HPA collector started (PID 94485).
+[00:13:07] CPU collector started (PID 94488).
+[00:13:07] Pod lifecycle collector started (PID 94493).
+[00:13:07] Prometheus collector started (PID 94505).
+
+============================================================
+  11. Running Load Phases
+============================================================
+[00:13:22] PHASE: CONNECT -- Deploying 800 websocket clients (CPU_WORK=1)
+[00:13:22]   Note: Clients linearly stagger connecting over 90s, then stop pinging at 120s.
+job.batch/websocket-loadgen created
+[00:13:22]   [CONNECT +0s] replicas=2 cpu=1% connections=0
+[00:13:37]   [CONNECT +15s] replicas=2 cpu=1% connections=38
+[00:13:52]   [CONNECT +30s] replicas=2 cpu=12% connections=166
+[00:14:07]   [CONNECT +45s] replicas=2 cpu=49% connections=310
+[00:14:22]   [CONNECT +60s] replicas=2 cpu=78% connections=437
+[00:14:38]   [CONNECT +75s] replicas=3 cpu=111% connections=575
+[00:14:53]   [CONNECT +90s] replicas=4 cpu=103% connections=706
+[00:15:08]   [CONNECT +105s] replicas=6 cpu=92% connections=800
+[00:15:23] PHASE: IDLE -- Clients automatically stop sending pings. CPUs will drop.
+[00:15:23] Waiting for HPA to observe low CPU and scale down to 2 replicas (should take ~60-90s)...
+[00:15:23]   [IDLE +0s] replicas=6 cpu=69% connections=800
+[00:15:38]   [IDLE +15s] replicas=7 cpu=72% connections=800
+[00:15:53]   [IDLE +30s] replicas=7 cpu=39% connections=800
+[00:16:08]   [IDLE +45s] replicas=7 cpu=16% connections=800
+[00:16:23]   [IDLE +60s] replicas=7 cpu=2% connections=800
+[00:16:38]   [IDLE +75s] replicas=7 cpu=2% connections=800
+[00:16:53]   [IDLE +90s] replicas=5 cpu=2% connections=800
+[00:17:08]   [IDLE +105s] replicas=3 cpu=4% connections=800
+[00:17:23]   [IDLE +120s] replicas=3 cpu=3% connections=800
+[00:17:39]   [IDLE +135s] replicas=3 cpu=4% connections=741
+[00:17:54]   [IDLE +150s] replicas=2! HPA successfully scaled down, dropping the 800 live connections!
+[00:18:09]   [STORM_CAPTURE +165s] replicas=2 connections=735
+[00:18:24]   [STORM_CAPTURE +180s] replicas=2 connections=735
+[00:18:39]   [STORM_CAPTURE +195s] replicas=2 connections=656
+
+============================================================
+  12. Stopping Collectors
+============================================================
+[00:18:39] All collectors stopped.
+
+============================================================
+  13. Running Analysis Pipeline
+============================================================
+[00:18:39] Parsing raw logs...
+  MULTI_RUN detected: preserving existing PROCESSED_DIR
+Parsing experiment-b3 logs...
+  Parsed cpu.csv: 66 rows
+  Parsed replicas.csv: 66 rows
+  Parsed connections.csv: 67 rows
+  Wrote summary.csv → /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/summary.csv
+  Summary: pod_seconds=1301.0  scale_up=51.0s  peak_replicas=7.0
+Experiment-B3 log parsing complete.
+[00:18:39] Parsing complete.
+[00:18:39] Generating plots...
+  Generated: cpu.png
+  Generated: connections.png
+  Generated: replicas.png
+  Generated: combined.png
+
+  --- Summary ---
+  Peak connections:  800
+  Peak CPU:          436m
+  Peak replicas:     7
+  Min replicas:      2
+  Scaling events:    7
+  (Expected: scale UP on CONNECT, then scale DOWN on IDLE killing connections)
+
+  connections_before_scale_down: 800
+  connections_after_scale_down:  735
+  connections lost due to scale-down: 65
+
+Experiment-B3 plots generated successfully.
+[00:18:40] Plots generated.
+
+============================================================
+  14. Archiving Results
+============================================================
+[00:18:40] Archived -> experiment-b3-hpa-idle-connections_final_20260612_001840.tgz
+
+============================================================
+  15. Deleting Kind Cluster
+============================================================
+Deleting cluster "stateful-exp" ...
+Deleted nodes: ["stateful-exp-control-plane" "stateful-exp-worker"]
+[00:18:41] Cluster deleted.
+
+============================================================
+  Experiment-B3 Complete
+============================================================
+
+  Raw results:       /home/abhas/node/STAR/future-work/results/raw/websocket/experiment-b3-hpa-idle-connections
+  Processed results: /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections
+  Plots:             /home/abhas/node/STAR/future-work/results/processed/websocket/experiment-b3-hpa-idle-connections/plots/
+
+  What to look for in the plots:
+    - cpu.png:          CPU spikes during CONNECT, drops to 0% at 120s
+    - replicas.png:     Replicas scale UP on CPU, then DOWN quickly (60s window)
+    - connections.png:  Connections hold perfectly flat at 800 natively... until HPA terminates the pods.
+                        The graph will step down permanently, proving HPA kills live connections.
+    - combined.png:     Explicit proof that connection drop is tied 100% to pod scale-down.
+
+  Compare with Experiment-C:
+    Custom controller held replicas proportional to connections throughout.
+
+
+[CLEANUP] Stopping background processes...
+[CLEANUP] Done.
+  Saved raw   → /home/abhas/node/STAR/future-work/results/raw/websocket/multi/experiment-b3-hpa-idle-connections/run_5
+  Saved proc  → /home/abhas/node/STAR/future-work/results/processed/websocket/multi/experiment-b3-hpa-idle-connections/run_5
+  Run 5 complete.
+
+==========================================
+All 5 runs complete. Multi-run results saved under:
+  raw:  /home/abhas/node/STAR/future-work/results/raw/websocket/multi/experiment-b3-hpa-idle-connections
+  proc: /home/abhas/node/STAR/future-work/results/processed/websocket/multi/experiment-b3-hpa-idle-connections
+==========================================

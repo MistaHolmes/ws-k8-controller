@@ -1,0 +1,6 @@
+metric,mean,std,min,max,n
+pod_seconds,4850790.6,10843679.393627113,1301.0,24248554.0,5
+scale_up_reaction_s,52.0,7.416198487095663,41.0,61.0,5
+scale_down_reaction_s,28.0,10.519822558706334,17.0,37.0,4
+peak_connections,800.0,0.0,800.0,800.0,5
+peak_replicas,8.8,3.492849839314596,7.0,15.0,5
