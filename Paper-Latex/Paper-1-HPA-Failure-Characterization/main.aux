@@ -1,0 +1,111 @@
+\relax 
+\citation{burns2016borg,verma2015large}
+\citation{k8s_hpa_docs,nguyen2020hpa}
+\citation{casalicchio2019auto,lorido2014auto}
+\citation{websocket_rfc}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{}{}{}}
+\citation{dickel2019evaluation}
+\citation{nguyen2020hpa}
+\citation{casalicchio2019auto}
+\citation{lorido2014auto}
+\citation{prometheus_adapter}
+\citation{qu2018auto}
+\citation{rossi2020horizontal}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Kubernetes HPA Architecture and Behavior}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Custom and Application-Level Metrics for HPA}{2}{}\protected@file@percent }
+\citation{dickel2019evaluation}
+\citation{nguyen2020hpa}
+\citation{nguyen2020hpa}
+\citation{nguyen2020hpa}
+\citation{kind_docs}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Stateful Workloads and Protocol-Aware Autoscaling}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Graceful Connection Draining}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Research Gap}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Background: HPA Control Architecture}{3}{}\protected@file@percent }
+\newlabel{sec:background}{{3}{3}{}{}{}}
+\newlabel{eq:hpa}{{1}{3}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Empirical Evidence of HPA Failure for Stateful WebSocket Workloads}{3}{}\protected@file@percent }
+\newlabel{sec:problem}{{4}{3}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Instrumented server: definition and rationale}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Standard Kubernetes HPA feedback loop architecture, reproduced from Nguyen et al.~\cite  {nguyen2020hpa}. The HPA controller periodically reads aggregated resource metrics from the API server (sourced either from the Metrics Server for KRM or the Prometheus Adapter for PCM) and computes a desired replica count using Equation~\ref {eq:hpa}. This loop assumes the observed metric faithfully represents current workload intensity - an assumption that breaks down for persistent-connection workloads where connections persist independently of CPU utilization.}}{4}{}\protected@file@percent }
+\newlabel{fig:hpa_arch}{{1}{4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Experiment A: HPA Baseline Under Monotonic Correlated Load}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Experiment A: Replica count timeline under monotonic WebSocket load with CPU $\propto $ connections. The clean staircase ascent (2$\rightarrow $5), flat stabilization plateau, and controlled descent to the minimum represent the theoretical ideal for HPA - achievable only under perfect signal-to-demand correlation.}}{5}{}\protected@file@percent }
+\newlabel{fig:exp_a_replicas}{{2}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Experiment B1: HPA Under Cyclic Load - Over-Provisioning and Recovery Asymmetry}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{5}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Experiment B1: HPA saturates at \texttt  {maxReplicas=15} within 99~seconds under cyclic load, representing an 87.5\% over-provision relative to the connection-derived optimum of 8~replicas. Recovery to the minimum requires $\sim $650~seconds, demonstrating severe asymmetry between scale-up and scale-down responsiveness.}}{5}{}\protected@file@percent }
+\newlabel{fig:exp_b1_replicas}{{3}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Experiment B2-Instrumented: Quantifying Reconnection Storm Intensity}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Methodological note: supersession of a non-instrumented pilot}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{6}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Experiment B2-Instrumented: Prometheus-measured reconnection rate (\texttt  {rate(new\_connections\_total[15s])}) over the five-cycle experiment. Each reconnection spike is precisely synchronized with an HPA scale-down event, with peak observed rates of 1,400~connections/second.}}{6}{}\protected@file@percent }
+\newlabel{fig:exp_b2_reconnections}{{4}{6}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Experiment B2-Instrumented: Active connection count during the reconnection storm period. The connection overshoot of 1,215 (51.9\% above the 800-client target) arises as reconnecting clients establish new sessions before the server has fully released the state associated with severed connections.}}{6}{}\protected@file@percent }
+\newlabel{fig:exp_b2_connections}{{5}{6}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Experiment B2-Instrumented: Temporal correlation between HPA replica changes (green) and active connection count (blue). Each downward step in replicas corresponds to a measurable spike in the connection disruption signal, confirming the direct causal relationship.}}{7}{}\protected@file@percent }
+\newlabel{fig:exp_b2_scaling}{{6}{7}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Experiment B3: Permanent Connection Loss Under Non-Reconnecting Clients}{7}{}\protected@file@percent }
+\newlabel{sec:b3}{{4.4}{7}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Pod termination mechanics and the 30-second limbo}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Replication and Statistical Validation}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Experiment B3 (representative Run~4): Active connection count exhibits permanent staircase destruction ($800{\rightarrow }771{\rightarrow }708{\rightarrow }644$). Each step-down is precisely synchronized with an HPA scale-down event. The connections are irrecoverable under the \texttt  {reconnect: false} regimen. Across all five replications, the mean final connection count was $649.4 \pm 8.8$ (Table~\ref {tab:b3_replication}).}}{8}{}\protected@file@percent }
+\newlabel{fig:exp_b3_connections}{{7}{8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Experiment B3, combined signal view - the causal proof of the mismatch between CPU-based scaling signals and stateful workload characteristics. CPU utilization (red) drops to near zero as connections become idle $\rightarrow $ HPA scales down the replica count (green) $\rightarrow $ active connections (blue) are permanently destroyed. The autoscaler is induced by its own metric to destroy the session state it should be protecting.}}{8}{}\protected@file@percent }
+\newlabel{fig:exp_b3_combined}{{8}{8}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Statistical replication of Experiment B3 (5 runs). Peak connections reached 800 in all runs, while final connection counts exhibited consistent degradation due to scale-down events, averaging 18.8\% connection loss per run.}}{8}{}\protected@file@percent }
+\newlabel{tab:b3_replication}{{1}{8}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Active connection count at each observed staircase step during the IDLE phase for all five B3 replications. Each step-down corresponds to a distinct HPA scale-down event that permanently destroyed the connections hosted on the terminated pod.}}{9}{}\protected@file@percent }
+\newlabel{tab:b3_steps}{{2}{9}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Summary of the Evidence Chain}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{9}{}\protected@file@percent }
+\newlabel{sec:discussion}{{5}{9}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}CPU as an Invalid Scaling Signal for Stateful Workloads}{9}{}\protected@file@percent }
+\newlabel{sec:signal_mismatch}{{5.1}{9}{}{}{}}
+\newlabel{eq:hpa_assumption}{{2}{9}{}{}{}}
+\newlabel{eq:websocket_reality}{{3}{9}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}The Stabilization Window Semantic Mismatch}{9}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Summary of the progressive evidence chain demonstrating the failure of CPU-based HPA for stateful WebSocket workloads. Each experiment isolates and quantifies a distinct failure mode.}}{10}{}\protected@file@percent }
+\newlabel{tab:failure_summary}{{3}{10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}The 30-Second Limbo Window as a Design Constraint}{10}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}HPA Stabilization Window Tuning Study}{10}{}\protected@file@percent }
+\newlabel{sec:tuning_study}{{5.4}{10}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Experimental Methodology.}{10}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{10}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces HPA stabilization window tuning study results (3 replications per configuration). Gap relation indicates whether the idle gap duration was below or above the configured stabilization window. Connection loss is reported as mean $\pm $ SD across the three runs.}}{10}{}\protected@file@percent }
+\newlabel{tab:tuning_results}{{4}{10}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Analysis.}{10}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Connection loss percentage relative to the HPA stabilization window and gap duration. Green bars (``below'') show zero loss when the gap is shorter than the window; red bars (``above'') show consistent connection destruction when the gap exceeds the window, regardless of window size.}}{11}{}\protected@file@percent }
+\newlabel{fig:tuning_results}{{9}{11}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Limitations}{11}{}\protected@file@percent }
+\newlabel{sec:limitations}{{6}{11}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{11}{}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{11}{}{}{}}
+\bibstyle{spbasic}
+\bibdata{reference}
+\bibcite{burns2016borg}{{1}{2016}{{Burns et~al.}}{{Burns, Grant, Oppenheimer, Brewer, and Wilkes}}}
+\bibcite{casalicchio2019auto}{{2}{2017}{{Casalicchio and Perciballi}}{{}}}
+\bibcite{dickel2019evaluation}{{3}{2019}{{Dickel et~al.}}{{Dickel, Podolskiy, and Gerndt}}}
+\bibcite{websocket_rfc}{{4}{2011}{{Fette and Melnikov}}{{}}}
+\bibcite{k8s_hpa_docs}{{5}{2024}{{Kubernetes Authors}}{{}}}
+\bibcite{kind_docs}{{6}{2024{}}{{Kubernetes SIGs}}{{}}}
+\bibcite{prometheus_adapter}{{7}{2024{}}{{Kubernetes SIGs}}{{}}}
+\bibcite{lorido2014auto}{{8}{2014}{{Lorido-Botr{\'a}n et~al.}}{{Lorido-Botr{\'a}n, Miguel-Alonso, and Lozano}}}
+\bibcite{nguyen2020hpa}{{9}{2020}{{Nguyen et~al.}}{{Nguyen, Yeom, Kim, Park, and Kim}}}
+\bibcite{qu2018auto}{{10}{2018}{{Qu et~al.}}{{Qu, Calheiros, and Buyya}}}
+\bibcite{rossi2020horizontal}{{11}{2019}{{Rossi et~al.}}{{Rossi, Nardelli, and Cardellini}}}
+\bibcite{verma2015large}{{12}{2015}{{Verma et~al.}}{{Verma, Pedrosa, Korupolu, Oppenheimer, Tune, and Wilkes}}}
+\gdef \@abspage@last{12}
