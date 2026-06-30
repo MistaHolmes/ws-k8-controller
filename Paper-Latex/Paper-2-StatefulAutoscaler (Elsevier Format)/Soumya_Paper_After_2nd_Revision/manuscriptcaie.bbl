@@ -1,0 +1,243 @@
+\begin{thebibliography}{10}
+
+\bibitem{Zheng2017qos}
+Xianrong Zheng, Li~Da~Xu, and Sheng Chai.
+\newblock Qos recommendation in cloud services.
+\newblock {\em IEEE Access}, 5:5171--5177, 2017.
+
+\bibitem{jula2014cloud}
+Amin Jula, Elankovan Sundararajan, and Zalinda Othman.
+\newblock Cloud computing service composition: A systematic literature review.
+\newblock {\em Expert systems with applications}, 41(8):3809--3824, 2014.
+
+\bibitem{alrifai2008scalable}
+Mohammad Alrifai, Thomas Risse, Peter Dolog, and Wolfgang Nejdl.
+\newblock A scalable approach for qos-based web service selection.
+\newblock In {\em International conference on service-oriented computing}, pages 190--199. Springer, 2008.
+
+\bibitem{eisa2020modelling}
+Mona Eisa, Muhammad Younas, Kashinath Basu, and Irfan Awan.
+\newblock Modelling and simulation of qos-aware service selection in cloud computing.
+\newblock {\em Simulation Modelling Practice and Theory}, 103:102108, 2020.
+
+\bibitem{kumar2018multi}
+Rakesh~Ranjan Kumar and Chiranjeev Kumar.
+\newblock A multi criteria decision making method for cloud service selection and ranking.
+\newblock {\em International Journal of Ambient Computing and Intelligence (IJACI)}, 9(3):1--14, 2018.
+
+\bibitem{kumar2018novel}
+Rakesh~Ranjan Kumar, Siba Mishra, and Chiranjeev Kumar.
+\newblock A novel framework for cloud service evaluation and selection using hybrid mcdm methods.
+\newblock {\em Arabian Journal for Science and Engineering}, 43(12):7015--7030, 2018.
+
+\bibitem{liu2016decision}
+Sen Liu, Felix~TS Chan, and Wenxue Ran.
+\newblock Decision making for the selection of cloud vendor: An improved approach under group decision-making with integrated weights and objective/subjective attributes.
+\newblock {\em Expert Systems with Applications}, 55:37--47, 2016.
+
+\bibitem{anwit2020tour}
+Raj Anwit, Abhinav Tomar, and Prasanta~K Jana.
+\newblock Tour planning for multiple mobile sinks in wireless sensor networks: A shark smell optimization approach.
+\newblock {\em Applied Soft Computing}, 97:106802, 2020.
+
+\bibitem{anwit2020scheme}
+Raj Anwit, Abhinav Tomar, and Prasanta~K Jana.
+\newblock Scheme for tour planning of mobile sink in wireless sensor networks.
+\newblock {\em IET Communications}, 14(3):430--439, 2020.
+
+\bibitem{gurrala2026novel}
+Rakesh~Reddy Gurrala and Sampath~Kumar Tallapally.
+\newblock A novel hybrid cheetah dung beetle optimization algorithm to solve cloud-fog scheduling problems.
+\newblock {\em Computers and Electrical Engineering}, 131:110968, 2026.
+
+\bibitem{radhamani2025multi}
+AS~Radhamani, Y~Mary Reeja, et~al.
+\newblock Multi-objective optimization based efficient resource scheduling scheme for infrastructure as a service cloud computing.
+\newblock {\em Swarm and Evolutionary Computation}, 99:102168, 2025.
+
+\bibitem{zhang2025adaptive}
+Yanfen Zhang, Longxin Zhang, Buqing Cao, Jing Liu, Wenyu Zhao, Jianguo Chen, and Keqin Li.
+\newblock Adaptive-oriented mutation snake optimizer for scheduling budget-constrained workflows in heterogeneous cloud environments.
+\newblock {\em Future Generation Computer Systems}, page 108118, 2025.
+
+\bibitem{gupta2025adaptive}
+Indrajeet Gupta, Rakesh~Ranjan Kumar, Debendra Muduli, and Risheeta Panda.
+\newblock Adaptive trust management in dynamic multi-cloud environments using performance specifications and real-time policy matching.
+\newblock In {\em 2025 International Conference on Innovations in Intelligent Systems: Advancements in Computing, Communication, and Cybersecurity (ISAC3)}, pages 1--6. IEEE, 2025.
+
+\bibitem{swathi2025adaptive}
+VNVLS Swathi, G~Senthil~Kumar, and A~Vani~Vathsala.
+\newblock Adaptive multi-level cloud service selection and composition using ahp--topsis.
+\newblock {\em Applied Sciences}, 15(20):11010, 2025.
+
+\bibitem{siyoum2025comparative}
+Yitayal~Belew Siyoum, Fikir~Gashaw Kindie, Mebratu~Assefa Gebeyehu, Sewale~Enyew Chanie, Teshager~Awoke Yeshiwas, and Yilkal~Azene Zelalem.
+\newblock Comparative optimization of wire-cut edm parameter for enhancing surface finish and machining time on stainless steel: a machine learning, genetic algorithms, teaching--learning-based optimization, and multi-objective jaya approach.
+\newblock {\em The International Journal of Advanced Manufacturing Technology}, 137(9):5339--5362, 2025.
+
+\bibitem{chanie2025optimization}
+Sewale~Enyew Chanie, Teshome~Mulatie Bogale, and Yitayal~Belew Siyoum.
+\newblock Optimization of wire-cut edm parameters using artificial neural network and genetic algorithm for enhancing surface finish and material removal rate of charging handlebar machining from mild steel aisi 1020.
+\newblock {\em The International Journal of Advanced Manufacturing Technology}, 136(7):3505--3523, 2025.
+
+\bibitem{adacal2006mobile}
+Mustafa Adacal and Ayse~B Bener.
+\newblock Mobile web services: a new agent-based framework.
+\newblock {\em IEEE Internet Computing}, 10(3):58--65, 2006.
+
+\bibitem{liu2004qos}
+Yutu Liu, Anne~H Ngu, and Liang~Z Zeng.
+\newblock Qos computation and policing in dynamic web service selection.
+\newblock In {\em Proceedings of the 13th international World Wide Web conference on Alternate track papers \& posters}, pages 66--73, 2004.
+
+\bibitem{menasce2002qos}
+Daniel~A Menasce.
+\newblock Qos issues in web services.
+\newblock {\em IEEE internet computing}, 6(6):72--75, 2002.
+
+\bibitem{ran2003model}
+Shuping Ran.
+\newblock A model for web services discovery with qos.
+\newblock {\em ACM Sigecom exchanges}, 4(1):1--10, 2003.
+
+\bibitem{perryea2006community}
+Christopher~A Perryea and Sam Chung.
+\newblock Community-based service discovery.
+\newblock In {\em 2006 IEEE International Conference on Web Services (ICWS'06)}, pages 903--906. IEEE, 2006.
+
+\bibitem{ardagna2005global}
+Danilo Ardagna and Barbara Pernici.
+\newblock Global and local qos constraints guarantee in web service selection.
+\newblock In {\em IEEE International Conference on Web Services (ICWS'05)}. IEEE, 2005.
+
+\bibitem{zeng2004qos}
+Liangzhao Zeng, Boualem Benatallah, Anne~HH Ngu, Marlon Dumas, Jayant Kalagnanam, and Henry Chang.
+\newblock Qos-aware middleware for web services composition.
+\newblock {\em IEEE Transactions on software engineering}, 30(5):311--327, 2004.
+
+\bibitem{youssef2020integrated}
+Ahmed~E Youssef.
+\newblock An integrated mcdm approach for cloud service selection based on topsis and bwm.
+\newblock {\em IEEE Access}, 8:71851--71865, 2020.
+
+\bibitem{kumar2021ccs}
+Rakesh~Ranjan Kumar, Binita Kumari, and Chiranjeev Kumar.
+\newblock Ccs-ossr: a framework based on hybrid mcdm for optimal service selection and ranking of cloud computing services.
+\newblock {\em Cluster Computing}, 24(2):867--883, 2021.
+
+\bibitem{d2008qos}
+Demian~Antony D'Mello, VS~Ananthanarayana, and Santhi Thilagam.
+\newblock A qos broker based architecture for dynamic web service selection.
+\newblock In {\em 2008 Second Asia International Conference on Modelling \& Simulation (AMS)}, pages 101--106. IEEE, 2008.
+
+\bibitem{bagga2019qos}
+Pallavi Bagga, Rahul Hans, and Aarchit Joshi.
+\newblock Qos based web service selection and multi-criteria decision making methods.
+\newblock 2019.
+
+\bibitem{chen2003fuzzy}
+Mei-Fang Chen, Gwo-Hshiung Tzeng, and Cherng~G Ding.
+\newblock Fuzzy mcdm approach to select service provider.
+\newblock In {\em The 12th IEEE International Conference on Fuzzy Systems, 2003. FUZZ'03.}, volume~1, pages 572--577. IEEE, 2003.
+
+\bibitem{xiong2007qos}
+Pengcheng Xiong and Yushun Fan.
+\newblock Qos-aware web service selection by a synthetic weight.
+\newblock In {\em Fuzzy Systems and Knowledge Discovery, Fourth International Conference on}, volume~3, pages 632--637. IEEE Computer Society, 2007.
+
+\bibitem{yu2005service}
+Tao Yu and Kwei-Jay Lin.
+\newblock Service selection algorithms for web services with end-to-end qos constraints.
+\newblock {\em Information systems and e-business management}, 3(2):103--126, 2005.
+
+\bibitem{dahan2021enhanced}
+Fadl Dahan, Khalil El~Hindi, Ahmed Ghoneim, and Hussain Alsalman.
+\newblock An enhanced ant colony optimization based algorithm to solve qos-aware web service composition.
+\newblock {\em IEEE Access}, 9:34098--34111, 2021.
+
+\bibitem{gavvala2019qos}
+Siva~Kumar Gavvala, Chandrashekar Jatoth, GR~Gangadharan, and Rajkumar Buyya.
+\newblock Qos-aware cloud service composition using eagle strategy.
+\newblock {\em Future Generation Computer Systems}, 90:273--290, 2019.
+
+\bibitem{haytamy2020deep}
+Samar Haytamy and Fatma Omara.
+\newblock A deep learning based framework for optimizing cloud consumer qos-based service composition.
+\newblock {\em Computing}, 102(5):1117--1137, 2020.
+
+\bibitem{khanam2018qos}
+Rashda Khanam, Rakesh~Ranjan Kumar, and Chiranjeev Kumar.
+\newblock Qos based cloud service composition with optimal set of services using pso.
+\newblock In {\em 2018 4th international conference on recent advances in information technology (RAIT)}, pages 1--6. IEEE, 2018.
+
+\bibitem{naseri2019new}
+Afshin Naseri and Nima Jafari~Navimipour.
+\newblock A new agent-based method for qos-aware cloud service composition using particle swarm optimization algorithm.
+\newblock {\em Journal of Ambient Intelligence and Humanized Computing}, 10(5):1851--1864, 2019.
+
+\bibitem{jatoth2019optimal}
+Chandrashekar Jatoth, GR~Gangadharan, and Rajkumar Buyya.
+\newblock Optimal fitness aware cloud service composition using an adaptive genotypes evolution based genetic algorithm.
+\newblock {\em Future Generation Computer Systems}, 94:185--198, 2019.
+
+\bibitem{priya2021cloud}
+A~Priya and RS~Bhuvaneswaran.
+\newblock Cloud service recommendation system based on clustering trust measures in multi-cloud environment.
+\newblock {\em Journal of Ambient Intelligence and Humanized Computing}, 12(7):7029--7038, 2021.
+
+\bibitem{asghari2018nature}
+Saied Asghari and Nima~Jafari Navimipour.
+\newblock Nature inspired meta-heuristic algorithms for solving the service composition problem in the cloud environments.
+\newblock {\em International Journal of Communication Systems}, 31(12):e3708, 2018.
+
+\bibitem{zhang2014qos}
+Tongguang Zhang.
+\newblock Qos-aware web service selection based on particle swarm optimization.
+\newblock {\em Journal of Networks}, 9(3):565, 2014.
+
+\bibitem{tomar2022decision}
+Abhinav Tomar, Rakesh~Ranjan Kumar, and Indrajeet Gupta.
+\newblock Decision making for cloud service selection: a novel and hybrid mcdm approach.
+\newblock {\em Cluster Computing}, pages 1--19, 2022.
+
+\bibitem{faruk2016genetic}
+Mohammed~Nisar Faruk, G~Lakshmi Vara~Prasad, and Govind Divya.
+\newblock A genetic pso algorithm with qos-aware cluster cloud service composition.
+\newblock In {\em Advances in signal processing and intelligent recognition systems}, pages 395--405. Springer, 2016.
+
+\bibitem{zhao2012improved}
+Xinchao Zhao, Boqian Song, Panyu Huang, Zichao Wen, Jialei Weng, and Yi~Fan.
+\newblock An improved discrete immune optimization algorithm based on pso for qos-driven web service composition.
+\newblock {\em Applied Soft Computing}, 12(8):2208--2216, 2012.
+
+\bibitem{da2020survey}
+Alexandre~Sawczuk da~Silva, Hui Ma, Yi~Mei, and Mengjie Zhang.
+\newblock A survey of evolutionary computation for web service composition: A technical perspective.
+\newblock {\em IEEE Transactions on Emerging Topics in Computational Intelligence}, 4(4):538--554, 2020.
+
+\bibitem{rao2016jaya}
+R~Rao.
+\newblock Jaya: A simple and new optimization algorithm for solving constrained and unconstrained optimization problems.
+\newblock {\em International Journal of Industrial Engineering Computations}, 7(1):19--34, 2016.
+
+\bibitem{arasteh2024quality}
+Bahman Arasteh, Babak Aghaei, Asgarali Bouyer, and Keyvan Arasteh.
+\newblock A quality-of-service aware composition-method for cloud service using discretized ant lion optimization algorithm.
+\newblock {\em Knowledge and Information Systems}, 66(7):4199--4220, 2024.
+
+\bibitem{du2017deeplog}
+Min Du, Feifei Li, Guineng Zheng, and Vivek Srikumar.
+\newblock Deeplog: Anomaly detection and diagnosis from system logs through deep learning.
+\newblock In {\em Proceedings of the 2017 ACM SIGSAC conference on computer and communications security}, pages 1285--1298, 2017.
+
+\bibitem{gibbons2014nonparametric}
+Jean~Dickinson Gibbons and Subhabrata Chakraborti.
+\newblock {\em Nonparametric statistical inference}.
+\newblock CRC press, 2014.
+
+\bibitem{quade1979using}
+Dana Quade.
+\newblock Using weighted rankings in the analysis of complete blocks with additive block effects.
+\newblock {\em Journal of the American Statistical Association}, 74(367):680--683, 1979.
+
+\end{thebibliography}

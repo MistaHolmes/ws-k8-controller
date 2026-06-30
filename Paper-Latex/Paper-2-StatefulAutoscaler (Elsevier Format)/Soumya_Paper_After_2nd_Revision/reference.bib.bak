@@ -1,0 +1,368 @@
+% Encoding: UTF-8
+
+@InProceedings{youseff2008toward,
+  author       = {Youseff, Lamia and Butrico, Maria and Da Silva, Dilma},
+  title        = {Toward a unified ontology of cloud computing},
+  booktitle    = {Grid Computing Environments Workshop, 2008. GCE'08},
+  year         = {2008},
+  pages        = {1--10},
+  organization = {IEEE},
+}
+
+@Article{garg2013framework,
+  author    = {Garg, Saurabh Kumar and Versteeg, Steve and Buyya, Rajkumar},
+  title     = {A framework for ranking of cloud computing services},
+  journal   = {Future Generation Computer Systems},
+  year      = {2013},
+  volume    = {29},
+  number    = {4},
+  pages     = {1012--1023},
+  publisher = {Elsevier},
+}
+
+@Article{kumar2017prioritizing,
+  author    = {Kumar, Rakesh Ranjan and Mishra, Siba and Kumar, Chiranjeev},
+  title     = {Prioritizing the solution of cloud service selection using integrated MCDM methods under Fuzzy environment},
+  journal   = {The Journal of Supercomputing},
+  year      = {2017},
+  volume    = {73},
+  number    = {11},
+  pages     = {4652--4682},
+  publisher = {Springer},
+}
+
+@InProceedings{zhang2012declarative,
+  author       = {Zhang, Miranda and Ranjan, Rajiv and Nepal, Surya and Menzel, Michael and Haller, Armin},
+  title        = {A declarative recommender system for cloud infrastructure services selection},
+  booktitle    = {International Conference on Grid Economics and Business Models},
+  year         = {2012},
+  pages        = {102--113},
+  organization = {Springer},
+}
+
+@Article{jatoth2017evaluating,
+  author    = {Jatoth, Chandrashekar and Gangadharan, GR and Fiore, Ugo},
+  title     = {Evaluating the efficiency of cloud services using modified data envelopment analysis and modified super-efficiency data envelopment analysis},
+  journal   = {Soft Computing},
+  year      = {2017},
+  volume    = {21},
+  number    = {23},
+  pages     = {7221--7234},
+  publisher = {Springer},
+}
+
+@Article{sun2016cloud,
+  author    = {Sun, Le and Ma, Jiangang and Zhang, Yanchun and Dong, Hai and Hussain, Farookh Khadeer},
+  title     = {Cloud-FuSeR: Fuzzy ontology and MCDM based cloud service selection},
+  journal   = {Future Generation Computer Systems},
+  year      = {2016},
+  volume    = {57},
+  pages     = {42--55},
+  publisher = {Elsevier},
+}
+
+@Article{jatoth2018selcloud,
+  author    = {Jatoth, Chandrashekar and Gangadharan, GR and Fiore, Ugo and Buyya, Rajkumar},
+  title     = {SELCLOUD: a hybrid multi-criteria decision-making model for selection of cloud services},
+  journal   = {Soft Computing},
+  year      = {2018},
+  pages     = {1--15},
+  publisher = {Springer},
+}
+
+@InProceedings{wagner2012multi,
+  author       = {Wagner, Florian and Klein, Adrian and Kl{\"o}pper, Benjamin and Ishikawa, Fuyuki and Honiden, Shinichi},
+  title        = {Multi-objective service composition with time-and input-dependent QoS},
+  booktitle    = {Web Services (ICWS), 2012 IEEE 19th International Conference on},
+  year         = {2012},
+  pages        = {234--241},
+  organization = {IEEE},
+}
+
+@Article{luo2013business,
+  author    = {Luo, Yihang and Fan, Yushun and Wang, Haoyi},
+  title     = {Business correlation-aware modelling and services selection in business service ecosystem},
+  journal   = {International Journal of Computer Integrated Manufacturing},
+  year      = {2013},
+  volume    = {26},
+  number    = {8},
+  pages     = {772--785},
+  publisher = {Taylor \& Francis},
+}
+
+@Article{kang2013web,
+  author    = {Kang, Guosheng and Liu, Jianxun and Tang, Mingdong and Cao, Buqing},
+  title     = {Web service selection algorithm based on principal component analysis},
+  journal   = {Journal of Electronics (China)},
+  year      = {2013},
+  volume    = {30},
+  number    = {2},
+  pages     = {204--212},
+  publisher = {Springer},
+}
+
+@Article{qi2016weighted,
+  author    = {Qi, Lianyong and Dou, Wanchun and Chen, Jinjun},
+  title     = {Weighted principal component analysis-based service selection method for multimedia services in cloud},
+  journal   = {Computing},
+  year      = {2016},
+  volume    = {98},
+  number    = {1-2},
+  pages     = {195--214},
+  publisher = {Springer},
+}
+
+@InCollection{hwang1981methods,
+  author    = {Hwang, Ching-Lai and Yoon, Kwangsun},
+  title     = {Methods for multiple attribute decision making},
+  booktitle = {Multiple attribute decision making},
+  publisher = {Springer},
+  year      = {1981},
+  pages     = {58--191},
+}
+
+@Article{rezaei2015best,
+  author    = {Rezaei, Jafar},
+  title     = {Best-worst multi-criteria decision-making method},
+  journal   = {Omega},
+  year      = {2015},
+  volume    = {53},
+  pages     = {49--57},
+  publisher = {Elsevier},
+}
+
+@Article{pearson1901principal,
+  author  = {Pearson, Karl},
+  title   = {Principal components analysis},
+  journal = {The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science},
+  year    = {1901},
+  volume  = {6},
+  number  = {2},
+  pages   = {559},
+}
+
+@Article{wold1987principal,
+  author    = {Wold, Svante and Esbensen, Kim and Geladi, Paul},
+  title     = {Principal component analysis},
+  journal   = {Chemometrics and intelligent laboratory systems},
+  year      = {1987},
+  volume    = {2},
+  number    = {1-3},
+  pages     = {37--52},
+  publisher = {Elsevier},
+}
+
+@Misc{al2008qws,
+  author  = {Al-Masri, Eyhab and Mahmoud, Qusay H},
+  title   = {The qws dataset},
+  year    = {2008},
+  journal = {2013-03-12]. http:∥ www. uoguelph. ca/\~{} qmahmoud/qws/index html},
+}
+
+@Article{mell2011nist,
+  author    = {Mell, Peter and Grance, Tim and others},
+  title     = {The NIST definition of cloud computing},
+  year      = {2011},
+  publisher = {Computer Security Division, Information Technology Laboratory, National Institute of Standards and Technology Gaithersburg},
+}
+
+@Article{buyya2009cloud,
+  author    = {Buyya, Rajkumar and Yeo, Chee Shin and Venugopal, Srikumar and Broberg, James and Brandic, Ivona},
+  title     = {Cloud computing and emerging IT platforms: Vision, hype, and reality for delivering computing as the 5th utility},
+  journal   = {Future Generation computer systems},
+  year      = {2009},
+  volume    = {25},
+  number    = {6},
+  pages     = {599--616},
+  publisher = {Elsevier},
+}
+
+@Article{armbrust2010view,
+  author    = {Armbrust, Michael and Fox, Armando and Griffith, Rean and Joseph, Anthony D and Katz, Randy and Konwinski, Andy and Lee, Gunho and Patterson, David and Rabkin, Ariel and Stoica, Ion and others},
+  title     = {A view of cloud computing},
+  journal   = {Communications of the ACM},
+  year      = {2010},
+  volume    = {53},
+  number    = {4},
+  pages     = {50--58},
+  publisher = {ACM},
+}
+
+@InProceedings{buyya2008market,
+  author       = {Buyya, Rajkumar and Yeo, Chee Shin and Venugopal, Srikumar},
+  title        = {Market-oriented cloud computing: Vision, hype, and reality for delivering it services as computing utilities},
+  booktitle    = {High Performance Computing and Communications, 2008. HPCC'08. 10th IEEE International Conference on},
+  year         = {2008},
+  pages        = {5--13},
+  organization = {Ieee},
+}
+
+@Article{zheng2013qos,
+  author    = {Zheng, Zibin and Wu, Xinmiao and Zhang, Yilei and Lyu, Michael R and Wang, Jianmin},
+  title     = {QoS ranking prediction for cloud services},
+  journal   = {IEEE transactions on parallel and distributed systems},
+  year      = {2013},
+  volume    = {24},
+  number    = {6},
+  pages     = {1213--1222},
+  publisher = {IEEE},
+}
+
+@InProceedings{godse2009approach,
+  author       = {Godse, Manish and Mulik, Shrikant},
+  title        = {An approach for selecting software-as-a-service (SaaS) product},
+  booktitle    = {Cloud Computing, 2009. CLOUD'09. IEEE International Conference on},
+  year         = {2009},
+  pages        = {155--158},
+  organization = {IEEE},
+}
+
+@InProceedings{ur2011towards,
+  author       = {ur Rehman, Zia and Hussain, Farookh K and Hussain, Omar K},
+  title        = {Towards multi-criteria cloud service selection},
+  booktitle    = {Innovative Mobile and Internet Services in Ubiquitous Computing (IMIS), 2011 Fifth International Conference on},
+  year         = {2011},
+  pages        = {44--48},
+  organization = {IEEE},
+}
+
+@Article{whaiduzzaman2014cloud,
+  author    = {Whaiduzzaman, Md and Gani, Abdullah and Anuar, Nor Badrul and Shiraz, Muhammad and Haque, Mohammad Nazmul and Haque, Israat Tanzeena},
+  title     = {Cloud service selection using multicriteria decision analysis},
+  journal   = {The Scientific World Journal},
+  year      = {2014},
+  volume    = {2014},
+  publisher = {Hindawi},
+}
+
+@Article{mackiewicz1993principal,
+  author  = {Mackiewicz, Andrzej and Ratajczak, Waldemar},
+  title   = {Principal components analysis (PCA)},
+  journal = {Computers and Geosciences},
+  year    = {1993},
+  volume  = {19},
+  pages   = {303--342},
+}
+
+@InProceedings{siegel2012cloud,
+  author       = {Siegel, Jane and Perdue, Jeff},
+  title        = {Cloud services measures for global use: the service measurement index (SMI)},
+  booktitle    = {SRII Global Conference (SRII), 2012 Annual},
+  year         = {2012},
+  pages        = {411--415},
+  organization = {IEEE},
+}
+
+@Article{kumar2017novel,
+  author    = {Kumar, Rakesh Ranjan and Mishra, Siba and Kumar, Chiranjeev},
+  title     = {A Novel Framework for Cloud Service Evaluation and Selection Using Hybrid MCDM Methods},
+  journal   = {Arabian Journal for Science and Engineering},
+  year      = {2017},
+  pages     = {1--16},
+  publisher = {Springer},
+}
+
+@Article{somu2018trust,
+  author    = {Somu, Nivethitha and MR, Gauthama Raman and Kirthivasan, Kannan and VS, Shankar Sriram},
+  title     = {A trust centric optimal service ranking approach for cloud service selection},
+  journal   = {Future Generation Computer Systems},
+  year      = {2018},
+  volume    = {86},
+  pages     = {234--252},
+  publisher = {Elsevier},
+}
+
+@Article{buyukozkan2018cloud,
+  author    = {B{\"u}y{\"u}k{\"o}zkan, G{\"u}l{\c{c}}in and G{\"o}{\c{c}}er, Fethullah and Feyzio{\u{g}}lu, Orhan},
+  title     = {Cloud computing technology selection based on interval-valued intuitionistic fuzzy MCDM methods},
+  journal   = {Soft Computing},
+  year      = {2018},
+  volume    = {22},
+  number    = {15},
+  pages     = {5091--5114},
+  publisher = {Springer},
+}
+
+@Article{alhanahnah2018context,
+  author    = {Alhanahnah, Mohannad and Bertok, Peter and Tari, Zahir and Alouneh, Sahel},
+  title     = {Context-aware multifaceted trust framework for evaluating trustworthiness of cloud providers},
+  journal   = {Future Generation Computer Systems},
+  year      = {2018},
+  volume    = {79},
+  pages     = {488--499},
+  publisher = {Elsevier},
+}
+
+@Article{nawaz2018mcdm,
+  author    = {Nawaz, Falak and Asadabadi, Mehdi Rajabi and Janjua, Naeem Khalid and Hussain, Omar Khadeer and Chang, Elizabeth and Saberi, Morteza},
+  title     = {An MCDM method for cloud service selection using a Markov chain and the best-worst method},
+  journal   = {Knowledge-Based Systems},
+  year      = {2018},
+  volume    = {159},
+  pages     = {120--131},
+  publisher = {Elsevier},
+}
+
+@Article{singh2017compliance,
+  author    = {Singh, Sarbjeet and Sidhu, Jagpreet},
+  title     = {Compliance-based multi-dimensional trust evaluation system for determining trustworthiness of cloud service providers},
+  journal   = {Future Generation Computer Systems},
+  year      = {2017},
+  volume    = {67},
+  pages     = {109--132},
+  publisher = {Elsevier},
+}
+
+@Article{triantaphyllou1997sensitivity,
+  author    = {Triantaphyllou, Evangelos and S{\'a}nchez, Alfonso},
+  title     = {A sensitivity analysis approach for some deterministic multi-criteria decision-making methods},
+  journal   = {Decision sciences},
+  year      = {1997},
+  volume    = {28},
+  number    = {1},
+  pages     = {151--194},
+  publisher = {Wiley Online Library},
+}
+
+@Article{saaty2003decision,
+  author    = {Saaty, Thomas L},
+  title     = {Decision-making with the AHP: Why is the principal eigenvector necessary},
+  journal   = {European journal of operational research},
+  year      = {2003},
+  volume    = {145},
+  number    = {1},
+  pages     = {85--91},
+  publisher = {Elsevier},
+}
+
+@InProceedings{sun2014hybrid,
+  author       = {Sun, Le and Dong, Hai and Hussain, Farookh Khadeer and Hussain, Omar Khadeer and Ma, Jiangang and Zhang, Yanchun},
+  title        = {A hybrid fuzzy framework for cloud service selection},
+  booktitle    = {Web Services (ICWS), 2014 IEEE International Conference on},
+  year         = {2014},
+  pages        = {313--320},
+  organization = {IEEE},
+}
+
+@Article{serrai2017towards,
+  author    = {Serrai, Walid and Abdelli, Abdelkrim and Mokdad, Lynda and Hammal, Youcef},
+  title     = {Towards an efficient and a more accurate web service selection using MCDM methods},
+  journal   = {Journal of computational science},
+  year      = {2017},
+  volume    = {22},
+  pages     = {253--267},
+  publisher = {Elsevier},
+}
+
+@Article{you2017operation,
+  author    = {You, Peipei and Guo, Sen and Zhao, Haoran and Zhao, Huiru},
+  title     = {Operation performance evaluation of power grid enterprise using a hybrid BWM-TOPSIS method},
+  journal   = {Sustainability},
+  year      = {2017},
+  volume    = {9},
+  number    = {12},
+  pages     = {2329},
+  publisher = {Multidisciplinary Digital Publishing Institute},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}

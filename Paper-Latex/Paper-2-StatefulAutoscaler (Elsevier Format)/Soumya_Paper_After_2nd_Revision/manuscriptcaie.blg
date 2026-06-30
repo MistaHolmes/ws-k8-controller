@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: manuscriptcaie.aux
+The style file: unsrt.bst
+Database file #1: sn-bibliography.bib
+Warning--empty journal in bagga2019qos
+You've used 48 entries,
+            1791 wiz_defined-function locations,
+            732 strings with 13414 characters,
+and the built_in function-call counts, 12995 in all, are:
+= -- 1241
+> -- 513
+< -- 14
++ -- 189
+- -- 141
+* -- 927
+:= -- 1963
+add.period$ -- 153
+call.type$ -- 48
+change.case$ -- 47
+chr.to.int$ -- 0
+cite$ -- 49
+duplicate$ -- 566
+empty$ -- 1258
+format.name$ -- 141
+if$ -- 2936
+int.to.chr$ -- 0
+int.to.str$ -- 48
+missing$ -- 49
+newline$ -- 243
+num.names$ -- 48
+pop$ -- 117
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 279
+stack$ -- 0
+substring$ -- 1122
+swap$ -- 159
+text.length$ -- 14
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 1
+while$ -- 141
+width$ -- 50
+write$ -- 537
+(There was 1 warning)
