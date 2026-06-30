@@ -106,6 +106,18 @@ done
 
 echo ""
 echo "=========================================="
+echo "Running deferred analysis for all $N runs"
+echo "=========================================="
+for i in $(seq 1 "$N"); do
+    echo "-------- Analyzing Run $i / $N --------"
+    export RAW_DIR="$MULTI_RAW/run_${i}"
+    export PROCESSED_DIR="$MULTI_PROC/run_${i}"
+    mkdir -p "$PROCESSED_DIR"
+    bash scripts/run-analysis.sh websocket "$EXPERIMENT_NAME"
+done
+
+echo ""
+echo "=========================================="
 echo "All $N runs complete. Multi-run results saved under:"
 echo "  raw:  $MULTI_RAW"
 echo "  proc: $MULTI_PROC"

@@ -11,8 +11,9 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 CLUSTER_NAME="stateful-exp"
-RESULT_DIR="$PROJECT_ROOT/results/raw/websocket/experiment-b1-hpa-churn"
-PROCESSED_DIR="$PROJECT_ROOT/results/processed/websocket/experiment-b1-hpa-churn"
+EXPERIMENT_NAME="experiment-b1-hpa-churn"
+RESULT_DIR="$PROJECT_ROOT/results/raw/websocket/$EXPERIMENT_NAME"
+PROCESSED_DIR="$PROJECT_ROOT/results/processed/websocket/$EXPERIMENT_NAME"
 
 HIGH_DURATION=60
 LOW_DURATION=30
@@ -45,38 +46,46 @@ echo "=============================================="
 # ----------------------------------------------------------
 # Fresh Cluster
 # ----------------------------------------------------------
-kind delete cluster --name "$CLUSTER_NAME" 2>/dev/null || true
-kind create cluster --name "$CLUSTER_NAME" --config "$PROJECT_ROOT/scripts/kind.yml"
+if ! kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
+  kind create cluster --name "$CLUSTER_NAME" --config "$PROJECT_ROOT/scripts/kind.yml"
 
-# ----------------------------------------------------------
-# Install Metrics Server
-# ----------------------------------------------------------
-kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-kubectl -n kube-system patch deployment metrics-server --type='json' -p='[
-  {"op":"replace","path":"/spec/template/spec/containers/0/args","value":[
-    "--cert-dir=/tmp",
-    "--secure-port=10250",
-    "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
-    "--kubelet-use-node-status-port",
-    "--metric-resolution=15s",
-    "--kubelet-insecure-tls"
-  ]}
-]'
-kubectl -n kube-system rollout status deployment/metrics-server --timeout=300s
-until kubectl top pods >/dev/null 2>&1; do sleep 5; done
+  # ----------------------------------------------------------
+  # Install Metrics Server
+  # ----------------------------------------------------------
+  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  kubectl -n kube-system patch deployment metrics-server --type='json' -p='[
+    {"op":"replace","path":"/spec/template/spec/containers/0/args","value":[
+      "--cert-dir=/tmp",
+      "--secure-port=10250",
+      "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
+      "--kubelet-use-node-status-port",
+      "--metric-resolution=15s",
+      "--kubelet-insecure-tls"
+    ]}
+  ]'
+  kubectl -n kube-system rollout status deployment/metrics-server --timeout=300s
+  until kubectl top pods >/dev/null 2>&1; do sleep 5; done
 
-# ----------------------------------------------------------
-# Build + Load Images
-# ----------------------------------------------------------
-cd "$PROJECT_ROOT/workloads/websocket/app"
-docker build -t websocket-server:latest .
-kind load docker-image websocket-server:latest --name "$CLUSTER_NAME"
+  # ----------------------------------------------------------
+  # Build + Load Images
+  # ----------------------------------------------------------
+  cd "$PROJECT_ROOT/workloads/websocket/app"
+  docker build -t websocket-server:latest .
+  kind load docker-image websocket-server:latest --name "$CLUSTER_NAME"
 
-cd "$PROJECT_ROOT/load-generator/websocket-client"
-docker build -t websocket-loadgen:latest .
-kind load docker-image websocket-loadgen:latest --name "$CLUSTER_NAME"
+  cd "$PROJECT_ROOT/load-generator/websocket-client"
+  docker build -t websocket-loadgen:latest .
+  kind load docker-image websocket-loadgen:latest --name "$CLUSTER_NAME"
 
-cd "$PROJECT_ROOT"
+  cd "$PROJECT_ROOT"
+else
+  echo "[*] Cluster '$CLUSTER_NAME' already exists. Reusing it."
+  # Clean up existing workload if any to ensure fresh state
+  kubectl delete -f workloads/websocket/k8s/deployment.yml --ignore-not-found
+  kubectl delete -f workloads/websocket/k8s/service.yml --ignore-not-found
+  kubectl delete hpa websocket-hpa --ignore-not-found
+  sleep 5
+fi
 
 # ----------------------------------------------------------
 # Deploy Workload
@@ -199,10 +208,18 @@ wait 2>/dev/null || true
 export RAW_DIR="$RESULT_DIR"
 export PROCESSED_DIR="$PROCESSED_DIR"
 
-bash scripts/run-analysis.sh websocket experiment-b1-hpa-churn
+if [ "${MULTI_RUN:-0}" != "1" ] && [ "${MULTI_RUN:-}" != "true" ]; then
+  bash scripts/run-analysis.sh websocket experiment-b1-hpa-churn
+else
+  echo "[*] MULTI_RUN active, deferring analysis to the end."
+fi
 
 echo "=============================================="
 echo " Experiment-B1 Completed"
 echo "=============================================="
 
-kind delete cluster --name "$CLUSTER_NAME"
+if [ "${MULTI_RUN:-0}" != "1" ] && [ "${MULTI_RUN:-}" != "true" ]; then
+  kind delete cluster --name "$CLUSTER_NAME"
+else
+  echo "[*] MULTI_RUN active, keeping cluster alive."
+fi
