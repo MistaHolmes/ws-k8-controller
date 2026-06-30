@@ -1,15 +1,15 @@
 # Fdb version 4
-["bibtex main"] 1781608105.31797 "main.aux" "main.bbl" "main" 1781608107.66781 0
+["bibtex main"] 1781608192.3189 "main.aux" "main.bbl" "main" 1781608194.8224 0
   "./reference.bib" 1781608046 5301 68d75032b613667784a7491b37d0acc0 ""
   "./spbasic.bst" 1781608046 33238 8c0372ffb65c1dd8cfd2d4211623c2f0 ""
-  "main.aux" 1781608107.56636 24475 637598fd74d7bb58109b6066d8530497 "pdflatex"
+  "main.aux" 1781608194.71486 24475 637598fd74d7bb58109b6066d8530497 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1781608105.3367 "/home/abhas/node/STAR/future-work/Paper-Latex/Paper-2-StatefulAutoscaler/main.tex" "main.pdf" "main" 1781608107.66796 0
+["pdflatex"] 1781608192.33932 "/home/abhas/node/STAR/future-work/Paper-Latex/Paper-2-StatefulAutoscaler/main.tex" "main.pdf" "main" 1781608194.82261 0
   "/etc/texmf/web2c/texmf.cnf" 1767188915.93592 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/abhas/node/STAR/future-work/Paper-Latex/Paper-2-StatefulAutoscaler/main.tex" 1781608046 99975 71b8fd651eb20fbdbd791185a81fe68f ""
+  "/home/abhas/node/STAR/future-work/Paper-Latex/Paper-2-StatefulAutoscaler/main.tex" 1781608187.22268 99975 71b8fd651eb20fbdbd791185a81fe68f ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
@@ -275,9 +275,9 @@
   "figures/processed-results-websockets/StatefulAutoScaler-System_Architecture-CRD.png" 1781608048 1442990 5b8afbdd1aa43e3d04e957eb2b4a66de ""
   "figures/processed-results-websockets/StatefulAutoscaler-Reconciliation-Flow-UML.png" 1781608048 33703 8f47d1f91aa845f07ab43c228f287022 ""
   "figures/scalability_summary.png" 1781608047 124857 fdab6e38b6d1037f7f6c8757b46da5b6 ""
-  "main.aux" 1781608107.56636 24475 637598fd74d7bb58109b6066d8530497 "pdflatex"
-  "main.bbl" 1781608105.33226 3954 a752d5c86ee3647eaafd70f3616fdf79 "bibtex main"
-  "main.tex" 1781608046 99975 71b8fd651eb20fbdbd791185a81fe68f ""
+  "main.aux" 1781608194.71486 24475 637598fd74d7bb58109b6066d8530497 "pdflatex"
+  "main.bbl" 1781608192.33477 3954 a752d5c86ee3647eaafd70f3616fdf79 "bibtex main"
+  "main.tex" 1781608187.22268 99975 71b8fd651eb20fbdbd791185a81fe68f ""
   "svglov3.clo" 1781608046 3696 b98636486931abc143bcf14934850e7b ""
   "svjour3.cls" 1781608046 47679 580d73513215963b6ad3ff0c4282b766 ""
   (generated)
