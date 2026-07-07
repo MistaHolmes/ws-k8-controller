@@ -15,4 +15,4 @@ spec:
           args:
             - "ws://websocket-service:8765"
             - "800"
-            - "120"
+            - "0"

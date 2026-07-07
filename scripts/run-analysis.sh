@@ -15,8 +15,8 @@ fi
 WORKLOAD="$1"
 EXPERIMENT="$2"
 
-RAW_DIR="results/raw/${WORKLOAD}/${EXPERIMENT}"
-PROCESSED_DIR="results/processed/${WORKLOAD}/${EXPERIMENT}"
+RAW_DIR="${RAW_DIR:-results/raw/${WORKLOAD}/${EXPERIMENT}}"
+PROCESSED_DIR="${PROCESSED_DIR:-results/processed/${WORKLOAD}/${EXPERIMENT}}"
 
 ANALYSIS_DIR="analysis"
 

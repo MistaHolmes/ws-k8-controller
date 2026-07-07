@@ -62,53 +62,61 @@ echo "=============================================="
 # ------------------------------------------------
 # Fresh Cluster
 # ------------------------------------------------
-kind delete cluster --name "$CLUSTER_NAME" 2>/dev/null || true
-kind create cluster --name "$CLUSTER_NAME" --config "$PROJECT_ROOT/scripts/kind.yml"
+if ! kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
+  kind create cluster --name "$CLUSTER_NAME" --config "$PROJECT_ROOT/scripts/kind.yml"
 
-# ------------------------------------------------
-# Install Metrics Server
-# ------------------------------------------------
-kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  # ------------------------------------------------
+  # Install Metrics Server
+  # ------------------------------------------------
+  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
-kubectl -n kube-system patch deployment metrics-server --type='json' -p='[
-  {"op":"replace","path":"/spec/template/spec/containers/0/args","value":[
-    "--cert-dir=/tmp",
-    "--secure-port=10250",
-    "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
-    "--kubelet-use-node-status-port",
-    "--metric-resolution=15s",
-    "--kubelet-insecure-tls"
-  ]}
-]'
+  kubectl -n kube-system patch deployment metrics-server --type='json' -p='[
+    {"op":"replace","path":"/spec/template/spec/containers/0/args","value":[
+      "--cert-dir=/tmp",
+      "--secure-port=10250",
+      "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
+      "--kubelet-use-node-status-port",
+      "--metric-resolution=15s",
+      "--kubelet-insecure-tls"
+    ]}
+  ]'
 
-kubectl -n kube-system rollout status deployment/metrics-server --timeout=300s
+  kubectl -n kube-system rollout status deployment/metrics-server --timeout=300s
 
-echo "[*] Waiting for metrics API..."
-until kubectl top pods >/dev/null 2>&1; do sleep 5; done
+  echo "[*] Waiting for metrics API..."
+  until kubectl top pods >/dev/null 2>&1; do sleep 5; done
 
 
-# ------------------------------------------------
-# Deploy Prometheus
-# ------------------------------------------------
-kubectl apply -f monitoring/prometheus/namespace.yaml
-kubectl apply -f monitoring/prometheus/rbac.yaml
-kubectl apply -f monitoring/prometheus/configmap.yaml
-kubectl apply -f monitoring/prometheus/deployment.yaml
-kubectl apply -f monitoring/prometheus/service.yaml
+  # ------------------------------------------------
+  # Deploy Prometheus
+  # ------------------------------------------------
+  kubectl apply -f monitoring/prometheus/namespace.yaml
+  kubectl apply -f monitoring/prometheus/rbac.yaml
+  kubectl apply -f monitoring/prometheus/configmap.yaml
+  kubectl apply -f monitoring/prometheus/deployment.yaml
+  kubectl apply -f monitoring/prometheus/service.yaml
 
-kubectl -n monitoring rollout status deployment/prometheus
-# ------------------------------------------------
-# Build + Load Images
-# ------------------------------------------------
-cd "$PROJECT_ROOT/workloads/websocket/app-instrumented"
-docker build -t websocket-server-instrumented:latest .
-kind load docker-image websocket-server-instrumented:latest --name "$CLUSTER_NAME"
+  kubectl -n monitoring rollout status deployment/prometheus
+  # ------------------------------------------------
+  # Build + Load Images
+  # ------------------------------------------------
+  cd "$PROJECT_ROOT/workloads/websocket/app-instrumented"
+  docker build -t websocket-server-instrumented:latest .
+  kind load docker-image websocket-server-instrumented:latest --name "$CLUSTER_NAME"
 
-cd "$PROJECT_ROOT/load-generator/websocket-client"
-docker build -t websocket-loadgen:latest .
-kind load docker-image websocket-loadgen:latest --name "$CLUSTER_NAME"
+  cd "$PROJECT_ROOT/load-generator/websocket-client"
+  docker build -t websocket-loadgen:latest .
+  kind load docker-image websocket-loadgen:latest --name "$CLUSTER_NAME"
 
-cd "$PROJECT_ROOT"
+  cd "$PROJECT_ROOT"
+else
+  echo "[*] Cluster '$CLUSTER_NAME' already exists. Reusing it."
+  # Clean up existing workload if any to ensure fresh state
+  kubectl delete -f workloads/websocket/k8s/deployment-instrumented.yml --ignore-not-found
+  kubectl delete -f workloads/websocket/k8s/service.yml --ignore-not-found
+  kubectl delete hpa websocket-hpa --ignore-not-found
+  sleep 5
+fi
 
 # ------------------------------------------------
 # Deploy Workload
@@ -306,10 +314,18 @@ wait 2>/dev/null || true
 # ------------------------------------------------
 # Automatic Analysis
 # ------------------------------------------------
-bash scripts/run-analysis.sh websocket "$EXPERIMENT_NAME"
+if [ "${MULTI_RUN:-0}" != "1" ] && [ "${MULTI_RUN:-}" != "true" ]; then
+  bash scripts/run-analysis.sh websocket "$EXPERIMENT_NAME"
+else
+  echo "[*] MULTI_RUN active, deferring analysis to the end."
+fi
 
 echo "=============================================="
 echo " Experiment-B2 Complete"
 echo "=============================================="
 
-kind delete cluster --name "$CLUSTER_NAME"
+if [ "${MULTI_RUN:-0}" != "1" ] && [ "${MULTI_RUN:-}" != "true" ]; then
+  kind delete cluster --name "$CLUSTER_NAME"
+else
+  echo "[*] MULTI_RUN active, keeping cluster alive."
+fi
