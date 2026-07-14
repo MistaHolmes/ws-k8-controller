@@ -1,152 +1,142 @@
 \relax 
-\bibstyle{sn-mathphys-num}
-\providecommand\hyper@newdestlabel[2]{}
-\providecommand\HyField@AuxAddToFields[1]{}
-\providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{hightower2017kubernetes,merkel2014docker}
 \citation{k8s_hpa_docs,nguyen2020hpa,burns2016borg}
-\citation{casalicchio2019auto,lorido2014auto}
-\Newlabel{1}{1}
+\citation{casalicchio2017auto,lorido2014auto}
 \citation{websocket_rfc}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{}{}{}}
 \citation{dickel2019evaluation}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}\protected@file@percent }
-\newlabel{sec:intro}{{1}{2}{Introduction}{section.1}{}}
 \citation{nguyen2020hpa}
-\citation{casalicchio2019auto}
-\citation{lorido2014auto,lorido2016adaptation}
+\citation{medel2024characterising}
+\citation{casalicchio2019performance}
+\citation{lorido2014auto}
 \citation{prometheus_adapter}
 \citation{qu2018auto}
-\citation{rossi2020horizontal}
-\citation{biswas2017hybrid}
-\citation{tsagkaropoulos2021severity}
-\citation{nikravesh2018genetic}
-\citation{alsaid2019scalability}
+\citation{rossi2019horizontal}
+\citation{liu2023prediction}
+\citation{zhou2024ahpa}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Kubernetes HPA Architecture and Behavior}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Custom and Application-Level Metrics for HPA}{2}{}\protected@file@percent }
 \citation{dickel2019evaluation}
 \citation{k8s_container_lifecycle_hooks}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{3}{section.2}\protected@file@percent }
-\newlabel{sec:related}{{2}{3}{Related Work}{section.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Kubernetes HPA Architecture and Behavior}{3}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Custom and Application-Level Metrics for HPA}{3}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Stateful Workloads and Protocol-Aware Autoscaling}{3}{subsection.2.3}\protected@file@percent }
+\citation{ahmad2024smarthpa}
+\citation{khaleq2023intelligent}
 \citation{nguyen2020hpa}
 \citation{hellerstein2004feedback}
 \citation{herbst2013elasticity}
-\citation{nguyen2020hpa}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Graceful Connection Draining}{4}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Research Gap}{4}{subsection.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Background: HPA Control Architecture}{4}{section.3}\protected@file@percent }
-\newlabel{sec:background}{{3}{4}{Background: HPA Control Architecture}{section.3}{}}
-\newlabel{eq:hpa}{{1}{4}{Background: HPA Control Architecture}{equation.1}{}}
+\citation{tedeschi2021cmsweb,ali2024cmsweb}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Stateful Workloads and Protocol-Aware Autoscaling}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Graceful Connection Draining}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Research Gap}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Background: HPA Control Architecture}{3}{}\protected@file@percent }
+\newlabel{sec:background}{{3}{3}{}{}{}}
+\newlabel{eq:hpa}{{1}{3}{}{}{}}
 \citation{kind_docs,merkel2014docker}
 \citation{k8s_metrics_server}
 \citation{prometheus_client_python,prometheus_docs}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overview of the standard Kubernetes Horizontal Pod Autoscaler (HPA) control architecture. The diagram was created by the authors based on the Kubernetes HPA architecture described by Nguyen et al.~\cite  {nguyen2020hpa} and the official Kubernetes architecture.}}{5}{figure.1}\protected@file@percent }
-\newlabel{fig:hpa_arch}{{1}{5}{Overview of the standard Kubernetes Horizontal Pod Autoscaler (HPA) control architecture. The diagram was created by the authors based on the Kubernetes HPA architecture described by Nguyen et al.~\cite {nguyen2020hpa} and the official Kubernetes architecture}{figure.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Empirical Evidence of HPA Failure for Stateful WebSocket Workloads}{5}{section.4}\protected@file@percent }
-\newlabel{sec:problem}{{4}{5}{Empirical Evidence of HPA Failure for Stateful WebSocket Workloads}{section.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Summary of Experimental Architecture and Configuration}}{5}{table.1}\protected@file@percent }
-\newlabel{tab:architecture}{{1}{5}{Summary of Experimental Architecture and Configuration}{table.1}{}}
-\@writefile{toc}{\contentsline {paragraph}{Instrumented server.}{6}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Experiment A: HPA Baseline Under Monotonic Correlated Load}{6}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{6}{section*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{6}{section*.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Results.}{6}{section*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Experiment B1: HPA Under Cyclic Load - Over-Provisioning and Recovery Asymmetry}{6}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{6}{section*.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{6}{section*.7}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Results from Experiment A establishing a correct-behavior baseline. Under monotonic WebSocket load where CPU is artificially coupled to session count via continuous pinging, the clean staircase ascent, flat stabilization plateau, and controlled descent to the minimum demonstrate that HPA achieves the theoretical ideal only when signal-to-demand correlation is perfect.}}{7}{figure.2}\protected@file@percent }
-\newlabel{fig:exp_a_replicas}{{2}{7}{Results from Experiment A establishing a correct-behavior baseline. Under monotonic WebSocket load where CPU is artificially coupled to session count via continuous pinging, the clean staircase ascent, flat stabilization plateau, and controlled descent to the minimum demonstrate that HPA achieves the theoretical ideal only when signal-to-demand correlation is perfect}{figure.2}{}}
-\@writefile{toc}{\contentsline {paragraph}{Results.}{7}{section*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Experiment B2-Instrumented: Quantifying Reconnection Storm Intensity}{7}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Methodological note.}{7}{section*.9}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Representative result from Experiment B1 demonstrating severe HPA over-provisioning and delayed recovery under cyclic load. HPA saturates at 10~replicas, a 233\% over-provision relative to the connection-derived optimum of 3~replicas, and requires $\sim $650~seconds to recover. Shaded bands show $\pm $1 SD across 3 replications.}}{8}{figure.3}\protected@file@percent }
-\newlabel{fig:exp_b1_replicas}{{3}{8}{Representative result from Experiment B1 demonstrating severe HPA over-provisioning and delayed recovery under cyclic load. HPA saturates at 10~replicas, a 233\% over-provision relative to the connection-derived optimum of 3~replicas, and requires $\sim $650~seconds to recover. Shaded bands show $\pm $1 SD across 3 replications}{figure.3}{}}
-\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{8}{section*.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{8}{section*.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Results.}{9}{section*.12}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Multi-run averages from Experiment B2-Instrumented demonstrating that HPA scale-down events directly trigger severe reconnection storms and connection instability. \textbf  {Left:} Reconnection rate showing peak observed average rates of 512~connections/second perfectly synchronized with scale-down events. \textbf  {Center:} Active connection count showing instability induced by simultaneous bursts, peaking at a mean of 767~($\pm $46). \textbf  {Right:} HPA replica changes, confirming that each downward step causes the corresponding session disruptions.}}{9}{figure.4}\protected@file@percent }
-\newlabel{fig:exp_b2_results}{{4}{9}{Multi-run averages from Experiment B2-Instrumented demonstrating that HPA scale-down events directly trigger severe reconnection storms and connection instability. \textbf {Left:} Reconnection rate showing peak observed average rates of 512~connections/second perfectly synchronized with scale-down events. \textbf {Center:} Active connection count showing instability induced by simultaneous bursts, peaking at a mean of 767~($\pm $46). \textbf {Right:} HPA replica changes, confirming that each downward step causes the corresponding session disruptions}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overview of the Kubernetes Horizontal Pod Autoscaler (HPA) control architecture used throughout this study.}}{4}{}\protected@file@percent }
+\newlabel{fig:hpa_arch}{{1}{4}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Empirical Evidence of HPA Failure Under the Evaluated Workload Characteristics}{4}{}\protected@file@percent }
+\newlabel{sec:problem}{{4}{4}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Summary of Experimental Architecture and Configuration}}{4}{}\protected@file@percent }
+\newlabel{tab:architecture}{{1}{4}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Instrumented server.}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Experiment A: HPA Baseline Under Monotonic Correlated Load}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Results from Experiment A establishing a correct-behavior baseline.}}{5}{}\protected@file@percent }
+\newlabel{fig:exp_a_replicas}{{2}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Experiment B1: HPA Under Cyclic Load - Over-Provisioning and Recovery Asymmetry}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{5}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Experiment B1: HPA replica over-allocation under cyclic load.}}{5}{}\protected@file@percent }
+\newlabel{fig:exp_b1_replicas}{{3}{5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Experiment B2-Instrumented: Quantifying Reconnection Storm Intensity}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Methodological note.}{5}{}\protected@file@percent }
 \citation{k8s_pod_lifecycle}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Experiment B3: Permanent Connection Loss Under Non-Reconnecting Clients}{10}{subsection.4.4}\protected@file@percent }
-\newlabel{sec:b3}{{4.4}{10}{Experiment B3: Permanent Connection Loss Under Non-Reconnecting Clients}{subsection.4.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{10}{section*.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{10}{section*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Pod termination mechanics and the 30-second limbo}{10}{section*.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Results.}{10}{section*.16}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Representative result from Experiment B3 showing staircase session destruction following successive HPA scale-down events. \textbf  {Left:} Active connection count exhibits permanent staircase destruction ($800{\rightarrow }771{\rightarrow }708{\rightarrow }644$). Connections are irrecoverable under \texttt  {reconnect: false}. \textbf  {Right:} Combined signal view demonstrating that as CPU utilization (red) drops to near zero due to idle connections, HPA scales down (green), causing the permanent destruction of active sessions (blue).}}{11}{figure.5}\protected@file@percent }
-\newlabel{fig:exp_b3_results}{{5}{11}{Representative result from Experiment B3 showing staircase session destruction following successive HPA scale-down events. \textbf {Left:} Active connection count exhibits permanent staircase destruction ($800{\rightarrow }771{\rightarrow }708{\rightarrow }644$). Connections are irrecoverable under \texttt {reconnect: false}. \textbf {Right:} Combined signal view demonstrating that as CPU utilization (red) drops to near zero due to idle connections, HPA scales down (green), causing the permanent destruction of active sessions (blue)}{figure.5}{}}
-\@writefile{toc}{\contentsline {paragraph}{Replication and Statistical Validation}{11}{section*.17}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Statistical replication of Experiment B3 (5 runs). Peak connections reached 800 in all runs, while final connection counts exhibited consistent degradation due to scale-down events, averaging 18.8\% connection loss per run.}}{12}{table.2}\protected@file@percent }
-\newlabel{tab:b3_replication}{{2}{12}{Statistical replication of Experiment B3 (5 runs). Peak connections reached 800 in all runs, while final connection counts exhibited consistent degradation due to scale-down events, averaging 18.8\% connection loss per run}{table.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Active connection count at each observed staircase step during the IDLE phase for all five B3 replications. Each step-down corresponds to a distinct HPA scale-down event that permanently destroyed the connections hosted on the terminated pod.}}{12}{table.3}\protected@file@percent }
-\newlabel{tab:b3_steps}{{3}{12}{Active connection count at each observed staircase step during the IDLE phase for all five B3 replications. Each step-down corresponds to a distinct HPA scale-down event that permanently destroyed the connections hosted on the terminated pod}{table.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Summary Across Experiments}{12}{subsection.4.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{12}{section.5}\protected@file@percent }
-\newlabel{sec:discussion}{{5}{12}{Discussion}{section.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}CPU as a Scaling Signal for Stateful Workloads}{12}{subsection.5.1}\protected@file@percent }
-\newlabel{sec:signal_mismatch}{{5.1}{12}{CPU as a Scaling Signal for Stateful Workloads}{subsection.5.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Summary of results across the four experiments. Each experiment isolates and quantifies a distinct aspect of HPA behavior under stateful WebSocket workloads.}}{13}{table.4}\protected@file@percent }
-\newlabel{tab:failure_summary}{{4}{13}{Summary of results across the four experiments. Each experiment isolates and quantifies a distinct aspect of HPA behavior under stateful WebSocket workloads}{table.4}{}}
-\newlabel{eq:hpa_assumption}{{2}{13}{CPU as a Scaling Signal for Stateful Workloads}{equation.2}{}}
-\newlabel{eq:websocket_reality}{{3}{13}{CPU as a Scaling Signal for Stateful Workloads}{equation.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}The Stabilization Window and Idle Connections}{14}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Pod Termination Timing}{14}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}HPA Stabilization Window Tuning Study}{14}{subsection.5.4}\protected@file@percent }
-\newlabel{sec:tuning_study}{{5.4}{14}{HPA Stabilization Window Tuning Study}{subsection.5.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Experimental Methodology.}{14}{section*.18}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Results.}{15}{section*.19}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces HPA stabilization window tuning study results (3 replications per configuration). Gap relation indicates whether the idle gap duration was below or above the configured stabilization window. Connection loss is reported as mean $\pm $ SD across the three runs.}}{15}{table.5}\protected@file@percent }
-\newlabel{tab:tuning_results}{{5}{15}{HPA stabilization window tuning study results (3 replications per configuration). Gap relation indicates whether the idle gap duration was below or above the configured stabilization window. Connection loss is reported as mean $\pm $ SD across the three runs}{table.5}{}}
-\@writefile{toc}{\contentsline {paragraph}{Analysis.}{15}{section*.20}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Connection loss percentage relative to the HPA stabilization window and gap duration. Green bars (``below'') show zero loss when the gap is shorter than the window; red bars (``above'') show consistent connection destruction when the gap exceeds the window, regardless of window size.}}{16}{figure.6}\protected@file@percent }
-\newlabel{fig:tuning_results}{{6}{16}{Connection loss percentage relative to the HPA stabilization window and gap duration. Green bars (``below'') show zero loss when the gap is shorter than the window; red bars (``above'') show consistent connection destruction when the gap exceeds the window, regardless of window size}{figure.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Threats to Validity and Limitations}{16}{section.6}\protected@file@percent }
-\newlabel{sec:limitations}{{6}{16}{Threats to Validity and Limitations}{section.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{17}{section.7}\protected@file@percent }
-\newlabel{sec:conclusion}{{7}{17}{Conclusion}{section.7}{}}
-\citation{mell2011nist}
-\citation{tirmazi2020borg}
-\citation{hindman2011mesos}
-\citation{mao2011autoscaling}
-\citation{gandhi2009optimal}
-\citation{toffetti2017self}
-\citation{socketio_docs}
-\citation{nginx_websocket}
-\citation{wrk_project}
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Experiment B3: Permanent Connection Loss Under Non-Reconnecting Clients}{6}{}\protected@file@percent }
+\newlabel{sec:b3}{{4.4}{6}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Experimental Setup.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Pod termination mechanics and the 30-second limbo}{6}{}\protected@file@percent }
+\citation{pozdniakova2024sla}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Experiment B2-Instrumented: Reconnection storms triggered by HPA scale-down events.}}{7}{}\protected@file@percent }
+\newlabel{fig:exp_b2_results}{{4}{7}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Experiment B3: Staircase session destruction due to HPA scale-down.}}{7}{}\protected@file@percent }
+\newlabel{fig:exp_b3_results}{{5}{7}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Results.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Replication and Statistical Validation}{7}{}\protected@file@percent }
+\citation{casalicchio2019performance}
+\citation{medel2024characterising}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Statistical replication of Experiment B3 (5 runs).}}{8}{}\protected@file@percent }
+\newlabel{tab:b3_replication}{{2}{8}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Active connection count at each observed staircase step during the IDLE phase for all five B3 replications.}}{8}{}\protected@file@percent }
+\newlabel{tab:b3_steps}{{3}{8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Summary Across Experiments}{8}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Summary of results across the four experiments.}}{8}{}\protected@file@percent }
+\newlabel{tab:failure_summary}{{4}{8}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{8}{}\protected@file@percent }
+\newlabel{sec:discussion}{{5}{8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}CPU as a Scaling Signal for Stateful Workloads}{8}{}\protected@file@percent }
+\newlabel{sec:signal_mismatch}{{5.1}{8}{}{}{}}
+\newlabel{eq:hpa_assumption}{{3}{8}{}{}{}}
+\newlabel{eq:websocket_reality}{{4}{8}{}{}{}}
+\citation{khaleq2023intelligent}
+\citation{tedeschi2021cmsweb}
+\citation{entrialgo2024joint}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}The Stabilization Window and Idle Connections}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Pod Termination Timing}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}HPA Stabilization Window Tuning Study}{9}{}\protected@file@percent }
+\newlabel{sec:tuning_study}{{5.4}{9}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Experimental Methodology.}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{9}{}\protected@file@percent }
+\citation{tedeschi2021cmsweb,ali2024cmsweb}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces HPA stabilization window tuning study results (3 replications per configuration).}}{10}{}\protected@file@percent }
+\newlabel{tab:tuning_results}{{5}{10}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Connection loss percentage relative to the HPA stabilization window and gap duration.}}{10}{}\protected@file@percent }
+\newlabel{fig:tuning_results}{{6}{10}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Analysis.}{10}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Threats to Validity and Limitations}{10}{}\protected@file@percent }
+\newlabel{sec:limitations}{{6}{10}{}{}{}}
+\bibstyle{spmpsci}
 \bibdata{reference}
-\bibcite{hightower2017kubernetes}{{1}{2017}{{Hightower et~al.}}{{}}}
-\bibcite{merkel2014docker}{{2}{2014}{{Merkel}}{{}}}
-\bibcite{k8s_hpa_docs}{{3}{2024}{{{Kubernetes Authors}}}{{}}}
-\bibcite{nguyen2020hpa}{{4}{2020}{{Nguyen et~al.}}{{}}}
-\bibcite{burns2016borg}{{5}{2016}{{Burns et~al.}}{{}}}
-\bibcite{casalicchio2019auto}{{6}{2017}{{Casalicchio and Perciballi}}{{}}}
-\bibcite{lorido2014auto}{{7}{2014}{{Lorido-Botr{\'a}n et~al.}}{{}}}
-\bibcite{websocket_rfc}{{8}{2011}{{Fette and Melnikov}}{{}}}
-\bibcite{dickel2019evaluation}{{9}{2019}{{Dickel et~al.}}{{}}}
-\@writefile{toc}{\contentsline {subparagraph}{Acknowledgements}{18}{section*.22}\protected@file@percent }
-\bibcite{lorido2016adaptation}{{10}{2016}{{Lorido-Botr{\'{a}}n et~al.}}{{}}}
-\bibcite{prometheus_adapter}{{11}{2024}{{{Kubernetes SIGs}}}{{}}}
-\bibcite{qu2018auto}{{12}{2018}{{Qu et~al.}}{{}}}
-\bibcite{rossi2020horizontal}{{13}{2019}{{Rossi et~al.}}{{}}}
-\bibcite{biswas2017hybrid}{{14}{2017}{{Biswas et~al.}}{{}}}
-\bibcite{tsagkaropoulos2021severity}{{15}{2021}{{Tsagkaropoulos et~al.}}{{}}}
-\bibcite{nikravesh2018genetic}{{16}{2018}{{Nikravesh et~al.}}{{}}}
-\bibcite{alsaid2019scalability}{{17}{2019}{{Al-Said~Ahmad and Andras}}{{}}}
-\bibcite{k8s_container_lifecycle_hooks}{{18}{2024}{{{Kubernetes Authors}}}{{}}}
-\bibcite{hellerstein2004feedback}{{19}{2004}{{Hellerstein et~al.}}{{}}}
-\bibcite{herbst2013elasticity}{{20}{2013}{{Herbst et~al.}}{{}}}
-\bibcite{kind_docs}{{21}{2024a}{{{Kubernetes SIGs}}}{{}}}
-\bibcite{k8s_metrics_server}{{22}{2024b}{{{Kubernetes SIGs}}}{{}}}
-\bibcite{prometheus_client_python}{{23}{2024a}{{{Prometheus Authors}}}{{}}}
-\bibcite{prometheus_docs}{{24}{2024b}{{{Prometheus Authors}}}{{}}}
-\bibcite{k8s_pod_lifecycle}{{25}{2024}{{{Kubernetes Authors}}}{{}}}
-\bibcite{mell2011nist}{{26}{2011}{{Mell and Grance}}{{}}}
-\bibcite{tirmazi2020borg}{{27}{2020}{{Tirmazi et~al.}}{{}}}
-\bibcite{hindman2011mesos}{{28}{2011}{{Hindman et~al.}}{{}}}
-\bibcite{mao2011autoscaling}{{29}{2011}{{Mao and Humphrey}}{{}}}
-\bibcite{gandhi2009optimal}{{30}{2009}{{Gandhi et~al.}}{{}}}
-\bibcite{toffetti2017self}{{31}{2017}{{Toffetti et~al.}}{{}}}
-\bibcite{socketio_docs}{{32}{2024}{{{Socket.IO Authors}}}{{}}}
-\bibcite{nginx_websocket}{{33}{2024}{{{NGINX Authors}}}{{}}}
-\bibcite{wrk_project}{{34}{2024}{{Glozer}}{{}}}
-\gdef \@abspage@last{21}
+\bibcite{liu2023prediction}{{1}{}{{}}{{}}}
+\bibcite{ahmad2024smarthpa}{{2}{}{{}}{{}}}
+\bibcite{ali2024cmsweb}{{3}{}{{}}{{}}}
+\bibcite{burns2016borg}{{4}{}{{}}{{}}}
+\bibcite{casalicchio2019performance}{{5}{}{{}}{{}}}
+\bibcite{casalicchio2017auto}{{6}{}{{}}{{}}}
+\bibcite{dickel2019evaluation}{{7}{}{{}}{{}}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{11}{}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{11}{}{}{}}
+\bibcite{entrialgo2024joint}{{8}{}{{}}{{}}}
+\bibcite{websocket_rfc}{{9}{}{{}}{{}}}
+\bibcite{hellerstein2004feedback}{{10}{}{{}}{{}}}
+\bibcite{herbst2013elasticity}{{11}{}{{}}{{}}}
+\bibcite{hightower2017kubernetes}{{12}{}{{}}{{}}}
+\bibcite{khaleq2023intelligent}{{13}{}{{}}{{}}}
+\bibcite{k8s_container_lifecycle_hooks}{{14}{}{{}}{{}}}
+\bibcite{k8s_hpa_docs}{{15}{}{{}}{{}}}
+\bibcite{k8s_pod_lifecycle}{{16}{}{{}}{{}}}
+\bibcite{kind_docs}{{17}{}{{}}{{}}}
+\bibcite{prometheus_adapter}{{18}{}{{}}{{}}}
+\bibcite{k8s_metrics_server}{{19}{}{{}}{{}}}
+\bibcite{lorido2014auto}{{20}{}{{}}{{}}}
+\bibcite{medel2024characterising}{{21}{}{{}}{{}}}
+\bibcite{merkel2014docker}{{22}{}{{}}{{}}}
+\bibcite{nguyen2020hpa}{{23}{}{{}}{{}}}
+\bibcite{pozdniakova2024sla}{{24}{}{{}}{{}}}
+\bibcite{prometheus_docs}{{25}{}{{}}{{}}}
+\bibcite{prometheus_client_python}{{26}{}{{}}{{}}}
+\bibcite{qu2018auto}{{27}{}{{}}{{}}}
+\bibcite{rossi2019horizontal}{{28}{}{{}}{{}}}
+\bibcite{tedeschi2021cmsweb}{{29}{}{{}}{{}}}
+\bibcite{zhou2024ahpa}{{30}{}{{}}{{}}}
+\providecommand\NAT@force@numbers{}\NAT@force@numbers
+\gdef \@abspage@last{12}
