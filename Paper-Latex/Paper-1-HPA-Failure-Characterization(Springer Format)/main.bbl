@@ -1,188 +1,551 @@
-\begin{thebibliography}{10}
-\providecommand{\url}[1]{{#1}}
-\providecommand{\urlprefix}{URL }
-\expandafter\ifx\csname urlstyle\endcsname\relax
-  \providecommand{\doi}[1]{DOI~\discretionary{}{}{}#1}\else
-  \providecommand{\doi}{DOI~\discretionary{}{}{}\begingroup
-  \urlstyle{rm}\Url}\fi
+%% BioMed_Central_Bib_Style_v1.01
 
-\bibitem{liu2023prediction}
-Toward optimal load prediction and customizable autoscaling scheme for
-  kubernetes.
-\newblock Mathematics \textbf{11}(12), 2675 (2023).
-\newblock \doi{10.3390/math11122675}
+\begin{thebibliography}{34}
+% BibTex style file: bmc-mathphys.bst (version 2.1), 2014-07-24
+\ifx \bisbn   \undefined \def \bisbn  #1{ISBN #1}\fi
+\ifx \binits  \undefined \def \binits#1{#1}\fi
+\ifx \bauthor  \undefined \def \bauthor#1{#1}\fi
+\ifx \batitle  \undefined \def \batitle#1{#1}\fi
+\ifx \bjtitle  \undefined \def \bjtitle#1{#1}\fi
+\ifx \bvolume  \undefined \def \bvolume#1{\textbf{#1}}\fi
+\ifx \byear  \undefined \def \byear#1{#1}\fi
+\ifx \bissue  \undefined \def \bissue#1{#1}\fi
+\ifx \bfpage  \undefined \def \bfpage#1{#1}\fi
+\ifx \blpage  \undefined \def \blpage #1{#1}\fi
+\ifx \burl  \undefined \def \burl#1{\textsf{#1}}\fi
+\ifx \doiurl  \undefined \def \doiurl#1{\url{https://doi.org/#1}}\fi
+\ifx \betal  \undefined \def \betal{\textit{et al.}}\fi
+\ifx \binstitute  \undefined \def \binstitute#1{#1}\fi
+\ifx \binstitutionaled  \undefined \def \binstitutionaled#1{#1}\fi
+\ifx \bctitle  \undefined \def \bctitle#1{#1}\fi
+\ifx \beditor  \undefined \def \beditor#1{#1}\fi
+\ifx \bpublisher  \undefined \def \bpublisher#1{#1}\fi
+\ifx \bbtitle  \undefined \def \bbtitle#1{#1}\fi
+\ifx \bedition  \undefined \def \bedition#1{#1}\fi
+\ifx \bseriesno  \undefined \def \bseriesno#1{#1}\fi
+\ifx \blocation  \undefined \def \blocation#1{#1}\fi
+\ifx \bsertitle  \undefined \def \bsertitle#1{#1}\fi
+\ifx \bsnm \undefined \def \bsnm#1{#1}\fi
+\ifx \bsuffix \undefined \def \bsuffix#1{#1}\fi
+\ifx \bparticle \undefined \def \bparticle#1{#1}\fi
+\ifx \barticle \undefined \def \barticle#1{#1}\fi
+\bibcommenthead
+\ifx \bconfdate \undefined \def \bconfdate #1{#1}\fi
+\ifx \botherref \undefined \def \botherref #1{#1}\fi
+\ifx \url \undefined \def \url#1{\textsf{#1}}\fi
+\ifx \bchapter \undefined \def \bchapter#1{#1}\fi
+\ifx \bbook \undefined \def \bbook#1{#1}\fi
+\ifx \bcomment \undefined \def \bcomment#1{#1}\fi
+\ifx \oauthor \undefined \def \oauthor#1{#1}\fi
+\ifx \citeauthoryear \undefined \def \citeauthoryear#1{#1}\fi
+\ifx \endbibitem  \undefined \def \endbibitem {}\fi
+\ifx \bconflocation  \undefined \def \bconflocation#1{#1}\fi
+\ifx \arxivurl  \undefined \def \arxivurl#1{\textsf{#1}}\fi
+\csname PreBibitemsHook\endcsname
 
-\bibitem{ahmad2024smarthpa}
-Ahmad, H., Treude, C., Wagner, M., Szabo, C.: Smart {HPA}: A resource-efficient
-  horizontal pod auto-scaler for microservice architectures.
-\newblock In: Proceedings of the IEEE International Conference on Software
-  Architecture (ICSA), pp. 46--57. IEEE (2024).
-\newblock \doi{10.1109/ICSA59870.2024.00013}
+%%% 1
+\bibitem[\protect\citeauthoryear{Hightower
+  et~al.}{2017}]{hightower2017kubernetes}
+\begin{bbook}
+\bauthor{\bsnm{Hightower}, \binits{K.}},
+\bauthor{\bsnm{Burns}, \binits{B.}},
+\bauthor{\bsnm{Beda}, \binits{J.}}:
+\bbtitle{Kubernetes: Up and Running}.
+\bpublisher{O'Reilly Media},
+\blocation{Sebastopol, CA}
+(\byear{2017})
+\end{bbook}
+\endbibitem
 
-\bibitem{ali2024cmsweb}
-Ali, A., Imran, M., Kuznetsov, V., Trigazis, S., Pervaiz, A., Pfeiffer, A.,
-  Mascheroni, M.: Implementation of new security features in cmsweb kubernetes
-  cluster at cern.
-\newblock Cluster Computing  (2024).
-\newblock \doi{10.1007/s10586-024-04626-6}
+%%% 2
+\bibitem[\protect\citeauthoryear{Merkel}{2014}]{merkel2014docker}
+\begin{bchapter}
+\bauthor{\bsnm{Merkel}, \binits{D.}}:
+\bctitle{Docker: Lightweight linux containers for consistent development and
+  deployment}.
+In: \bbtitle{Linux Journal},
+vol. \bseriesno{2014}.
+\bpublisher{Belltown Media},
+\blocation{Houston, TX, USA}
+(\byear{2014})
+\end{bchapter}
+\endbibitem
 
-\bibitem{burns2016borg}
-Burns, B., Grant, B., Oppenheimer, D., Brewer, E., Wilkes, J.: Borg, omega, and
-  kubernetes \textbf{14}(1), 70--93 (2016).
-\newblock \doi{10.1145/2898442.2898444}
+%%% 3
+\bibitem[\protect\citeauthoryear{{Kubernetes Authors}}{2024}]{k8s_hpa_docs}
+\begin{botherref}
+\oauthor{\bsnm{{Kubernetes Authors}}}:
+Horizontal Pod Autoscaling - Kubernetes Documentation.
+\url{https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
-\bibitem{casalicchio2019performance}
-Casalicchio, E.: A study on performance measures for auto-scaling cpu-intensive
-  containerized applications.
-\newblock Cluster Computing \textbf{22}, 995--1006 (2019).
-\newblock \doi{10.1007/s10586-018-02890-1}
+%%% 4
+\bibitem[\protect\citeauthoryear{Nguyen et~al.}{2020}]{nguyen2020hpa}
+\begin{barticle}
+\bauthor{\bsnm{Nguyen}, \binits{T.-T.}},
+\bauthor{\bsnm{Yeom}, \binits{Y.}},
+\bauthor{\bsnm{Kim}, \binits{T.}},
+\bauthor{\bsnm{Park}, \binits{D.-H.}},
+\bauthor{\bsnm{Kim}, \binits{S.}}:
+\batitle{Horizontal pod autoscaler in {Kubernetes} for elastic container
+  orchestration}.
+\bjtitle{Sensors}
+\bvolume{20}(\bissue{16}),
+\bfpage{4621}
+(\byear{2020})
+\doiurl{10.3390/s20164621}
+\end{barticle}
+\endbibitem
 
-\bibitem{casalicchio2017auto}
-Casalicchio, E., Perciballi, V.: Auto-scaling of containers: the impact of
-  relative and absolute metrics.
-\newblock In: 2017 IEEE 2nd International Workshops on Foundations and
-  Applications of Self-* Systems (FAS*W), pp. 207--214. IEEE, New York, NY, USA
-  (2017).
-\newblock \doi{10.1109/FAS-W.2017.149}
+%%% 5
+\bibitem[\protect\citeauthoryear{Burns et~al.}{2016}]{burns2016borg}
+\begin{bchapter}
+\bauthor{\bsnm{Burns}, \binits{B.}},
+\bauthor{\bsnm{Grant}, \binits{B.}},
+\bauthor{\bsnm{Oppenheimer}, \binits{D.}},
+\bauthor{\bsnm{Brewer}, \binits{E.}},
+\bauthor{\bsnm{Wilkes}, \binits{J.}}:
+\bctitle{Borg, omega, and kubernetes}.
+In: \bbtitle{Queue},
+vol. \bseriesno{14},
+pp. \bfpage{70}--\blpage{93}.
+\bpublisher{ACM},
+\blocation{New York, NY, USA}
+(\byear{2016}).
+\doiurl{10.1145/2898442.2898444}
+\end{bchapter}
+\endbibitem
 
-\bibitem{dickel2019evaluation}
-Dickel, H., Podolskiy, V., Gerndt, M.: Evaluation of autoscaling metrics for
-  (stateful) {IoT} gateways.
-\newblock In: 2019 IEEE 12th Conference on Service-Oriented Computing and
-  Applications (SOCA), pp. 17--24. IEEE, New York, NY, USA (2019).
-\newblock \doi{10.1109/SOCA.2019.00011}
+%%% 6
+\bibitem[\protect\citeauthoryear{Casalicchio and
+  Perciballi}{2017}]{casalicchio2019auto}
+\begin{bchapter}
+\bauthor{\bsnm{Casalicchio}, \binits{E.}},
+\bauthor{\bsnm{Perciballi}, \binits{V.}}:
+\bctitle{Auto-scaling of containers: the impact of relative and absolute
+  metrics}.
+In: \bbtitle{2017 IEEE 2nd International Workshops on Foundations and
+  Applications of Self-* Systems (FAS*W)},
+pp. \bfpage{207}--\blpage{214}.
+\bpublisher{IEEE},
+\blocation{New York, NY, USA}
+(\byear{2017}).
+\doiurl{10.1109/FAS-W.2017.149}
+\end{bchapter}
+\endbibitem
 
-\bibitem{entrialgo2024joint}
-Entrialgo, J., Garc\'ia, M., Garc\'ia, J., L\'opez, J.M.: Joint autoscaling of
-  containers and virtual machines for cost optimization in container clusters.
-\newblock Journal of Grid Computing \textbf{22}, 17 (2024).
-\newblock \doi{10.1007/s10723-023-09732-4}
+%%% 7
+\bibitem[\protect\citeauthoryear{Lorido-Botr{\'a}n
+  et~al.}{2014}]{lorido2014auto}
+\begin{barticle}
+\bauthor{\bsnm{Lorido-Botr{\'a}n}, \binits{T.}},
+\bauthor{\bsnm{Miguel-Alonso}, \binits{J.}},
+\bauthor{\bsnm{Lozano}, \binits{J.A.}}:
+\batitle{A review of auto-scaling techniques for elastic applications in cloud
+  environments}.
+\bjtitle{Journal of Grid Computing}
+\bvolume{12}(\bissue{4}),
+\bfpage{559}--\blpage{592}
+(\byear{2014})
+\doiurl{10.1007/s10723-014-9314-7}
+\end{barticle}
+\endbibitem
 
-\bibitem{websocket_rfc}
-Fette, I., Melnikov, A.: {The WebSocket Protocol}.
-\newblock RFC 6455, IETF (2011).
-\newblock \doi{10.17487/RFC6455}
+%%% 8
+\bibitem[\protect\citeauthoryear{Fette and Melnikov}{2011}]{websocket_rfc}
+\begin{botherref}
+\oauthor{\bsnm{Fette}, \binits{I.}},
+\oauthor{\bsnm{Melnikov}, \binits{A.}}:
+{The WebSocket Protocol}.
+RFC 6455, IETF
+(2011).
+\doiurl{10.17487/RFC6455}
+\end{botherref}
+\endbibitem
 
-\bibitem{hellerstein2004feedback}
-Hellerstein, J.L., Diao, Y., Parekh, S., Tilbury, D.M.: Feedback Control of
-  Computing Systems.
-\newblock John Wiley \& Sons, Hoboken, NJ, USA (2004)
+%%% 9
+\bibitem[\protect\citeauthoryear{Dickel et~al.}{2019}]{dickel2019evaluation}
+\begin{bchapter}
+\bauthor{\bsnm{Dickel}, \binits{H.}},
+\bauthor{\bsnm{Podolskiy}, \binits{V.}},
+\bauthor{\bsnm{Gerndt}, \binits{M.}}:
+\bctitle{Evaluation of autoscaling metrics for (stateful) {IoT} gateways}.
+In: \bbtitle{2019 IEEE 12th Conference on Service-Oriented Computing and
+  Applications (SOCA)},
+pp. \bfpage{17}--\blpage{24}.
+\bpublisher{IEEE},
+\blocation{New York, NY, USA}
+(\byear{2019}).
+\doiurl{10.1109/SOCA.2019.00011}
+\end{bchapter}
+\endbibitem
 
-\bibitem{herbst2013elasticity}
-Herbst, N.R., Kounev, S., Reussner, R.: Elasticity in cloud computing: What it
-  is, and what it is not.
-\newblock In: Proceedings of the 10th International Conference on Autonomic
-  Computing (ICAC), pp. 23--27. USENIX Association, Berkeley, CA, USA (2013)
+%%% 10
+\bibitem[\protect\citeauthoryear{Lorido-Botr{\'{a}}n
+  et~al.}{2016}]{lorido2016adaptation}
+\begin{botherref}
+\oauthor{\bsnm{Lorido-Botr{\'{a}}n}, \binits{T.}},
+\oauthor{\bsnm{Miguel-Alonso}, \binits{J.}},
+\oauthor{\bsnm{Lozano}, \binits{J.A.}}:
+Adaptation in cloud resource configuration: A survey.
+Journal of Cloud Computing
+\textbf{5}(7)
+(2016)
+\doiurl{10.1186/s13677-016-0057-9}
+\end{botherref}
+\endbibitem
 
-\bibitem{hightower2017kubernetes}
-Hightower, K., Burns, B., Beda, J.: Kubernetes: Up and Running.
-\newblock O'Reilly Media, Sebastopol, CA (2017)
+%%% 11
+\bibitem[\protect\citeauthoryear{{Kubernetes SIGs}}{2024}]{prometheus_adapter}
+\begin{botherref}
+\oauthor{\bsnm{{Kubernetes SIGs}}}:
+Kubernetes Custom Metrics Adapter for {Prometheus}.
+\url{https://github.com/kubernetes-sigs/prometheus-adapter}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
-\bibitem{khaleq2023intelligent}
-Khaleq, A.A., Ra, I.: Intelligent microservices autoscaling module using
-  reinforcement learning.
-\newblock Cluster Computing \textbf{26}(5), 2789--2800 (2023).
-\newblock \doi{10.1007/s10586-023-03999-8}
+%%% 12
+\bibitem[\protect\citeauthoryear{Qu et~al.}{2018}]{qu2018auto}
+\begin{barticle}
+\bauthor{\bsnm{Qu}, \binits{C.}},
+\bauthor{\bsnm{Calheiros}, \binits{R.N.}},
+\bauthor{\bsnm{Buyya}, \binits{R.}}:
+\batitle{Auto-scaling web applications in clouds: A taxonomy and survey}.
+\bjtitle{ACM Computing Surveys}
+\bvolume{51}(\bissue{4}),
+\bfpage{1}--\blpage{33}
+(\byear{2018})
+\doiurl{10.1145/3148149}
+\end{barticle}
+\endbibitem
 
-\bibitem{k8s_container_lifecycle_hooks}
-{Kubernetes Authors}: Container lifecycle hooks - kubernetes documentation.
-\newblock
-  \url{https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/}
-  (2024).
-\newblock Accessed: July 2026
+%%% 13
+\bibitem[\protect\citeauthoryear{Rossi et~al.}{2019}]{rossi2020horizontal}
+\begin{bchapter}
+\bauthor{\bsnm{Rossi}, \binits{F.}},
+\bauthor{\bsnm{Nardelli}, \binits{M.}},
+\bauthor{\bsnm{Cardellini}, \binits{V.}}:
+\bctitle{Horizontal and vertical scaling of container-based applications using
+  reinforcement learning}.
+In: \bbtitle{2019 IEEE 12th International Conference on Cloud Computing
+  (CLOUD)},
+pp. \bfpage{329}--\blpage{338}.
+\bpublisher{IEEE},
+\blocation{New York, NY, USA}
+(\byear{2019}).
+\doiurl{10.1109/CLOUD.2019.00061}
+\end{bchapter}
+\endbibitem
 
-\bibitem{k8s_hpa_docs}
-{Kubernetes Authors}: Horizontal pod autoscaling - kubernetes documentation.
-\newblock
-  \url{https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/}
-  (2024).
-\newblock Accessed: July 2026
+%%% 14
+\bibitem[\protect\citeauthoryear{Biswas et~al.}{2017}]{biswas2017hybrid}
+\begin{botherref}
+\oauthor{\bsnm{Biswas}, \binits{A.}},
+\oauthor{\bsnm{Majumdar}, \binits{S.}},
+\oauthor{\bsnm{Nandy}, \binits{B.}},
+\oauthor{\bsnm{El-Haraki}, \binits{A.}}:
+A hybrid auto-scaling technique for clouds processing applications with service
+  level agreements.
+Journal of Cloud Computing
+\textbf{6}(29)
+(2017)
+\doiurl{10.1186/s13677-017-0100-5}
+\end{botherref}
+\endbibitem
 
-\bibitem{k8s_pod_lifecycle}
-{Kubernetes Authors}: Pod lifecycle - kubernetes documentation.
-\newblock
-  \url{https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/}
-  (2024).
-\newblock Accessed: July 2026
+%%% 15
+\bibitem[\protect\citeauthoryear{Tsagkaropoulos
+  et~al.}{2021}]{tsagkaropoulos2021severity}
+\begin{botherref}
+\oauthor{\bsnm{Tsagkaropoulos}, \binits{A.}},
+\oauthor{\bsnm{Verginadis}, \binits{Y.}},
+\oauthor{\bsnm{Papageorgiou}, \binits{N.}},
+\oauthor{\bsnm{Paraskevopoulos}, \binits{F.}},
+\oauthor{\bsnm{Apostolou}, \binits{D.}},
+\oauthor{\bsnm{Mentzas}, \binits{G.}}:
+Severity: A {QoS}-aware approach to cloud application elasticity.
+Journal of Cloud Computing
+\textbf{10}(45)
+(2021)
+\doiurl{10.1186/s13677-021-00255-5}
+\end{botherref}
+\endbibitem
 
-\bibitem{kind_docs}
-{Kubernetes SIGs}: kind - kubernetes in docker.
-\newblock \url{https://kind.sigs.k8s.io/} (2024).
-\newblock Accessed: July 2026
+%%% 16
+\bibitem[\protect\citeauthoryear{Nikravesh et~al.}{2018}]{nikravesh2018genetic}
+\begin{botherref}
+\oauthor{\bsnm{Nikravesh}, \binits{A.Y.}},
+\oauthor{\bsnm{Ajila}, \binits{S.A.}},
+\oauthor{\bsnm{Lung}, \binits{C.-H.}}:
+Using genetic algorithms to find optimal solution in a search space for a cloud
+  predictive cost-driven decision maker.
+Journal of Cloud Computing
+\textbf{7}(20)
+(2018)
+\doiurl{10.1186/s13677-018-0122-7}
+\end{botherref}
+\endbibitem
 
-\bibitem{prometheus_adapter}
-{Kubernetes SIGs}: Kubernetes custom metrics adapter for {Prometheus}.
-\newblock \url{https://github.com/kubernetes-sigs/prometheus-adapter} (2024).
-\newblock Accessed: July 2026
+%%% 17
+\bibitem[\protect\citeauthoryear{Al-Said~Ahmad and
+  Andras}{2019}]{alsaid2019scalability}
+\begin{botherref}
+\oauthor{\bsnm{Al-Said~Ahmad}, \binits{A.}},
+\oauthor{\bsnm{Andras}, \binits{P.}}:
+Scalability analysis comparisons of cloud-based software services.
+Journal of Cloud Computing
+\textbf{8}(10)
+(2019)
+\doiurl{10.1186/s13677-019-0134-y}
+\end{botherref}
+\endbibitem
 
-\bibitem{k8s_metrics_server}
-{Kubernetes SIGs}: Metrics server.
-\newblock \url{https://github.com/kubernetes-sigs/metrics-server} (2024).
-\newblock Accessed: July 2026
+%%% 18
+\bibitem[\protect\citeauthoryear{{Kubernetes
+  Authors}}{2024}]{k8s_container_lifecycle_hooks}
+\begin{botherref}
+\oauthor{\bsnm{{Kubernetes Authors}}}:
+Container Lifecycle Hooks - Kubernetes Documentation.
+\url{https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
-\bibitem{lorido2014auto}
-Lorido-Botr{\'a}n, T., Miguel-Alonso, J., Lozano, J.A.: A review of
-  auto-scaling techniques for elastic applications in cloud environments.
-\newblock Journal of Grid Computing \textbf{12}(4), 559--592 (2014).
-\newblock \doi{10.1007/s10723-014-9314-7}
+%%% 19
+\bibitem[\protect\citeauthoryear{Hellerstein
+  et~al.}{2004}]{hellerstein2004feedback}
+\begin{bbook}
+\bauthor{\bsnm{Hellerstein}, \binits{J.L.}},
+\bauthor{\bsnm{Diao}, \binits{Y.}},
+\bauthor{\bsnm{Parekh}, \binits{S.}},
+\bauthor{\bsnm{Tilbury}, \binits{D.M.}}:
+\bbtitle{Feedback Control of Computing Systems}.
+\bpublisher{John Wiley \& Sons},
+\blocation{Hoboken, NJ, USA}
+(\byear{2004})
+\end{bbook}
+\endbibitem
 
-\bibitem{medel2024characterising}
-Medel, V., Tolosana-Calasanz, R., \'{A}ngel Ba\~{n}ares, J., Rana, O.F.:
-  Characterising resource management performance in kubernetes.
-\newblock Future Generation Computer Systems  (2024).
-\newblock Accepted / published in 2024
+%%% 20
+\bibitem[\protect\citeauthoryear{Herbst et~al.}{2013}]{herbst2013elasticity}
+\begin{bchapter}
+\bauthor{\bsnm{Herbst}, \binits{N.R.}},
+\bauthor{\bsnm{Kounev}, \binits{S.}},
+\bauthor{\bsnm{Reussner}, \binits{R.}}:
+\bctitle{Elasticity in cloud computing: What it is, and what it is not}.
+In: \bbtitle{Proceedings of the 10th International Conference on Autonomic
+  Computing (ICAC)},
+pp. \bfpage{23}--\blpage{27}.
+\bpublisher{USENIX Association},
+\blocation{Berkeley, CA, USA}
+(\byear{2013})
+\end{bchapter}
+\endbibitem
 
-\bibitem{merkel2014docker}
-Merkel, D.: Docker: Lightweight linux containers for consistent development and
-  deployment \textbf{2014}(239) (2014)
+%%% 21
+\bibitem[\protect\citeauthoryear{{Kubernetes SIGs}}{2024a}]{kind_docs}
+\begin{botherref}
+\oauthor{\bsnm{{Kubernetes SIGs}}}:
+kind - Kubernetes in Docker.
+\url{https://kind.sigs.k8s.io/}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
-\bibitem{nguyen2020hpa}
-Nguyen, T.T., Yeom, Y., Kim, T., Park, D.H., Kim, S.: {Horizontal Pod
-  Autoscaler} in {Kubernetes} for elastic container orchestration.
-\newblock Sensors \textbf{20}(16), 4621 (2020).
-\newblock \doi{10.3390/s20164621}
+%%% 22
+\bibitem[\protect\citeauthoryear{{Kubernetes SIGs}}{2024b}]{k8s_metrics_server}
+\begin{botherref}
+\oauthor{\bsnm{{Kubernetes SIGs}}}:
+Metrics Server.
+\url{https://github.com/kubernetes-sigs/metrics-server}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
-\bibitem{pozdniakova2024sla}
-Pozdniakova, O., Ma\v{z}eika, D., Cholomskis, A.: Sla-adaptive threshold
-  adjustment for a kubernetes {Horizontal Pod Autoscaler}.
-\newblock Electronics \textbf{13}(7), 1242 (2024).
-\newblock \doi{10.3390/electronics13071242}
+%%% 23
+\bibitem[\protect\citeauthoryear{{Prometheus
+  Authors}}{2024a}]{prometheus_client_python}
+\begin{botherref}
+\oauthor{\bsnm{{Prometheus Authors}}}:
+Prometheus Python Client.
+\url{https://github.com/prometheus/client_python}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
-\bibitem{prometheus_docs}
-{Prometheus Authors}: Prometheus documentation.
-\newblock \url{https://prometheus.io/docs/introduction/overview/} (2024).
-\newblock Accessed: July 2026
+%%% 24
+\bibitem[\protect\citeauthoryear{{Prometheus Authors}}{2024b}]{prometheus_docs}
+\begin{botherref}
+\oauthor{\bsnm{{Prometheus Authors}}}:
+Prometheus Documentation.
+\url{https://prometheus.io/docs/introduction/overview/}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
-\bibitem{prometheus_client_python}
-{Prometheus Authors}: Prometheus python client.
-\newblock \url{https://github.com/prometheus/client_python} (2024).
-\newblock Accessed: July 2026
+%%% 25
+\bibitem[\protect\citeauthoryear{{Kubernetes
+  Authors}}{2024}]{k8s_pod_lifecycle}
+\begin{botherref}
+\oauthor{\bsnm{{Kubernetes Authors}}}:
+Pod Lifecycle - Kubernetes Documentation.
+\url{https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
-\bibitem{qu2018auto}
-Qu, C., Calheiros, R.N., Buyya, R.: Auto-scaling web applications in clouds: A
-  taxonomy and survey.
-\newblock ACM Computing Surveys \textbf{51}(4), 1--33 (2018).
-\newblock \doi{10.1145/3148149}
+%%% 26
+\bibitem[\protect\citeauthoryear{Mell and Grance}{2011}]{mell2011nist}
+\begin{botherref}
+\oauthor{\bsnm{Mell}, \binits{P.}},
+\oauthor{\bsnm{Grance}, \binits{T.}}:
+The {NIST} definition of cloud computing.
+Technical Report Special Publication 800-145,
+National Institute of Standards and Technology
+(2011).
+\doiurl{10.6028/NIST.SP.800-145}
+\end{botherref}
+\endbibitem
 
-\bibitem{rossi2019horizontal}
-Rossi, F., Nardelli, M., Cardellini, V.: Horizontal and vertical scaling of
-  container-based applications using reinforcement learning.
-\newblock In: 2019 IEEE 12th International Conference on Cloud Computing
-  (CLOUD), pp. 329--338. IEEE, New York, NY, USA (2019).
-\newblock \doi{10.1109/CLOUD.2019.00061}
+%%% 27
+\bibitem[\protect\citeauthoryear{Tirmazi et~al.}{2020}]{tirmazi2020borg}
+\begin{bchapter}
+\bauthor{\bsnm{Tirmazi}, \binits{M.}},
+\bauthor{\bsnm{Barker}, \binits{A.}},
+\bauthor{\bsnm{Deng}, \binits{N.}},
+\bauthor{\bsnm{Haque}, \binits{M.E.}},
+\bauthor{\bsnm{Qin}, \binits{Z.G.}},
+\bauthor{\bsnm{Hand}, \binits{S.}},
+\bauthor{\bsnm{Harchol-Balter}, \binits{M.}},
+\bauthor{\bsnm{Wilkes}, \binits{J.}}:
+\bctitle{Borg: The next generation}.
+In: \bbtitle{Proceedings of the Fifteenth European Conference on Computer
+  Systems (EuroSys)},
+pp. \bfpage{1}--\blpage{14}.
+\bpublisher{ACM},
+\blocation{New York, NY, USA}
+(\byear{2020}).
+\doiurl{10.1145/3342195.3387517}
+\end{bchapter}
+\endbibitem
 
-\bibitem{tedeschi2021cmsweb}
-Tedeschi, M., Imran, M., Kuznetsov, V., Trendafilov, T., Ciangottini, D.,
-  Legger, F., Magini, N.: Migration of cmsweb cluster at cern to kubernetes: A
-  comprehensive study.
-\newblock Cluster Computing  (2021).
-\newblock \doi{10.1007/s10586-021-03325-0}
+%%% 28
+\bibitem[\protect\citeauthoryear{Hindman et~al.}{2011}]{hindman2011mesos}
+\begin{bchapter}
+\bauthor{\bsnm{Hindman}, \binits{B.}},
+\bauthor{\bsnm{Konwinski}, \binits{A.}},
+\bauthor{\bsnm{Zaharia}, \binits{M.}},
+\bauthor{\bsnm{Ghodsi}, \binits{A.}},
+\bauthor{\bsnm{Joseph}, \binits{A.D.}},
+\bauthor{\bsnm{Katz}, \binits{R.}},
+\bauthor{\bsnm{Shenker}, \binits{S.}},
+\bauthor{\bsnm{Stoica}, \binits{I.}}:
+\bctitle{Mesos: A platform for fine-grained resource sharing in the data
+  center}.
+In: \bbtitle{Proceedings of the 8th USENIX Symposium on Networked Systems
+  Design and Implementation (NSDI)},
+pp. \bfpage{295}--\blpage{308}.
+\bpublisher{USENIX Association},
+\blocation{Berkeley, CA, USA}
+(\byear{2011})
+\end{bchapter}
+\endbibitem
 
-\bibitem{zhou2024ahpa}
-Zhou, Z., Zhang, C., Ma, L., et~al.: {AHPA}: Adaptive horizontal pod
-  autoscaling systems on alibaba cloud container service for kubernetes.
-\newblock In: Proceedings of the AAAI Conference on Artificial Intelligence,
-  pp. 15621--15629 (2024).
-\newblock \doi{10.1609/aaai.v37i13.26852}
+%%% 29
+\bibitem[\protect\citeauthoryear{Mao and Humphrey}{2011}]{mao2011autoscaling}
+\begin{bchapter}
+\bauthor{\bsnm{Mao}, \binits{M.}},
+\bauthor{\bsnm{Humphrey}, \binits{M.}}:
+\bctitle{Auto-scaling to minimize cost and meet application deadlines in cloud
+  workflows}.
+In: \bbtitle{Proceedings of 2011 International Conference for High Performance
+  Computing, Networking, Storage and Analysis},
+pp. \bfpage{1}--\blpage{12}.
+\bpublisher{ACM},
+\blocation{New York, NY, USA}
+(\byear{2011}).
+\doiurl{10.1145/2063384.2063449}
+\end{bchapter}
+\endbibitem
+
+%%% 30
+\bibitem[\protect\citeauthoryear{Gandhi et~al.}{2009}]{gandhi2009optimal}
+\begin{bchapter}
+\bauthor{\bsnm{Gandhi}, \binits{A.}},
+\bauthor{\bsnm{Harchol-Balter}, \binits{M.}},
+\bauthor{\bsnm{Das}, \binits{R.}},
+\bauthor{\bsnm{Lefurgy}, \binits{C.}}:
+\bctitle{Optimal power allocation in server farms}.
+In: \bbtitle{Proceedings of the ACM SIGMETRICS Joint International Conference
+  on Measurement and Modeling of Computer Systems},
+pp. \bfpage{157}--\blpage{168}.
+\bpublisher{ACM},
+\blocation{New York, NY, USA}
+(\byear{2009}).
+\doiurl{10.1145/1555349.1555368}
+\end{bchapter}
+\endbibitem
+
+%%% 31
+\bibitem[\protect\citeauthoryear{Toffetti et~al.}{2017}]{toffetti2017self}
+\begin{barticle}
+\bauthor{\bsnm{Toffetti}, \binits{G.}},
+\bauthor{\bsnm{Brunner}, \binits{S.}},
+\bauthor{\bsnm{Bl{\"o}chlinger}, \binits{M.}},
+\bauthor{\bsnm{Spillner}, \binits{J.}},
+\bauthor{\bsnm{Bohnert}, \binits{T.M.}}:
+\batitle{Self-managing cloud-native applications: Design, implementation, and
+  experience}.
+\bjtitle{Future Generation Computer Systems}
+\bvolume{72},
+\bfpage{165}--\blpage{179}
+(\byear{2017})
+\doiurl{10.1016/j.future.2016.09.002}
+\end{barticle}
+\endbibitem
+
+%%% 32
+\bibitem[\protect\citeauthoryear{{Socket.IO Authors}}{2024}]{socketio_docs}
+\begin{botherref}
+\oauthor{\bsnm{{Socket.IO Authors}}}:
+{Socket.IO} Documentation.
+\url{https://socket.io/docs/v4/}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
+
+%%% 33
+\bibitem[\protect\citeauthoryear{{NGINX Authors}}{2024}]{nginx_websocket}
+\begin{botherref}
+\oauthor{\bsnm{{NGINX Authors}}}:
+WebSocket Proxying.
+\url{https://nginx.org/en/docs/http/websocket.html}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
+
+%%% 34
+\bibitem[\protect\citeauthoryear{Glozer}{2024}]{wrk_project}
+\begin{botherref}
+\oauthor{\bsnm{Glozer}, \binits{W.}}:
+wrk: A HTTP Benchmarking Tool.
+\url{https://github.com/wg/wrk}.
+Accessed: 2025
+(2024)
+\end{botherref}
+\endbibitem
 
 \end{thebibliography}
